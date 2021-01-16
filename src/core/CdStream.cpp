@@ -140,7 +140,7 @@ CdStreamInit(int32 numChannels)
 	
 	CDDEBUG("read info %p", gpReadInfo);
 	
-	CdStreamAddImage("MODELS\\GTA3.IMG");
+	CdStreamAddImage("MODELS\\CDIMAGES\\TXD.IMG");
 	
 	int32 nStatus = CdStreamRead(0, pBuffer, 0, 1);
 	

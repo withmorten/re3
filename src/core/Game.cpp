@@ -165,7 +165,7 @@ CGame::InitialiseOnceBeforeRW(void)
 {
 	CFileMgr::Initialise();
 	CdStreamInit(MAX_CDCHANNELS);
-	ValidateVersion();
+	//ValidateVersion();
 #ifdef EXTENDED_COLOURFILTER
 	CPostFX::InitOnce();
 #endif
@@ -493,9 +493,9 @@ bool CGame::Initialise(const char* datFile)
 	CPickups::Init();
 	CTheCarGenerators::Init();
 
-	CdStreamAddImage("MODELS\\GTA3.IMG");
+	//CdStreamAddImage("MODELS\\GTA3.IMG");
 
-	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
+	//CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
 #else
 	CPedStats::Initialise();	// InitialiseOnceAfterRW
@@ -509,7 +509,7 @@ bool CGame::Initialise(const char* datFile)
 #endif
 	CWorld::AddParticles();
 	CVehicleModelInfo::LoadVehicleColours();
-	CVehicleModelInfo::LoadEnvironmentMaps();
+	//CVehicleModelInfo::LoadEnvironmentMaps();
 	CTheZones::PostZoneCreation();
 	POP_MEMID();
 
@@ -693,7 +693,7 @@ bool CGame::ShutDown(void)
 	CAnimManager::Shutdown();
 	CCutsceneMgr::Shutdown();
 	CVehicleModelInfo::DeleteVehicleColourTextures();
-	CVehicleModelInfo::ShutdownEnvironmentMaps();
+	//CVehicleModelInfo::ShutdownEnvironmentMaps();
 	CRadar::Shutdown();
 	CStreaming::Shutdown();
 	CTxdStore::GameShutdown();

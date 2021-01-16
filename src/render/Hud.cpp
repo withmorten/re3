@@ -166,10 +166,10 @@ struct
 	{"detonator", "detonator_mask"},
 	{"", ""},
 	{"", ""},
-	{"radardisc", "radardisc"},
-	{"pager", "pagerm"},
 	{"", ""},
-	{"", ""},
+	{"pageron", ""},
+	{"pageroff", ""},
+	{"wanted", ""},
 	{"bleeder", ""},
 	{"sitesniper", "sitesniperm"},
 	{"siteM16", "siteM16m"},
@@ -1036,7 +1036,7 @@ void CHud::Draw()
 					PagerOn = 0;
 				}
 			}
-			Sprites[HUD_PAGER].Draw(CRect(SCREEN_SCALE_X(26.0f) - SCREEN_SCALE_X_FIX(PagerXOffset), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_X(160.0f) + SCREEN_SCALE_X(26.0f) - SCREEN_SCALE_X_FIX(PagerXOffset), SCREEN_SCALE_Y(80.0f) + SCREEN_SCALE_Y(27.0f)), CRGBA(255, 255, 255, 255));		
+			Sprites[HUD_PAGERON].Draw(CRect(SCREEN_SCALE_X(26.0f) - SCREEN_SCALE_X_FIX(PagerXOffset), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_X(160.0f) + SCREEN_SCALE_X(26.0f) - SCREEN_SCALE_X_FIX(PagerXOffset), SCREEN_SCALE_Y(80.0f) + SCREEN_SCALE_Y(27.0f)), CRGBA(255, 255, 255, 255));		
 			CFont::SetBackgroundOff();
 			CFont::SetScale(SCREEN_SCALE_X(0.84f), SCREEN_SCALE_Y(1.0f));
 			CFont::SetColor(PAGER_COLOR);
@@ -1071,7 +1071,6 @@ void CHud::Draw()
 			rect.Grow(4.0f);
 	#endif
 #endif
-			Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
 			CRadar::DrawBlips();
 		}
 	}

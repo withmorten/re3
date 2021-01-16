@@ -635,6 +635,32 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 	return pMarker;
 }
 
+
+C3dMarker *
+C3dMarkers::PlaceBigArrow(CVector &pos)
+{
+	C3dMarker *pMarker;
+
+	pMarker = nil;
+	float dist = Sqrt((pos.x - FindPlayerCentreOfWorld(0).x) * (pos.x - FindPlayerCentreOfWorld(0).x) +
+	                  (pos.y - FindPlayerCentreOfWorld(0).y) * (pos.y - FindPlayerCentreOfWorld(0).y));
+
+	pMarker = &m_aMarkerArray[0];
+
+	if(pMarker == nil) return pMarker;
+
+	pMarker->m_fCameraRange = dist;
+	pMarker->m_fSize = 1.0f;
+
+	pMarker->m_Matrix.GetPosition() = pos;
+	pMarker->AddMarker(0, 1, 1.0f, 225, 0, 0, 255, 0.0f, 0.0f, 0.0f);
+
+	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
+	pMarker->m_Matrix.UpdateRW();
+	pMarker->m_bIsUsed = true;
+	return pMarker;
+}
+
 void
 C3dMarkers::PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {

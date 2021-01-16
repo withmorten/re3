@@ -231,7 +231,7 @@ CVehicleModelInfo::SetClump(RpClump *clump)
 	PreprocessHierarchy();
 	FindEditableMaterialList();
 	m_envMap = nil;
-	SetEnvironmentMap();
+	//SetEnvironmentMap();
 }
 
 RwFrame*

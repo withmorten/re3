@@ -591,45 +591,32 @@ CCarCtrl::GenerateOneRandomCar()
 }
 
 int32
-CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
-	int32 model = -1;
-	while (model == -1 || !CStreaming::HasModelLoaded(model)){
-		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
-		if (rnd < pZone->carThreshold[0])
-			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
-		else if (rnd < pZone->carThreshold[1])
-			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
-		else if (rnd < pZone->carThreshold[2])
-			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
-		else if (rnd < pZone->carThreshold[3])
-			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
-		else if (rnd < pZone->carThreshold[4])
-			model = CCarCtrl::ChooseCarModel((*pClass = SPECIAL));
-		else if (rnd < pZone->carThreshold[5])
-			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
-		else if (rnd < pZone->copThreshold)
-			*pClass = COPS, model = CCarCtrl::ChoosePoliceCarModel();
-		else if (rnd < pZone->gangThreshold[0])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[1])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = TRIAD) - MAFIA);
-		else if (rnd < pZone->gangThreshold[2])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = DIABLO) - MAFIA);
-		else if (rnd < pZone->gangThreshold[3])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YAKUZA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[4])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YARDIE) - MAFIA);
-		else if (rnd < pZone->gangThreshold[5])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = COLOMB) - MAFIA);
-		else if (rnd < pZone->gangThreshold[6])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = NINES) - MAFIA);
-		else if (rnd < pZone->gangThreshold[7])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG8) - MAFIA);
-		else if (rnd < pZone->gangThreshold[8])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG9) - MAFIA);
-		else
-			model = CCarCtrl::ChooseCarModel((*pClass = TAXI));
-	}
+CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass)
+{
+	uint16_t model;
+
+	do {
+		int rand = CGeneral::GetRandomNumberInRange(0.0f, 1000.0f);
+
+		if(pZone->carThreshold[0] > rand) {
+			model = ChooseCarModel(*pClass = POOR);
+		} else if(pZone->carThreshold[1] > rand) {
+			model = ChooseCarModel(*pClass = RICH);
+		} else if(pZone->carThreshold[2] > rand) {
+			model = ChooseCarModel(*pClass = EXEC);
+		} else if(pZone->carThreshold[3] > rand) {
+			model = ChooseCarModel(*pClass = WORKER);
+		} else if(pZone->carThreshold[4] > rand) {
+			model = ChooseCarModel(*pClass = SPECIAL);
+		} else if(pZone->carThreshold[5] > rand) {
+			model = ChooseCarModel(*pClass = BIG);
+		} else if(pZone->copThreshold > rand) {
+			*pClass = COPS, model = ChoosePoliceCarModel();
+		} else {
+			model = ChooseCarModel(*pClass = 6);
+		}
+	} while(!(model != -1 && CStreaming::HasModelLoaded(model)));
+
 	return model;
 }
 

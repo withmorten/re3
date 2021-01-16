@@ -16,7 +16,7 @@
 #endif
 #define MENUHEADER_WIDTH 0.84f
 
-#define MENU_X_MARGIN 40.0f
+#define MENU_X_MARGIN -20.0f
 #define MENUACTION_POS_Y 60.0f
 #define MENUACTION_SCALE_MULT 0.9f
 
@@ -57,12 +57,12 @@
 #define STATS_ROW_HEIGHT 20.0f
 #define STATS_ROW_X_MARGIN 50.0f
 #define STATS_BOTTOM_MARGIN 135.0f
-#define STATS_TOP_MARGIN 40.0f
-#define STATS_TOP_DIMMING_AREA_LENGTH (93.0f - STATS_TOP_MARGIN)
-#define STATS_BOTTOM_DIMMING_AREA_LENGTH 55.0f
+#define STATS_TOP_MARGIN 130.0f
+#define STATS_TOP_DIMMING_AREA_LENGTH (260.0f - STATS_TOP_MARGIN)
+#define STATS_BOTTOM_DIMMING_AREA_LENGTH 60.0f
 #define STATS_PUT_BACK_TO_BOTTOM_Y 50.0f
-#define STATS_RATING_X 24.0f
-#define STATS_RATING_Y 20.0f
+#define STATS_RATING_X 214.0f
+#define STATS_RATING_Y 134.0f
 
 #define BRIEFS_TOP_MARGIN 40.0f
 #define BRIEFS_LINE_X 50.0f
@@ -105,6 +105,7 @@ enum eFrontendSprites
 	FE_ARROWS2,
 	FE_ARROWS3,
 	FE_ARROWS4,
+	FE_RADIO0,
 	FE_RADIO1,
 	FE_RADIO2,
 	FE_RADIO3,
@@ -114,33 +115,19 @@ enum eFrontendSprites
 	FE_RADIO7,
 	FE_RADIO8,
 	FE_RADIO9,
-
+	FE_DMALOGO,
+	FE_RSTARLOGO,
+	FE_GTALOGO,
+	FE_0,
+	FE_1,
+	FE_2,
+	FE_3,
+	FE_4,
+	FE_SLIDEREMPTY,
+	FE_SLIDERFULL,
+	FE_SLIDERNUB,
+	FE_MOUSE,
 	NUM_FE_SPRITES
-};
-
-enum eMenuSprites
-{
-	MENUSPRITE_CONNECTION,
-	MENUSPRITE_FINDGAME,
-	MENUSPRITE_HOSTGAME,
-	MENUSPRITE_MAINMENU,
-	MENUSPRITE_PLAYERSET,
-	MENUSPRITE_SINGLEPLAYER,
-	MENUSPRITE_MULTIPLAYER,
-	MENUSPRITE_DMALOGO,
-	MENUSPRITE_GTALOGO,
-	MENUSPRITE_RSTARLOGO,
-	MENUSPRITE_GAMESPY,
-	MENUSPRITE_MOUSE,
-	MENUSPRITE_MOUSET,
-	MENUSPRITE_MP3LOGO,
-	MENUSPRITE_DOWNOFF,
-	MENUSPRITE_DOWNON,
-	MENUSPRITE_UPOFF,
-	MENUSPRITE_UPON,
-	MENUSPRITE_GTA3LOGO,
-	MENUSPRITE_UNUSED,
-	NUM_MENU_SPRITES
 };
 
 enum eSaveSlot
@@ -480,7 +467,7 @@ extern CMenuScreen aScreens[MENUPAGES];
 #else
 #include "frontendoption.h"
 struct CCustomScreenLayout {
-	eMenuSprites sprite;
+	eFrontendSprites sprite;
 	int columnWidth;
 	int headerHeight;
 	int lineHeight;
@@ -599,7 +586,7 @@ public:
 	bool m_bStartWaitingForKeyBind;
 	bool m_bSpritesLoaded;
 	CSprite2d m_aFrontEndSprites[NUM_FE_SPRITES];
-	CSprite2d m_aMenuSprites[NUM_MENU_SPRITES];
+	CSprite2d m_aMenuSprites[20];
  int32 field_518;
 	int32 m_nMenuFadeAlpha;
 	bool m_bPressedPgUpOnList;
@@ -722,7 +709,10 @@ public:
 	#define ISLAND_LOADING_ISNT(p)
 #endif
 
+	static float fMenuItemPulse;
+
 public:
+	static float GetItemPulse() { return fMenuItemPulse; }
 	static void BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
 	void CheckCodesForControls(int);
@@ -731,6 +721,7 @@ public:
 	int CostructStatLine(int);
 	void DisplayHelperText();
 	int DisplaySlider(float, float, float, float, float, float);
+	void DisplaySlider(float x, float y, float w, float h, float progress);
 	void DoSettingsBeforeStartingAGame();
 	void Draw();
 	void DrawControllerBound(int32, int32, int32, int8);

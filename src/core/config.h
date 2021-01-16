@@ -4,7 +4,7 @@ enum Config {
 	NUMPLAYERS = 1,	// 4 on PS2
 
 	NUMCDIMAGES = 12, // gta3.img duplicates (not used on PC)
-	MAX_CDIMAGES = 8, // additional cdimages
+	MAX_CDIMAGES = 32, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,	// 3150 on PS2
@@ -50,6 +50,11 @@ enum Config {
 	NUM_MAPOBJECTS = 1250,
 	NUM_PATHCONNECTIONS = 10260,
 
+	/*	NUM_PATHNODES = 7395,
+	NUM_CARPATHLINKS = 3114,
+	NUM_MAPOBJECTS = 1875,
+	NUM_PATHCONNECTIONS = 15390,*/
+
 	// Link list lengths
 	NUMALPHALIST = 20,
 	NUMALPHAENTITYLIST = 150,
@@ -57,9 +62,9 @@ enum Config {
 	NUMREFERENCES = 800,
 
 	// Zones
-	NUMAUDIOZONES = 36,
-	NUMZONES = 50,
-	NUMMAPZONES = 25,
+	NUMAUDIOZONES = 50, // 36,
+	NUMZONES = 150,     // 50,
+	NUMMAPZONES = 50,   // 25,
 
 	// Cull zones
 	NUMCULLZONES = 512,
@@ -169,14 +174,14 @@ enum Config {
 #define GTA3_PC_STEAM	312
 // TODO? maybe something for xbox or android?
 
-#define GTA_VERSION	GTA3_PC_11
+#define GTA_VERSION	GTA3_PC_10
 
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
 #define NO_CDCHECK
 
 // those infamous texts
-#define DRAW_GAME_VERSION_TEXT
+//#define DRAW_GAME_VERSION_TEXT
 #define DRAW_MENU_VERSION_TEXT
 
 // Memory allocation and compression
@@ -194,9 +199,9 @@ enum Config {
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
-#		define PS2_MATFX
+//#		define PS2_MATFX
 #	endif
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+//#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
@@ -227,7 +232,7 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
-#define MORE_LANGUAGES		// Add more translations to the game
+//#define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
@@ -247,27 +252,27 @@ enum Config {
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define PROPER_SCALING		// use original DEFAULT_SCREEN_WIDTH/DEFAULT_SCREEN_HEIGHT from PS2 instead of PC(R* changed HEIGHT here to make radar look better, but broke other hud elements aspect ratio).
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
-#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
+//#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
-#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+//#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
 //#define USE_TEXTURE_POOL
 #ifdef LIBRW
-#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
-#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
-#define SCREEN_DROPLETS			// neo water droplets
-#define NEW_RENDERER		// leeds-like world rendering, needs librw
+//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+//#define SCREEN_DROPLETS			// neo water droplets
+//#define NEW_RENDERER		// leeds-like world rendering, needs librw
 #endif
 
-#define FIX_SPRITES	// fix sprites aspect ratio(moon, coronas, particle etc)
+//#define FIX_SPRITES	// fix sprites aspect ratio(moon, coronas, particle etc)
 
 #ifndef EXTENDED_COLOURFILTER
 #undef SCREEN_DROPLETS		// we need the backbuffer for this effect
 #endif
 
 // Particle
-//#define PC_PARTICLE
+#define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
@@ -278,9 +283,9 @@ enum Config {
 #define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
-#define KANGAROO_CHEAT
-#define ALLCARSHELI_CHEAT
-#define ALT_DODO_CHEAT
+//#define KANGAROO_CHEAT
+//#define ALLCARSHELI_CHEAT
+//#define ALT_DODO_CHEAT
 #define REGISTER_START_BUTTON
 #define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 #define BUTTON_ICONS // use textures to show controller buttons
@@ -288,7 +293,7 @@ enum Config {
 // Hud, frontend and radar
 //#define PS2_HUD
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
-// #define BETA_SLIDING_TEXT
+#define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define FIX_RADAR			// use radar size from early version before R* broke it
 // #define XBOX_SUBTITLES	// the infamous outlines
@@ -299,7 +304,7 @@ enum Config {
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+//#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
@@ -321,7 +326,7 @@ enum Config {
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 #ifdef PC_MENU
-#	define MISSION_REPLAY // mobile feature
+//#	define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
@@ -341,19 +346,19 @@ enum Config {
 //#define USE_BETA_REPLAY_MODE // adds another replay mode, a few seconds slomo (caution: buggy!)
 
 // Vehicles
-#define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
+//#define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
 //#define REMOVE_TREADABLE_PATHFIND
 
 // Pickups
-//#define MONEY_MESSAGES
+#define MONEY_MESSAGES
 #define CAMERA_PICKUP
 
 // Peds
-#define PED_SKIN		// support for skinned geometry on peds
+//#define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
 // #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
-#define CANCELLABLE_CAR_ENTER
+//#define CANCELLABLE_CAR_ENTER
 //#define PEDS_REPORT_CRIMES_ON_PHONE
 
 // Camera
@@ -363,10 +368,10 @@ enum Config {
 
 // Audio
 #define RADIO_SCROLL_TO_PREV_STATION
-#define AUDIO_CACHE
+//#define AUDIO_CACHE
 //#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
-#define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
+//#define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 
 #ifdef AUDIO_OPUS
 #define AUDIO_OAL_USE_OPUS // enable support of opus files

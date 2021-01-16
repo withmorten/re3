@@ -936,7 +936,7 @@ CPed::MoveHeadToLook(void)
 
 	if (m_pLookTarget) {
 
-		if (!bShakeFist && GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
+	/*	if (!bShakeFist && GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
 
 			CAnimBlendAssociation *fuckUAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FUCKU);
 			if (fuckUAssoc) {
@@ -960,7 +960,7 @@ CPed::MoveHeadToLook(void)
 					}
 				}
 			}
-		}
+		}*/
 
 		if (m_pLookTarget->IsPed()) {
 			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(lookPos, PED_MID);
@@ -1031,6 +1031,42 @@ CPed::MoveHeadToLook(void)
 			ClearLookFlag();
 	}
 }
+
+void
+CPed::AnnoyNearestPed()
+{
+	CAnimBlendAssociation *newAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FUCKU, 2.0f);
+
+	newAssoc->blendAmount = 0.0f;
+	newAssoc->blendDelta = 2.0f;
+
+	Say(SOUND_PED_ATTACK);
+
+	CPed *charToAnnoy = nil;
+	for(int i = 0; i < m_numNearPeds; ++i) {
+		CPed *nearPed = m_nearPeds[i];
+
+		if((nearPed->GetPosition() - GetPosition()).MagnitudeSqr() > sq(7.0f)) break;
+
+		if(nearPed->CharCreatedBy != MISSION_CHAR && nearPed->IsPedShootable()) {
+			charToAnnoy = nearPed;
+			break;
+		}
+	}
+	if(charToAnnoy) { 
+		if((charToAnnoy->IsGangMember())) {
+			charToAnnoy->RegisterThreatWithGangPeds(this);
+			charToAnnoy->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, this);
+			charToAnnoy->SetObjectiveTimer(20000);
+		}
+		else if (charToAnnoy->m_nPedType == PEDTYPE_COP) {
+			if(this->IsPlayer()) FindPlayerPed()->SetWantedLevel(1);
+		}
+
+		charToAnnoy->Say(SOUND_PED_ATTACK);
+	}
+}
+
 
 void
 CPed::RestoreHeadPosition(void)

@@ -1119,13 +1119,13 @@ CCamera::CamControl(void)
 			WellBufferMe(CloseInPedHeightTarget, &Cams[ActiveCam].m_fCloseInPedHeightOffset, &Cams[ActiveCam].m_fCloseInPedHeightOffsetSpeed, 0.1f, 0.025f, false);
 
 			// Check if entering fight cam
-			if(!m_bFirstPersonBeingUsed){
+			/*if(!m_bFirstPersonBeingUsed){
 				if(FindPlayerPed()->GetPedState() == PED_FIGHT && !m_bUseMouse3rdPerson)
 					ReqMode = CCam::MODE_FIGHT_CAM;
 				if(((CPed*)pTargetEntity)->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT &&
 				   FindPlayerPed()->GetPedState() == PED_ATTACK && !m_bUseMouse3rdPerson)
 					ReqMode = CCam::MODE_FIGHT_CAM;
-			}
+			}*/
 
 			// Garage cam
 			if(CCullZones::CamStairsForPlayer() && CCullZones::FindZoneWithStairsAttributeForPlayer())
@@ -3456,6 +3456,8 @@ CCamera::GetScreenFadeStatus(void)
 void
 CCamera::RenderMotionBlur(void)
 {
+	return;
+
 	if(m_BlurType == 0)
 		return;
 

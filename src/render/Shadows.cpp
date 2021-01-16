@@ -1772,6 +1772,6 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 	ASSERT(pPosn != NULL);
 
 	C3dMarkers::PlaceMarkerSet(nID, MARKERTYPE_CYLINDER, *pPosn, Max(fFrontX, -fSideY),
-			0, 128, 255, 128,
+			225, 0, 0, 128,
 			2048, 0.2f, 0);
 }

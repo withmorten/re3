@@ -650,7 +650,7 @@ psInitialize(void)
 #else
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
-	InitialiseLanguage();
+	//InitialiseLanguage();
 #if GTA_VERSION < GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
@@ -846,7 +846,7 @@ RwChar **_psGetVideoModeList()
 				|| (_dwMemTotalVideo - vm.depth * vm.height * vm.width / 8) > (12 * 1024 * 1024)/*12 MB*/ )
 			{
 				_VMList[i] = (RwChar*)RwCalloc(100, sizeof(RwChar));
-				rwsprintf(_VMList[i],"%lu X %lu X %lu", vm.width, vm.height, vm.depth);
+				rwsprintf(_VMList[i],"%lux%lux%lu", vm.width, vm.height, vm.depth);
 			}
 			else
 				_VMList[i] = nil;
@@ -2341,7 +2341,7 @@ WinMain(HINSTANCE instance,
 						
 						printf("Into TheGame!!!\n");
 #else				
-						LoadingScreen(nil, nil, "loadsc0");
+						//LoadingScreen(nil, nil, "loadsc0");
 #endif
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
@@ -2358,7 +2358,7 @@ WinMain(HINSTANCE instance,
 #ifndef PS2_MENU
 					case GS_INIT_FRONTEND:
 					{
-						LoadingScreen(nil, nil, "loadsc0");
+						//LoadingScreen(nil, nil, "loadsc0");
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						

@@ -1617,8 +1617,8 @@ CAutomobile::PreRender(void)
 		break;
 	}
 
-	if(GetModelIndex() != MI_RCBANDIT && GetModelIndex() != MI_DODO &&
-	   GetModelIndex() != MI_RHINO) {
+	if(GetModelIndex() != MI_RCBANDIT && GetModelIndex() != MI_DODO /*&&
+	   GetModelIndex() != MI_RHINO*/) {
 	// Process lights
 
 	// Turn lights on/off
@@ -1683,23 +1683,23 @@ CAutomobile::PreRender(void)
 					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
 						CCoronas::RegisterCorona((uintptr)this + 6, 150, 150, 195, 255,
 							lightL, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
+							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
 					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
 						CCoronas::RegisterCorona((uintptr)this + 7, 150, 150, 195, 255,
 							lightR, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
+							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
 				}else{
 					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
 						CCoronas::RegisterCorona((uintptr)this + 6, 160, 160, 140, 255,
 							lightL, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
+							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
 					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
 						CCoronas::RegisterCorona((uintptr)this + 7, 160, 160, 140, 255,
 							lightR, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
+							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
 				}
 			}

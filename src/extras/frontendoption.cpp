@@ -159,7 +159,7 @@ void FrontendOptionAddDynamic(const char* gxtKey, DrawFunc drawFunc, int8 *var, 
 	option.m_CFODynamic->save = saveName;
 }
 
-uint8 FrontendScreenAdd(const char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight,
+uint8 FrontendScreenAdd(const char* gxtKey, eFrontendSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight,
 	int8 font, float fontScaleX, float fontScaleY, int8 alignment, bool showLeftRightHelper, ReturnPrevPageFunc returnPrevPageFunc) {
 
 	uint8 screenOrder = RegisterNewScreen(gxtKey, prevPage, returnPrevPageFunc);

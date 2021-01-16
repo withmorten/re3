@@ -67,6 +67,7 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "MemoryHeap.h"
+#include "Frontend.h"
 
 GlobalScene Scene;
 
@@ -308,11 +309,11 @@ DoFade(void)
 		CSprite2d::DrawRect(rect, fadeColor);
 
 		if(CDraw::FadeValue != 0 && TheCamera.m_FadeTargetIsSplashScreen){
-			fadeColor.r = 255;
-			fadeColor.g = 255;
-			fadeColor.b = 255;
+			fadeColor.r = 0;
+			fadeColor.g = 0;
+			fadeColor.b = 0;
 			fadeColor.a = CDraw::FadeValue;
-			splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), fadeColor, fadeColor, fadeColor, fadeColor);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), fadeColor);
 		}
 	}
 }
@@ -552,6 +553,8 @@ DestroySplashScreen(void)
 	if(splashTxdId != -1)
 		CTxdStore::RemoveTxdSlot(splashTxdId);
 	splashTxdId = -1;
+
+	FrontEndMenuManager.UnloadTextures();
 }
 
 Const char*
@@ -569,10 +572,12 @@ GetRandomSplashScreen(void)
 		15, 6, 8, 20
 	};
 
-	index = splashIndex[4*index2 + CGeneral::GetRandomNumberInRange(0, 3)];
+	/*index = splashIndex[4*index2 + CGeneral::GetRandomNumberInRange(0, 3)];
 	index2++;
 	if(index2 == 6)
-		index2 = 0;
+		index2 = 0;*/
+
+	index = CGeneral::GetRandomNumberInRange(0, 4);
 	sprintf(splashName, "loadsc%d", index);
 	return splashName;
 }
@@ -633,6 +638,28 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
 		splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 
+		CSprite2d::DrawRect(CRect(SCALE_AND_CENTER_X(0.0f), SCREEN_SCALE_Y(80.0f), SCALE_AND_CENTER_X(0.0f) + SCREEN_SCALE_X(640.0f), SCREEN_SCALE_Y(170.0f)),
+		                    CRGBA(100, 0, 0, 125));
+
+		wchar str[64];
+		CFont::SetRightJustifyOff();
+		CFont::SetCentreOn();
+		CFont::SetFontStyle(FONT_HEADING);
+		CFont::SetColor(CRGBA(255, 255, 255, 255));
+		CFont::SetWrapx(SCREEN_SCALE_X(240.0f));
+		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(0.8f));
+
+		CFont::SetFontStyle(FONT_HEADING);
+		AsciiToUnicode("Informations:", str);
+		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(90.0f), str);
+
+		CFont::SetFontStyle(FONT_BANK);
+		AsciiToUnicode("If you press the jump button, guess what? You jump!", str);
+		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(120.0f), str);
+
+		AsciiToUnicode("Now get your ass out of here.", str);
+		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(140.0f), str);
+
 		if(str1){
 			NumberOfChunksLoaded += 1;
 
@@ -640,10 +667,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 			float length = SCREEN_WIDTH - SCREEN_SCALE_X(100);
 			float vpos = SCREEN_HEIGHT - SCREEN_SCALE_Y(13);
 			float height = SCREEN_SCALE_Y(7);
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
+			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(255, 255, 255, 255));
 
 			length *= NumberOfChunksLoaded/TOTALNUMCHUNKS;
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(81, 106, 137, 255));
+			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(225, 0, 0, 255));
 
 			// this is done by the game but is unused
 			CFont::SetScale(SCREEN_SCALE_X(2), SCREEN_SCALE_Y(2));

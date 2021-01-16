@@ -63,10 +63,10 @@ function getarch(a)
 	return a
 end
 
-workspace "re3"
+workspace "re3d"
 	language "C++"
 	configurations { "Debug", "Release" }
-	startproject "re3"
+	startproject "re3d"
 	location "build"
 	symbols "Full"
 	staticruntime "off"
@@ -227,9 +227,9 @@ local function addSrcFiles( prefix )
 	return prefix .. "/*cpp", prefix .. "/*.h", prefix .. "/*.c", prefix .. "/*.ico", prefix .. "/*.rc"
 end
 
-project "re3"
+project "re3d"
 	kind "WindowedApp"
-	targetname "re3"
+	targetname "re3d"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
 
 	files { addSrcFiles("src") }

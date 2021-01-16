@@ -1320,6 +1320,20 @@ CPlayerPed::ProcessControl(void)
 		}
 	}
 
+	// Middle finger.
+	if (padUsed && padUsed->GetStfuJustDown() && FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
+		AnnoyNearestPed();
+	}
+
+	CAnimBlendAssociation *fuckUAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FUCKU);
+	if(fuckUAssoc) {
+		float animTime = fuckUAssoc->currentTime;
+		if(animTime > 6.0f / 30.0f && animTime < 32.0f / 30.0f) { 
+			AddWeaponModel(MI_FINGERS);
+		} else
+			RemoveWeaponModel(0);
+	} 
+
 	switch (m_nPedState) {
 		case PED_NONE:
 		case PED_IDLE:

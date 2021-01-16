@@ -4719,12 +4719,12 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 				if(PedColDist < DEFAULT_NEAR + 0.3f)
 					RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05f));
 			}else{
-				RwCameraSetNearClipPlane(Scene.camera, Min(ColCamDist-0.35f, DEFAULT_NEAR));
+				RwCameraSetNearClipPlane(Scene.camera, Min(ColCamDist - 0.35f, DEFAULT_NEAR));
 			}
 		}else{
 			Source = colPoint.point;
 			if(PedColDist < DEFAULT_NEAR + 0.3f)
-				RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05f));
+				RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05));
 		}
 	}
 	CWorld::pIgnoreEntity = nil;

@@ -757,11 +757,11 @@ CPopulation::AddPedInCar(CVehicle* car)
 	CTheZones::GetZoneInfoForTimeOfDay(&coors, &zoneInfo);
 	switch (car->GetModelIndex()) {
 		case MI_FIRETRUCK:
-			preferredModel = 0;
+			preferredModel = COP_FBI;
 			pedType = PEDTYPE_FIREMAN;
 			break;
 		case MI_AMBULAN:
-			preferredModel = 0;
+			preferredModel = COP_FBI;
 			pedType = PEDTYPE_EMERGENCY;
 			break;
 		case MI_FBICAR:

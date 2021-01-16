@@ -2063,6 +2063,14 @@ int32 CPad::GetWeapon(void)
 	return false;
 }
 
+bool
+CPad::GetStfuJustDown()
+{
+	if(ArePlayerControlsDisabled()) return false;
+
+	return !!(NewState.RightShoulder1 && !OldState.RightShoulder1);
+}
+
 bool CPad::WeaponJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )

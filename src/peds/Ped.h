@@ -601,7 +601,8 @@ public:
 	uint8 CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
-	void SetPointGunAt(CEntity*);
+	void SetPointGunAt(CEntity *);
+	void AnnoyNearestPed();
 	bool Seek(void);
 	bool SetWanderPath(int8);
 	bool SetFollowPath(CVector);

@@ -356,7 +356,7 @@ static char StreamedNameTable[][25]=
 static char StreamedNameTable[][25] =
 {
 	"AUDIO\\HEAD.WAV",
-	"AUDIO\\CLASS.WAV",
+	"AUDIO\\CLASS.VB",
 	"AUDIO\\KJAH.WAV",
 	"AUDIO\\RISE.WAV",
 	"AUDIO\\LIPS.WAV",
@@ -368,8 +368,8 @@ static char StreamedNameTable[][25] =
 	"AUDIO\\POLICE.WAV",
 	"AUDIO\\CITY.WAV",
 	"AUDIO\\WATER.WAV",
-	"AUDIO\\COMOPEN.WAV",
-	"AUDIO\\SUBOPEN.WAV",
+	"AUDIO\\COMOPEN.VB",
+	"AUDIO\\SUBOPEN.VB",
 	"AUDIO\\JB.MP3",
 	"AUDIO\\BET.MP3",
 	"AUDIO\\L1_LG.MP3",
@@ -449,7 +449,7 @@ static char StreamedNameTable[][25] =
 	"AUDIO\\MT_PH3.MP3",
 	"AUDIO\\MT_PH4.MP3",
 	"AUDIO\\MISCOM.WAV",
-	"AUDIO\\END.MP3",
+	"AUDIO\\END.VB",
 #endif
 	"AUDIO\\lib_a1.WAV",
 	"AUDIO\\lib_a2.WAV",

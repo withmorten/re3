@@ -464,6 +464,9 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 	} else if (modelIndex == MI_PICKUP_KILLFRENZY) {
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
+	} else if(modelIndex == MI_PICKUP_JAILFREE) {
+		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
+		return true;
 	}
 	return false;
 }

@@ -211,7 +211,6 @@ CGameLogic::Update()
 			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
 			PassTime(720);
 			RestorePlayerStuffDuringResurrection(pPlayerInfo.m_pPed, vecRestartPos, fRestartFloat);
-			pPlayerInfo.m_pPed->ClearWeapons();
 			SortOutStreamingAndMemory(pPlayerInfo.GetPos());
 			TheCamera.m_fCamShakeForce = 0.0f;
 			TheCamera.SetMotionBlur(0, 0, 0, 0, MOTION_BLUR_NONE);

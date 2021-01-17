@@ -15,7 +15,7 @@
 #define RUBBISH_MAX_DIST (18.0f)
 #define RUBBISH_FADE_DIST (16.5f)
 
-RwTexture *gpRubbishTexture[4];
+RwTexture *gpRubbishTexture[6];
 RwImVertexIndex RubbishIndexList[6];
 RwImVertexIndex RubbishIndexList2[6];	// unused
 RwIm3DVertex RubbishVertices[4];
@@ -56,20 +56,20 @@ CRubbish::Render(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 
-	for(type = 0; type < 4; type++){
+	for(type = 0; type < 6; type++){
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRubbishTexture[type]));
 
 		TempBufferIndicesStored = 0;
 		TempBufferVerticesStored = 0;
 
 		COneSheet *sheet;
-		for(sheet = &aSheets[type*NUM_RUBBISH_SHEETS / 4];
-		    sheet < &aSheets[(type+1)*NUM_RUBBISH_SHEETS / 4];
+		for(sheet = &aSheets[type*NUM_RUBBISH_SHEETS / 6];
+		    sheet < &aSheets[(type+1)*NUM_RUBBISH_SHEETS / 6];
 		    sheet++){
 			if(sheet->m_state == 0)
 				continue;
 
-			uint32 alpha = 128;
+			uint32 alpha = 255;
 			CVector pos;
 			if(sheet->m_state == 1){
 				pos = sheet->m_basePos;
@@ -405,6 +405,8 @@ CRubbish::Init(void)
 	gpRubbishTexture[1] = RwTextureRead("gameleaf02_64", nil);
 	gpRubbishTexture[2] = RwTextureRead("newspaper01_64", nil);
 	gpRubbishTexture[3] = RwTextureRead("newspaper02_64", nil);
+	gpRubbishTexture[4] = RwTextureRead("newspaper03_64", nil);
+	gpRubbishTexture[5] = RwTextureRead("newspaper04_64", nil);
 	CTxdStore::PopCurrentTxd();
 	RubbishVisibility = 255;
 	bRubbishInvisible = false;
@@ -429,4 +431,10 @@ CRubbish::Shutdown(void)
 #if GTA_VERSION >= GTA3_PC_11
 	gpRubbishTexture[3] = nil;
 #endif
+
+	RwTextureDestroy(gpRubbishTexture[4]);
+	gpRubbishTexture[4] = nil;
+
+	RwTextureDestroy(gpRubbishTexture[5]);
+	gpRubbishTexture[5] = nil;
 }

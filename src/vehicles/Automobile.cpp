@@ -3395,15 +3395,6 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 				}
 				break;
 			}
-
-			if(m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle() && impulse > 10.0f){
-				int money = (doubleMoney ? 2 : 1) * impulse*pHandling->nMonetaryValue/1000000.0f;
-				money = Min(money, 40);
-				if(money > 2){
-					sprintf(gString, "$%d", money);
-					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += money;
-				}
-			}
 		}
 
 		float damage = (impulse-25.0f)*pHandling->fCollisionDamageMultiplier*0.6f*damageMultiplier;

@@ -17,7 +17,7 @@
 
 static CTrainNode* pTrackNodes;
 static int16 NumTrackNodes;
-static float StationDist[3] = { 873.0f, 1522.0f, 2481.0f };
+static float StationDist[3] = { 873.0f, 1171.0f, 2481.0f };
 static float TotalLengthOfTrack;
 static float TotalDurationOfTrack;
 static CTrainInterpolationLine aLineBits[17];
@@ -26,7 +26,7 @@ static float EngineTrackSpeed[2];
 
 static CTrainNode* pTrackNodes_S;
 static int16 NumTrackNodes_S;
-static float StationDist_S[4] = { 55.0f, 1388.0f, 2337.0f, 3989.0f };
+static float StationDist_S[4] = { 55.0f, 1388.0f, 3989.0f, 3989.0f };
 static float TotalLengthOfTrack_S;
 static float TotalDurationOfTrack_S;
 static CTrainInterpolationLine aLineBits_S[18];
@@ -430,7 +430,7 @@ CTrain::InitTrains(void)
 			&TotalLengthOfTrack, &TotalDurationOfTrack, aLineBits, false);
 	// Subway
 	if(pTrackNodes_S == nil)
-		ReadAndInterpretTrackFile("data\\paths\\tracks2.dat", &pTrackNodes_S, &NumTrackNodes_S, 4, StationDist_S,
+		ReadAndInterpretTrackFile("data\\paths\\tracks2.dat", &pTrackNodes_S, &NumTrackNodes_S, 3, StationDist_S,
 			&TotalLengthOfTrack_S, &TotalDurationOfTrack_S, aLineBits_S, true);
 
 	int trainId;
@@ -624,16 +624,11 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 	// end
 	interpLines[j].time = *totalDuration;
 }
-
+#include "AudioscriptObject.h"
 void
 PlayAnnouncement(uint8 sound, uint8 station)
 {
-	// this was gone in a PC version but inlined on PS2
-	cAudioScriptObject *obj = new cAudioScriptObject;
-	obj->AudioId = sound;
-	obj->Posn = CTrain::aStationCoors[station];
-	obj->AudioEntity = AEHANDLE_NONE;
-	DMAudio.CreateOneShotScriptObject(obj);
+	PlayOneShotScriptObject(sound, CTrain::aStationCoors[station]);
 }
 
 void

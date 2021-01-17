@@ -52,8 +52,9 @@ CRubbish::Render(void)
 {
 	int type;
 
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 
 	for(type = 0; type < 6; type++){
@@ -69,7 +70,7 @@ CRubbish::Render(void)
 			if(sheet->m_state == 0)
 				continue;
 
-			uint32 alpha = 255;
+			uint32 alpha = 128;
 			CVector pos;
 			if(sheet->m_state == 1){
 				pos = sheet->m_basePos;

@@ -969,7 +969,7 @@ CPlayerPed::ProcessAnimGroups(void)
 					groupToSet = ASSOCGRP_PLAYER; // ASSOCGRP_PLAYER2ARMED;
 				}
 			} else {
-				groupToSet = ASSOCGRP_PLAYER1ARMED;
+				groupToSet = ASSOCGRP_PLAYER; //ASSOCGRP_PLAYER1ARMED;
 			}
 		}
 	}

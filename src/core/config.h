@@ -23,7 +23,7 @@ enum Config {
 	XTRACOMPSMODELSIZE = 2,
 	TWODFXSIZE = 2000,	// 1210 on PS2
 
-	MAXVEHICLESLOADED = 50, // 70 on mobile
+	MAXVEHICLESLOADED = 70, // 70 on mobile
 
 	NUMOBJECTINFO = 168, // object.dat
 
@@ -146,7 +146,7 @@ enum Config {
 
 // This is enabled for all released games.
 // any debug stuff that isn't left in any game is not in FINAL
-//#define FINAL
+#define FINAL
 
 // This is enabled for all released games except mobile
 // any debug stuff that is only left in mobile, is not in MASTER
@@ -176,8 +176,8 @@ enum Config {
 #define NO_CDCHECK
 
 // those infamous texts
-#define DRAW_GAME_VERSION_TEXT
-#define DRAW_MENU_VERSION_TEXT
+//#define DRAW_GAME_VERSION_TEXT
+//#define DRAW_MENU_VERSION_TEXT
 
 // Memory allocation and compression
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
@@ -211,7 +211,7 @@ enum Config {
 	#undef DRAW_GAME_VERSION_TEXT
 #else
 	// not in master builds
-	#define VALIDATE_SAVE_SIZE
+//	#define VALIDATE_SAVE_SIZE
 
 	#define NO_MOVIES	// disable intro videos
 	#define DEBUGMENU
@@ -228,7 +228,7 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
 #define MORE_LANGUAGES		// Add more translations to the game
-#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+//#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
 #if defined(__LP64__) || defined(_WIN64)
@@ -282,7 +282,7 @@ enum Config {
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
 #define REGISTER_START_BUTTON
-#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+//#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 #define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar
@@ -301,10 +301,10 @@ enum Config {
 #else
 #	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
-#	define TRIANGLE_BACK_BUTTON
-//#	define CIRCLE_BACK_BUTTON
+//#	define TRIANGLE_BACK_BUTTON
+#	define CIRCLE_BACK_BUTTON
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
-//#	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
+#	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 #	define CUSTOM_FRONTEND_OPTIONS
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
@@ -324,11 +324,11 @@ enum Config {
 #	define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+//#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
+//#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
 #endif
 
 #ifdef MASTER
@@ -351,10 +351,10 @@ enum Config {
 // Peds
 #define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
-// #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
-// #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
+#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
+#define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
-//#define PEDS_REPORT_CRIMES_ON_PHONE
+#define PEDS_REPORT_CRIMES_ON_PHONE
 
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes

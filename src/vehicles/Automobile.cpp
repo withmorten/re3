@@ -491,7 +491,7 @@ CAutomobile::ProcessControl(void)
 		BlowUpCarsInPath();
 		break;
 	case MI_YARDIE:
-	// beta also had esperanto here it seems
+	case MI_ESPERANT:
 		HydraulicControl();
 		break;
 	default:

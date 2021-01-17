@@ -403,7 +403,7 @@ RsInitialize(void)
 	 */
 	RwBool              result;
 
-	RsGlobal.appName = RWSTRING("GTA3");
+	RsGlobal.appName = RWSTRING("GTA3D");
 	RsGlobal.maximumWidth = DEFAULT_SCREEN_WIDTH;
 	RsGlobal.maximumHeight = DEFAULT_SCREEN_HEIGHT;
 	RsGlobal.width = DEFAULT_SCREEN_WIDTH;

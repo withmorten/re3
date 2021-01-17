@@ -2651,19 +2651,21 @@ CMenuManager::DrawFrontEndNormal()
 	bool hideBackground = m_nCurrScreen == MENUPAGE_STATS || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS;
 	bool hideLogo = m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS; 
 	static int currentSprite = FE_0;
-	if (m_nCurrScreen == MENUPAGE_START_MENU) {
-		switch (m_nCurrOption) {
-		case 0:
-			currentSprite = FE_0;
-			break;
-		case 1:
-			currentSprite = FE_1;
-			break;
-		default:
-			currentSprite = FE_2;
-			break;
+	if(m_nCurrScreen == MENUPAGE_START_MENU) {
+		switch(m_nCurrOption) {
+		case 0: currentSprite = FE_0; break;
+		case 1: currentSprite = FE_1; break;
+		default: currentSprite = FE_2; break;
 		};
+	} else if(m_nCurrScreen == MENUPAGE_PAUSE_MENU) {
+		if (m_nCurrOption == 4) currentSprite = FE_1;
+		else if(m_nCurrOption == 5) currentSprite = FE_2;
+		else currentSprite = FE_4;
+	} else if(m_nCurrScreen == MENUPAGE_OPTIONS) {
+		currentSprite = FE_1;
 	}
+	else if (m_nCurrScreen == MENUPAGE_EXIT)
+		currentSprite = FE_2;
 
 	if(!hideBackground)
 		m_aFrontEndSprites[currentSprite].Draw(CRect(backgroundRect), CRGBA(255, 255, 255, 255));

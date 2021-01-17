@@ -479,7 +479,7 @@ C3dMarkers::Init()
 	CTxdStore::SetCurrentTxd(txdSlot);
 	CFileMgr::ChangeDir("\\");
 	m_pRpClumpArray[MARKERTYPE_ARROW] = CFileLoader::LoadAtomicFile2Return("models/generic/arrow.dff");
-	m_pRpClumpArray[MARKERTYPE_CYLINDER] = CFileLoader::LoadAtomicFile2Return("models/generic/zonecylb.dff");
+	m_pRpClumpArray[MARKERTYPE_CYLINDER] = CFileLoader::LoadAtomicFile2Return("models/generic/sphere.dff");
 	CTxdStore::PopCurrentTxd();
 }
 
@@ -664,9 +664,8 @@ C3dMarkers::PlaceBigArrow(CVector &pos)
 void
 C3dMarkers::PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {
-	PlaceMarker(id, type, pos, size, r, g, b, a, pulsePeriod, pulseFraction, 1);
-	PlaceMarker(id, type, pos, size * 0.93f, r, g, b, a, pulsePeriod, pulseFraction, 2);
-	PlaceMarker(id, type, pos, size * 0.86f, r, g, b, a, pulsePeriod, pulseFraction, -1);
+	PlaceMarker(id, type, pos, size * 0.4f, r, g, b, a * 0.2f, pulsePeriod, pulseFraction, 1);
+	PlaceMarker(id, type, pos, size * 0.5f, r, g, b, a * 0.5f, pulsePeriod, pulseFraction, 2);
 }
 
 

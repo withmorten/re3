@@ -966,7 +966,7 @@ CPlayerPed::ProcessAnimGroups(void)
 				if (!GetWeapon()->IsType2Handed()) {
 					groupToSet = ASSOCGRP_PLAYER;
 				} else {
-					groupToSet = ASSOCGRP_PLAYER2ARMED;
+					groupToSet = ASSOCGRP_PLAYER; // ASSOCGRP_PLAYER2ARMED;
 				}
 			} else {
 				groupToSet = ASSOCGRP_PLAYER1ARMED;

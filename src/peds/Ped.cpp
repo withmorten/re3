@@ -5467,8 +5467,12 @@ CPed::Seek(void)
 
 	} else if (m_objective != OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 
-		if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS || m_objective == OBJECTIVE_RUN_TO_AREA || bIsRunning)
-			nextMove = PEDMOVE_RUN;
+		if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS || m_objective == OBJECTIVE_RUN_TO_AREA || bIsRunning) {
+			if(IsGangMember()) 
+				nextMove = PEDMOVE_SPRINT;
+			else
+				nextMove = PEDMOVE_RUN;
+		}
 		else
 			nextMove = PEDMOVE_WALK;
 

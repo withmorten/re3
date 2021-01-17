@@ -132,7 +132,7 @@ CFileLoader::LoadLevel(const char *filename)
 	for(i = 1; i < COLSTORESIZE; i++)
 		if(CColStore::GetSlot(i))
 			CColStore::GetBoundingBox(i).Grow(120.0f);
-	CWorld::RepositionCertainDynamicObjects();
+	//CWorld::RepositionCertainDynamicObjects();
 	CColStore::RemoveAllCollision();
 }
 

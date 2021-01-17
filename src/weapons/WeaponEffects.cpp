@@ -113,7 +113,7 @@ CWeaponEffects::Render(void)
 			
 			CSprite::RenderOneXLUSprite_Rotate_Aspect(pos.x, pos.y, pos.z,
 				size*w, size*h,
-				107, 134, 247, 158,
+				255, 88, 100, 158,
 				recipz2, TWOPI - gCrossHair.m_fRotation, gCrossHair.m_nAlpha);
 						
 			gCrossHair.m_fRotation += 0.02f;

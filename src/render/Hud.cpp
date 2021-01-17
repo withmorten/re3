@@ -34,14 +34,14 @@
 #define WASTEDBUSTED_Y 122.0f
 #define BIGMESSAGE_Y 80.0f
 #else
-#define MONEY_X 110.0f
+#define MONEY_X 20.0f
 #define WEAPON_X 99.0f
 #define AMMO_X 66.0f
 #define HEALTH_X 110.0f
 #define STARS_X 60.0f
 #define ZONE_Y 30.0f
 #define VEHICLE_Y 55.0f
-#define CLOCK_X 111.0f
+#define CLOCK_X 92.0f
 #define SUBS_Y 68.0f
 #define WASTEDBUSTED_Y 82.0f
 #define BIGMESSAGE_Y 84.0f
@@ -77,6 +77,7 @@
 
 // Game has colors inlined in code.
 // For easier modification we collect them here:
+CRGBA ALPHAHUD_COLOR(255, 255, 1, 255);
 CRGBA MONEY_COLOR(89, 115, 150, 255);
 CRGBA AMMO_COLOR(0, 0, 0, 255);
 CRGBA HEALTH_COLOR(186, 101, 50, 255);
@@ -164,8 +165,8 @@ struct
 	{"molotov", "molotovm"},
 	{"grenade", "grenadem"},
 	{"detonator", "detonator_mask"},
-	{"", ""},
-	{"", ""},
+	{"radar_mask", ""},
+	{"bar_filled", ""},
 	{"", ""},
 	{"pageron", ""},
 	{"pageroff", ""},
@@ -313,6 +314,36 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 void CHud::SetVehicleName(wchar *name)
 {
 	m_pVehicleName = name;
+}
+
+void
+CHud::DrawAlphaProgressBar(float x, float y, float w, float h, bool bArmour)
+{
+	CVector2D vecUV[4];
+	float fOffset;
+
+	float fValue;
+	if(!bArmour) {
+		fValue = 1.0f - (CWorld::Players[0].m_pPed->m_fHealth * 100) / 10000;
+		fOffset = 0.70f;
+		vecUV[0] = CVector2D(0.330f, 0.0f + fValue);
+		vecUV[1] = CVector2D(0.660f, 0.0f + fValue);
+		vecUV[2] = CVector2D(0.330f, 1.0f);
+		vecUV[3] = CVector2D(0.660f, 1.0f);
+	} else {
+		fValue = 1.0f - (CWorld::Players[0].m_pPed->m_fArmour * 100) / 10000;
+		fOffset = 0.75f;
+
+		vecUV[0] = CVector2D(0.0f, 0.0f + fValue);
+		vecUV[1] = CVector2D(0.330f, 0.0f + fValue);
+		vecUV[2] = CVector2D(0.0f, 1.0f);
+		vecUV[3] = CVector2D(0.330f, 1.0f);
+	}
+
+	if(fValue < 1.0f)
+		Sprites[HUD_BARFILLED].Draw(CRect(SCREEN_SCALE_X(x), SCREEN_SCALE_FROM_BOTTOM(y * (1.0f - (fValue * fOffset))), SCREEN_SCALE_X(x) + SCREEN_SCALE_X(w), SCREEN_SCALE_FROM_BOTTOM(y) + SCREEN_SCALE_Y(h)),
+	                                        CRGBA(255, 255, 255, 255), (vecUV[0].x), (vecUV[0].y), (vecUV[1].x), (vecUV[1].y), (vecUV[2].x), (vecUV[2].y),
+	                                        (vecUV[3].x), (vecUV[3].y));
 }
 
 void CHud::Draw()
@@ -489,22 +520,20 @@ void CHud::Draw()
 		wchar sPrintIcon[16];
 		char sTemp[16];
 
-		sprintf(sTemp, "$%08d", CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
+		sprintf(sTemp, "$%09d", CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
 		AsciiToUnicode(sTemp, sPrint);
 
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+		CFont::SetScale(SCREEN_SCALE_X(0.60f), SCREEN_SCALE_Y(0.91f));
 		CFont::SetCentreOff();
 		CFont::SetRightJustifyOn();
 		CFont::SetRightJustifyWrap(0.0f);
 		CFont::SetBackGroundOnlyTextOff();
 		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetPropOff();
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MONEY_X) + SCREEN_SCALE_X_FIX(2.0f), SCREEN_SCALE_Y(43.0f) + SCREEN_SCALE_Y_FIX(2.0f), sPrint);
-		CFont::SetColor(MONEY_COLOR);
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MONEY_X), SCREEN_SCALE_Y(43.0f), sPrint);
+		CFont::SetPropOn();
+		CFont::SetColor(ALPHAHUD_COLOR);
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(12.0f), sPrint);
 
 		/*
 			DrawAmmo
@@ -538,10 +567,10 @@ void CHud::Draw()
 		*/
 		Sprites[WeaponType].Draw(
 			CRect(
-				SCREEN_SCALE_FROM_RIGHT(WEAPON_X),
-				SCREEN_SCALE_Y(27.0f),
-				SCREEN_SCALE_FROM_RIGHT(WEAPON_X)+SCREEN_SCALE_X(64.0f),
-				SCREEN_SCALE_Y(27.0f)+SCREEN_SCALE_Y(64.0f)),
+				SCREEN_SCALE_X(33.5f),
+				SCREEN_SCALE_FROM_BOTTOM(190.0f),
+				SCREEN_SCALE_X(33.5f) + SCREEN_SCALE_X(36.0f),
+				SCREEN_SCALE_FROM_BOTTOM(190.0f) + SCREEN_SCALE_Y(34.5f)),
 			CRGBA(255, 255, 255, 255),
 			0.015f,
 			0.015f,
@@ -568,14 +597,6 @@ void CHud::Draw()
 		/*
 			DrawHealth
 		*/
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
-		CFont::SetJustifyOff();
-		CFont::SetCentreOff();
-		CFont::SetRightJustifyWrap(0.0f);
-		CFont::SetRightJustifyOn();
-		CFont::SetPropOff();
-		CFont::SetFontStyle(FONT_HEADING);
 
 		if (m_ItemToFlash == ITEM_HEALTH && CTimer::GetFrameCounter() & 8
 			|| m_ItemToFlash != ITEM_HEALTH
@@ -584,25 +605,9 @@ void CHud::Draw()
 			if (FindPlayerPed()->m_fHealth >= 10
 				|| FindPlayerPed()->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 
-				AsciiToUnicode("{", sPrintIcon);
-#ifdef FIX_BUGS
-				sprintf(sTemp, "%03d", int32(FindPlayerPed()->m_fHealth + 0.5f));
-#else
-				sprintf(sTemp, "%03d", (int32)FindPlayerPed()->m_fHealth);
-#endif
-				AsciiToUnicode(sTemp, sPrint);
-				CFont::SetColor(CRGBA(0, 0, 0, 255));
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(HEALTH_X) + SCREEN_SCALE_X_FIX(2.0f), SCREEN_SCALE_Y(65.0f) + SCREEN_SCALE_Y_FIX(2.0f), sPrint);
-
 				if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || CTimer::GetFrameCounter() & 4)
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(HEALTH_X) + SCREEN_SCALE_X_FIX(2.0f) - SCREEN_SCALE_X(56.0f) + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(65.0f) + SCREEN_SCALE_Y_FIX(2.0f), sPrintIcon);
-				
-				CFont::SetColor(HEALTH_COLOR);
+					DrawAlphaProgressBar((34.0f), (156.0f), (34.0f), (112.0f), false);
 
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(HEALTH_X), SCREEN_SCALE_Y(65.0f), sPrint);
-
-				if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || CTimer::GetFrameCounter() & 4)
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(HEALTH_X) + SCREEN_SCALE_X_FIX(2.0f) - SCREEN_SCALE_X(56.0f), SCREEN_SCALE_Y(65.0f), sPrintIcon);
 			}
 		}
 
@@ -865,22 +870,20 @@ void CHud::Draw()
 			DrawClock
 		*/
 		CFont::SetJustifyOff();
-		CFont::SetCentreOff();
+		CFont::SetCentreOn();
 		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+		CFont::SetScale(SCREEN_SCALE_X(0.60f), SCREEN_SCALE_Y(0.91f));
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetPropOff();
+		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetRightJustifyOn();
-		CFont::SetRightJustifyWrap(0.0f);
+		CFont::SetRightJustifyOff();
+		CFont::SetCentreOn();
 
 		sprintf(sTemp, "%02d:%02d", CClock::GetHours(), CClock::GetMinutes());
 		AsciiToUnicode(sTemp, sPrint);
 
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(CLOCK_X) + SCREEN_SCALE_X_FIX(2.0f), SCREEN_SCALE_Y(22.0f) + SCREEN_SCALE_Y_FIX(2.0f), sPrint);
-		CFont::SetColor(CLOCK_COLOR);
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(CLOCK_X), SCREEN_SCALE_Y(22.0f), sPrint);
+		CFont::SetColor(ALPHAHUD_COLOR);
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(92.0f), SCREEN_SCALE_Y(34.0f), sPrint);
 
 		/*
 			DrawOnScreenTimer
@@ -1054,7 +1057,7 @@ void CHud::Draw()
 			DrawRadar
 		*/
 		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
-			CRadar::DrawMap();
+			//CRadar::DrawMap();
 			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
 			rect.Translate(SCREEN_SCALE_X_FIX(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 

@@ -383,15 +383,6 @@ bool CRadar::DisplayThisBlip(int32 counter)
 	}
 }
 
-#include "VisibilityPlugins.h"
-
-RpAtomic *
-BigArrowAtomicCB(RpAtomic *atomic, void *data)
-{
-	*(RpAtomic **)data = atomic;
-	return atomic;
-}
-
 void CRadar::Draw3dMarkers()
 {
 	for (int i = 0; i < NUMRADARBLIPS; i++) {

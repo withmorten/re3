@@ -4724,11 +4724,10 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 		}else{
 			Source = colPoint.point;
 			if(PedColDist < DEFAULT_NEAR + 0.3f)
-				RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05));
+				RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05f));
 		}
 	}
 	CWorld::pIgnoreEntity = nil;
-
 	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
 	float ViewPlaneWidth = ViewPlaneHeight * CDraw::FindAspectRatio() * fTweakFOV;
 	float Near = RwCameraGetNearClipPlane(Scene.camera);

@@ -334,7 +334,7 @@ CVisibilityPlugins::RenderWheelAtomicCB(RpAtomic *atomic)
 	mi = GetAtomicModelInfo(atomic);
 	m = RwFrameGetLTM(RpAtomicGetFrame(atomic));
 	RwV3dSub(&view, RwMatrixGetPos(m), ms_pCameraPosn);
-	len = RwV3dLength(&view);
+	len = RwV3dLength(&view) * 0.5f;
 #ifdef FIX_BUGS
 	// from VC
 	lodatm = mi->GetAtomicFromDistance(len * TheCamera.LODDistMultiplier / VEHICLE_LODDIST_MULTIPLIER);

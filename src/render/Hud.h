@@ -26,8 +26,10 @@ enum eSprites
 	HUD_MOLOTOV,
 	HUD_GRENADE,
 	HUD_DETONATOR,
-	HUD_UNK = 15,
-	HUD_PAGERON = 16,
+	HUD_RADARMASK,
+	HUD_BARFILLED,
+	HUD_UNK,
+	HUD_PAGERON,
 	HUD_PAGEROFF,
 	HUD_WANTED,
 	HUD_SITESNIPER = 20,
@@ -75,6 +77,7 @@ public:
 	static void SetZoneName(wchar *name);
 	static void SetHelpMessage(wchar *message, bool quick);
 	static void SetVehicleName(wchar *name);
+	static void DrawAlphaProgressBar(float x, float y, float w, float h, bool bArmour);
 	static void Draw();
 	static void DrawAfterFade();
 	static void SetMessage(wchar *message);

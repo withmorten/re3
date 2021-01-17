@@ -174,7 +174,7 @@ enum Config {
 #define GTA3_PC_STEAM	312
 // TODO? maybe something for xbox or android?
 
-#define GTA_VERSION	GTA3_PC_10
+#define GTA_VERSION	GTA3_PC_11
 
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
@@ -199,9 +199,9 @@ enum Config {
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
-//#		define PS2_MATFX
+#		define PS2_MATFX
 #	endif
-//#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
@@ -272,7 +272,7 @@ enum Config {
 #endif
 
 // Particle
-#define PC_PARTICLE
+//#define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
@@ -354,7 +354,7 @@ enum Config {
 #define CAMERA_PICKUP
 
 // Peds
-//#define PED_SKIN		// support for skinned geometry on peds
+#define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
 // #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward

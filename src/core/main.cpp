@@ -553,8 +553,6 @@ DestroySplashScreen(void)
 	if(splashTxdId != -1)
 		CTxdStore::RemoveTxdSlot(splashTxdId);
 	splashTxdId = -1;
-
-	FrontEndMenuManager.UnloadTextures();
 }
 
 Const char*

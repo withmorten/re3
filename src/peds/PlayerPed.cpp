@@ -1332,6 +1332,8 @@ CPlayerPed::ProcessControl(void)
 			AddWeaponModel(MI_FINGERS);
 		} else
 			RemoveWeaponModel(0);
+
+		fuckUAssoc->SetDeleteCallback(FinishFuckUCB, this);
 	} 
 
 	switch (m_nPedState) {

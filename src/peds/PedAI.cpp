@@ -3798,6 +3798,10 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 			}
 		}
 	}
+	
+	if ( veh->GetModelIndex() == MI_BUS )
+		optedDoorNode = CAR_DOOR_RF;
+	
 	bool someoneExitsFromOurExitDoor = false;
 	bool someoneEntersFromOurExitDoor = false;
 	switch (optedDoorNode) {
@@ -4165,6 +4169,12 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 			posToOpen = lfPos;
 		}
 	}
+	
+	if ( veh->GetModelIndex() == MI_BUS )
+	{
+		m_vehDoor = CAR_DOOR_RF;
+		posToOpen = rfPos;
+	}
 }
 
 bool
@@ -4231,6 +4241,13 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 		m_vehDoor = CAR_DOOR_RR;
 		posToOpen = rrPos;
 	}
+	
+	if ( veh->GetModelIndex() == MI_BUS )
+	{
+		m_vehDoor = CAR_DOOR_RF;
+		posToOpen = rfPos;
+	}
+	
 	return canEnter;
 }
 

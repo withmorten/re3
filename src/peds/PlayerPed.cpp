@@ -1330,8 +1330,7 @@ CPlayerPed::ProcessControl(void)
 		float animTime = fuckUAssoc->currentTime;
 		if(animTime > 6.0f / 30.0f && animTime < 32.0f / 30.0f) { 
 			AddWeaponModel(MI_FINGERS);
-		} else
-			RemoveWeaponModel(0);
+		} 
 
 		fuckUAssoc->SetDeleteCallback(FinishFuckUCB, this);
 	} 

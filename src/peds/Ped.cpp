@@ -936,7 +936,7 @@ CPed::MoveHeadToLook(void)
 
 	if (m_pLookTarget) {
 
-	/*	if (!bShakeFist && GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
+		if (!bShakeFist && GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
 
 			CAnimBlendAssociation *fuckUAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FUCKU);
 			if (fuckUAssoc) {
@@ -960,7 +960,7 @@ CPed::MoveHeadToLook(void)
 					}
 				}
 			}
-		}*/
+		}
 
 		if (m_pLookTarget->IsPed()) {
 			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(lookPos, PED_MID);

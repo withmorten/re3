@@ -1828,11 +1828,11 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 	if(zoomvalue < 0.1f)
 		zoomvalue = 0.1f;
 	if(TheCamera.CarZoomIndicator == CAM_ZOOM_1)
-		AlphaOffset = CGeneral::GetATanOfXY(23.0f, zoomvalue);	// near
+		AlphaOffset = DEGTORAD(1.3f); // near
 	else if(TheCamera.CarZoomIndicator == CAM_ZOOM_2)
-		AlphaOffset = CGeneral::GetATanOfXY(10.8f, zoomvalue);	// mid
+		AlphaOffset = DEGTORAD(0.0f); // mid
 	else if(TheCamera.CarZoomIndicator == CAM_ZOOM_3)
-		AlphaOffset = CGeneral::GetATanOfXY(7.0f, zoomvalue);	// far
+		AlphaOffset = DEGTORAD(10.8f); // far
 
 
 	float Length = (Source - TargetCoors).Magnitude2D();
@@ -2126,7 +2126,7 @@ CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientati
 	if(!CamTargetEntity->IsVehicle())
 		return;
 
-	FOV = DefaultFOV;
+	FOV = DefaultFOV + 10.0f;
 
 	if(ResetStatics){
 		AlphaSpeed = 0.0f;
@@ -2139,7 +2139,7 @@ CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientati
 	CVector TargetCoors = CameraTarget;
 	float BaseDist = Dimensions.Magnitude2D();
 
-	TargetCoors.z += Dimensions.z - 0.1f;	// final
+	TargetCoors.z += Dimensions.z - 0.35f;
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
 	while(Alpha >= PI) Alpha -= 2*PI;
 	while(Alpha < -PI) Alpha += 2*PI;

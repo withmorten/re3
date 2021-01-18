@@ -1081,19 +1081,20 @@ CAutomobile::ProcessControl(void)
 
 	if(m_fHealth < 250.0f && GetStatus() != STATUS_WRECKED){
 		// Car is on fire
+		if (m_fFireBlowUpTimer > 0.0f && m_fHealth > 0.0f)
+		{
+			CParticle::AddParticle(PARTICLE_CARFLAME2, damagePos,
+				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.01125f, 0.09f)),
+				nil, 0.9f);
 
-		CParticle::AddParticle(PARTICLE_CARFLAME, damagePos,
-			CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.01125f, 0.09f)),
-			nil, 0.9f);
+			CVector coors = damagePos;
+			coors.x += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+				coors.y += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+				coors.z += CGeneral::GetRandomNumberInRange(0.5625f, 2.25f);
+			CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, coors, CVector(0.0f, 0.0f, 0.0f));
 
-		CVector coors = damagePos;
-		coors.x += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
-		coors.y += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
-		coors.z += CGeneral::GetRandomNumberInRange(0.5625f, 2.25f);
-		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, coors, CVector(0.0f, 0.0f, 0.0f));
-
-		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, CVector(0.0f, 0.0f, 0.0f), nil, 0.5f);
-
+			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, CVector(0.0f, 0.0f, 0.0f), nil, 0.5f);
+		}
 		// Blow up car after 5 seconds
 		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
 		if(m_fFireBlowUpTimer > 5000.0f){

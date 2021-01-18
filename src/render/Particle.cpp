@@ -175,6 +175,7 @@ RwTexture *gpBulletHitTex;
 RwTexture *gpGunShellTex;
 RwTexture *gpWakeOldTex;
 RwTexture *gpPointlightTex;
+RwTexture *gpFireHoseTexture;
 
 RwRaster  *gpSmokeRaster[MAX_SMOKE_FILES];
 RwRaster  *gpSmoke2Raster[MAX_SMOKE2_FILES];
@@ -204,6 +205,8 @@ RwRaster  *gpWakeOldRaster;
 
 
 RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
+
+RwRaster  *gpFireHoseRaster;
 
 RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
 
@@ -432,6 +435,9 @@ void CParticle::Initialise()
 
 	gpPointlightTex = RwTextureRead("pointlight", nil);
 	gpPointlightRaster = RwTextureGetRaster(gpPointlightTex);
+
+	gpFireHoseTexture = RwTextureRead("firehose", nil);
+	gpFireHoseRaster = RwTextureGetRaster(gpFireHoseTexture);
 	
 	CTxdStore::PopCurrentTxd();
 	
@@ -441,6 +447,14 @@ void CParticle::Initialise()
 		
 		switch ( i )
 		{
+		case PARTICLE_BLOOD_SPLASH:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_CARFLAME2:
+			entry->m_ppRaster = &gpFlame1Raster;
+			break;
+			
 			case PARTICLE_BLOOD:
 				entry->m_ppRaster = &gpBloodRaster;
 				break;
@@ -465,8 +479,11 @@ void CParticle::Initialise()
 				break;
 
 			case PARTICLE_FLAME:
-			case PARTICLE_CARFLAME:
 				entry->m_ppRaster = &gpFlame1Raster;
+				break;
+
+			case PARTICLE_CARFLAME:
+				entry->m_ppRaster = gpExplosionMediumRaster;
 				break;
 
 			case PARTICLE_FIREBALL:
@@ -789,6 +806,9 @@ void CParticle::Shutdown()
 #if GTA_VERSION >= GTA3_PC_11
 	gpPointlightTex = nil;
 #endif
+
+	RwTextureDestroy(gpFireHoseTexture);
+	gpFireHoseTexture = nil;
 
 	int32 slot;
 
@@ -1868,6 +1888,34 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 					nil,
 					fSize, color, 0, 0, 0, 0);
 		
+		vecStepPos += vecRandOffset;
+	}
+}
+
+void CParticle::AddJetExplosion2(CVector const &vecPos, float fPower, float fSize)
+{
+	CRGBA color(240, 240, 240, 255);
+
+	if (fPower < 1.0f)
+		fPower = 1.0f;
+
+	CVector vecRandOffset
+	(
+		CGeneral::GetRandomNumberInRange(-0.5f, 0.5f),
+		CGeneral::GetRandomNumberInRange(-0.5f, 0.5f),
+		CGeneral::GetRandomNumberInRange(0.8f, 1.0f)
+	);
+
+	CVector vecStepPos = vecPos;
+
+	for ( int32 i = 0; i < int32(fPower * 4.0f); i++)
+	{
+		CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST,
+			vecStepPos,
+			CVector(0.0f, 0.0f, 0.0f),
+			nil,
+			fSize, CRGBA(240, 240, 240, 255));
+
 		vecStepPos += vecRandOffset;
 	}
 }

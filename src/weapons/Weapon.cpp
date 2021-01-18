@@ -962,6 +962,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 						{
 							for ( uint8 i = 0; i < bloodAmount; i++ )
 								CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point->point, dir);
+
+							CParticle::AddParticle(PARTICLE_BLOOD_SPLASH, point->point, CVector(0.0f, 0.0f, 0.0f));
 						}
 					}
 				}
@@ -977,6 +979,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					{
 						for ( int32 i = 0; i < 8; i++ )
 							CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point->point + CVector(0.0f, 0.0f, 0.15f), dir);
+
+						CParticle::AddParticle(PARTICLE_BLOOD_SPLASH, point->point, CVector(0.0f, 0.0f, 0.0f));
 					}
 
 					if ( victimPed->Dead() )
@@ -1270,6 +1274,8 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 						{
 							for ( uint8 i = 0; i < bloodAmount; i++ )
 								CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point.point, dir);
+
+							CParticle::AddParticle(PARTICLE_BLOOD_SPLASH, point.point, CVector(0.0f, 0.0f, 0.0f));
 						}
 					}
 				}
@@ -1741,6 +1747,8 @@ CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
 
 							CParticle::AddParticle(PARTICLE_BLOOD, pos, dir);
 						}
+
+						CParticle::AddParticle(PARTICLE_BLOOD_SPLASH, point.point, CVector(0.0f, 0.0f, 0.0f));
 					}
 				}
 

@@ -55,6 +55,8 @@ CRubbish::Render(void)
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDDESTCOLOR);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 
 	for(type = 0; type < 6; type++){
@@ -138,6 +140,8 @@ CRubbish::Render(void)
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
 }
 
 void
@@ -241,9 +245,10 @@ CRubbish::Update(void)
 			// Found ground, so add to statics list
 			sheet->m_angle = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 6.28f;
 			sheet->m_state = 1;
+			/*
 			if(CCullZones::FindAttributesForCoors(sheet->m_basePos, nil) & ATTRZONE_NORAIN)
 				sheet->m_isVisible = false;
-			else
+			else*/
 				sheet->m_isVisible = true;
 			sheet->RemoveFromList();
 			sheet->AddToList(&StartStaticsList);
@@ -310,9 +315,9 @@ CRubbish::Update(void)
 			float ty = aSheets[i].m_basePos.y + aSheets[i].m_yDist;
 			float tz = aSheets[i].m_basePos.z + 3.0f;
 			aSheets[i].m_targetZ = CWorld::FindGroundZFor3DCoord(tx, ty, tz, &foundGround) + 0.1f;
-			if(CCullZones::FindAttributesForCoors(CVector(tx, ty, aSheets[i].m_targetZ), nil) & ATTRZONE_NORAIN)
+			/*if(CCullZones::FindAttributesForCoors(CVector(tx, ty, aSheets[i].m_targetZ), nil) & ATTRZONE_NORAIN)
 				aSheets[i].m_targetIsVisible = false;
-			else
+			else*/
 				aSheets[i].m_targetIsVisible = true;
 			if(foundGround){
 				// start animation

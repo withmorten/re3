@@ -88,6 +88,7 @@ public:
 	}
 
 	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
+	static void AddJetExplosion2(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 };
 

@@ -142,6 +142,7 @@ void CBulletInfo::Update(void)
 					if (pPed->GetIsOnScreen()) {
 						for (int j = 0; j < NUM_PED_BLOOD_PARTICLES; j++)
 							CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point.point + BLOOD_PARTICLE_OFFSET, vecParticleDirection);
+						CParticle::AddParticle(PARTICLE_BLOOD_SPLASH, point.point, CVector(0.0f, 0.0f, 0.0f));
 					}
 					if (pPed->GetPedState() == PED_DEAD) {
 						CAnimBlendAssociation* pAnim;

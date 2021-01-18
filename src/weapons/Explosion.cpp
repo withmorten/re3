@@ -189,12 +189,12 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 
 		if (explosion.m_pVictimEntity != nil && !explosion.m_bIsBoat) {
 			int rn = (CGeneral::GetRandomNumber() & 1) + 2;
-			for (int i = 0; i < rn; i++) {
+			/*for (int i = 0; i < rn; i++) {
 				CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, 3.5f, colMedExpl);
 				CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, 5.5f, color);
-			}
+			}*/
 			CVehicle *veh = (CVehicle*)explosion.m_pVictimEntity;
-			int32 component = CAR_WING_LR;
+			int32 component = CAR_BOOT;
 
 			// miami leftover
 			if (veh->IsBike())
@@ -203,9 +203,9 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 			if (veh->IsComponentPresent(component)) {
 				CVector componentPos;
 				veh->GetComponentWorldPosition(component, componentPos);
-				rn = (CGeneral::GetRandomNumber() & 1) + 1;
-				for (int i = 0; i < rn; i++)
-					CParticle::AddJetExplosion(componentPos, 1.4f, 0.0f);
+				//rn = (CGeneral::GetRandomNumber() & 1) + 1;
+				//for (int i = 0; i < rn; i++)
+					CParticle::AddJetExplosion2(componentPos, 3.0f, 0.8f);
 			}
 		}
 		break;
@@ -335,11 +335,13 @@ CExplosion::Update()
 			case EXPLOSION_HELI:
 			case EXPLOSION_MINE:
 			case EXPLOSION_BARREL:
+				/*
 				if (CTimer::GetFrameCounter() & 1) {
 					CPointLights::AddLight(CPointLights::LIGHT_POINT, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), 20.0f, 1.0f, 1.0f, 0.5f, CPointLights::FOG_NONE, true);
 					CCoronas::RegisterCorona((uintptr)&explosion, 255, 255, 200, 255, explosion.m_vecPosition, 8.0f, 120.0f, gpCoronaTexture[0], CCoronas::TYPE_NORMAL, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 				} else
 					CCoronas::RegisterCorona((uintptr)&explosion, 128, 128, 100, 255, explosion.m_vecPosition, 8.0f, 120.0f, gpCoronaTexture[0], CCoronas::TYPE_NORMAL, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+				*/
 				CCoronas::RegisterCorona((uintptr)&explosion + 1, 30, 30, 25, 255, explosion.m_vecPosition, explosion.m_fRadius, 120.0f, gpCoronaTexture[7], CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 				break;
 			case EXPLOSION_MOLOTOV:
@@ -364,7 +366,7 @@ CExplosion::Update()
 						pos.z += 5.0f; // what is the point of this?
 
 						pos.z = explosion.m_fZshift + 0.5f;
-						CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, CGeneral::GetRandomNumberInRange(-3.0f, 3.0f), CGeneral::GetRandomNumberInRange(-180.0f, 180.0f));
+						//CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, CGeneral::GetRandomNumberInRange(-3.0f, 3.0f), CGeneral::GetRandomNumberInRange(-180.0f, 180.0f));
 					}
 				}
 				break;
@@ -372,7 +374,8 @@ CExplosion::Update()
 			case EXPLOSION_CAR_QUICK:
 				if (someTime >= 3500) {
 					if (explosion.m_pVictimEntity != nil && !explosion.m_bIsBoat) {
-						if ((CGeneral::GetRandomNumber() & 0xF) == 0) {
+						//if ((CGeneral::GetRandomNumber() & 0xF) == 0)
+						{
 							CVehicle *veh = (CVehicle*)explosion.m_pVictimEntity;
 							uint8 component = CAR_WING_LR;
 
@@ -383,7 +386,7 @@ CExplosion::Update()
 							if (veh->IsComponentPresent(component)) {
 								CVector componentPos;
 								veh->GetComponentWorldPosition(component, componentPos);
-								CParticle::AddJetExplosion(componentPos, 1.5f, 0.0f);
+								//CParticle::AddJetExplosion(componentPos, 1.5f, 0.0f);
 							}
 						}
 						if (CTimer::GetTimeInMilliseconds() > explosion.m_fStartTime) {
@@ -403,11 +406,11 @@ CExplosion::Update()
 
 					CCoronas::RegisterCorona((uintptr)&explosion + 1, 30, 15, 0, 255, explosion.m_vecPosition, explosion.m_fRadius, 80.0f, gpCoronaTexture[7], CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 				} else if (explosion.m_nIteration & 1) {
-					if (explosion.m_pVictimEntity != nil)
-						CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, CGeneral::GetRandomNumberInRange(0.5f, 0.8f), color);
+					//if (explosion.m_pVictimEntity != nil)
+						//CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, CGeneral::GetRandomNumberInRange(0.5f, 0.8f), color);
 					CVector pos = explosion.m_vecPosition;
 					pos.z += 1.0f;
-					CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, pos, CVector(0.0f, 0.0f, 0.11f), nil, CGeneral::GetRandomNumberInRange(0.5f, 2.0f), color);
+					//CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, pos, CVector(0.0f, 0.0f, 0.11f), nil, CGeneral::GetRandomNumberInRange(0.5f, 2.0f), color);
 				}
 				break;
 			case EXPLOSION_TANK_GRENADE:

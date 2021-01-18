@@ -113,14 +113,14 @@ CFire::ProcessFire(void)
 			firePos.z = ModelInfo.z + 0.15f;
 		}
 
-		CParticle::AddParticle(PARTICLE_CARFLAME, firePos,
-			CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.0125f, 0.1f) * m_fStrength),
-				0, m_fStrength, 0, 0, 0, 0);
+		CParticle::AddParticle(PARTICLE_CARFLAME, firePos + CVector(CGeneral::GetRandomNumberInRange(-1.5f, 1.5f), CGeneral::GetRandomNumberInRange(-1.5f, 1.5f), 0.0f),
+			CVector(0.0f, 0.0f, 0.25f),
+				0, 0.4f, 0, 0, 0, 0);
 
 		CGeneral::GetRandomNumber(); CGeneral::GetRandomNumber(); CGeneral::GetRandomNumber(); /* unsure why these three rands are called */
 
-		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, firePos,
-			CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+		//CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, firePos,
+		//	CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 	}
 	if (CTimer::GetTimeInMilliseconds() < m_nExtinguishTime || m_bIsScriptFire) {
 		if (CTimer::GetTimeInMilliseconds() > m_nStartTime)

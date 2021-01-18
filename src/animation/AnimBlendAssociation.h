@@ -62,6 +62,12 @@ public:
 
 	CAnimBlendAssociation(void);
 	CAnimBlendAssociation(CAnimBlendAssociation &other);
+
+#ifdef ADAPT_PED_HIERARCHY
+	CAnimBlendAssociation(CAnimBlendAssociation &other, RpClump *clump);
+	void CopyForClump(CAnimBlendAssociation &anim, RpClump *clump);
+#endif
+
 #ifndef FIX_BUGS
 	virtual
 #endif

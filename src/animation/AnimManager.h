@@ -82,6 +82,9 @@ public:
 	static CAnimBlendHierarchy *GetAnimation(int32 n) { return &ms_aAnimations[n]; }
 	static const char *GetAnimGroupName(AssocGroupId groupId);
 	static CAnimBlendAssociation *CreateAnimAssociation(AssocGroupId groupId, AnimationId animId);
+#ifdef ADAPT_PED_HIERARCHY
+	static CAnimBlendAssociation *CreateAnimAssociation(int groupId, int animId, RpClump *clump);
+#endif
 	static CAnimBlendAssociation *GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
 	static CAnimBlendAssociation *GetAnimAssociation(AssocGroupId groupId, const char *name);
 	static CAnimBlendAssociation *AddAnimation(RpClump *clump, AssocGroupId groupId, AnimationId animId);

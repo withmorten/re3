@@ -72,6 +72,28 @@ CAnimBlendAssocGroup::CopyAnimation(const char *name)
 	return new CAnimBlendAssociation(*anim);
 }
 
+#ifdef ADAPT_PED_HIERARCHY
+CAnimBlendAssociation*
+CAnimBlendAssocGroup::CopyAnimation(uint32 id, RpClump *clump)
+{
+	CAnimBlendAssociation *anim = GetAnimation(id);
+	if(anim == nil)
+		return nil;
+	CAnimManager::UncompressAnimation(anim->hierarchy);
+	return new CAnimBlendAssociation(*anim, clump);
+}
+
+CAnimBlendAssociation*
+CAnimBlendAssocGroup::CopyAnimation(const char *name, RpClump *clump)
+{
+	CAnimBlendAssociation *anim = GetAnimation(name);
+	if(anim == nil)
+		return nil;
+	CAnimManager::UncompressAnimation(anim->hierarchy);
+	return new CAnimBlendAssociation(*anim, clump);
+}
+#endif
+
 bool
 strcmpIgnoringDigits(const char *s1, const char *s2)
 {

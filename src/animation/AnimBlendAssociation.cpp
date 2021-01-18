@@ -34,6 +34,50 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation &other)
 	Init(other);
 }
 
+#ifdef ADAPT_PED_HIERARCHY
+CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation &other, RpClump *clump)
+{
+	nodes = nil;
+	blendAmount = 1.0f;
+	blendDelta = 0.0f;
+	currentTime = 0.0f;
+	speed = 1.0f;
+	timeStep = 0.0f;
+	callbackType = CB_NONE;
+	link.Init();
+	Init(other);
+	CopyForClump(other, clump);
+}
+// Copy the BlendAssoc in such a way that it can work with a different frame hierarchy
+void
+CAnimBlendAssociation::CopyForClump(CAnimBlendAssociation &anim, RpClump *clump)
+{
+	int i;
+	CAnimBlendClumpData *clumpData = *RPANIMBLENDCLUMPDATA(clump);
+
+	hierarchy = anim.hierarchy;
+	numNodes = clumpData->numFrames;
+	flags = anim.flags;
+	animId = anim.animId;
+	AllocateAnimBlendNodeArray(numNodes);
+	for(i = 0; i < numNodes; i++){
+		nodes[i] = anim.nodes[i];
+		nodes[i].association = this;
+	}
+
+	CAnimBlendHierarchy *hier = anim.hierarchy;
+	AnimBlendFrameData *frameData;
+	for(int i = 0; i < anim.hierarchy->numSequences; i++){
+		CAnimBlendSequence *seq = &anim.hierarchy->sequences[i];
+		frameData = RpAnimBlendClumpFindFrame(clump, seq->name);
+		if(frameData && seq->numFrames > 0){
+			int n = frameData - clumpData->frames;
+			nodes[n].sequence = seq;
+		}
+	}
+}
+#endif
+
 CAnimBlendAssociation::~CAnimBlendAssociation(void)
 {
 	FreeAnimBlendNodeArray();

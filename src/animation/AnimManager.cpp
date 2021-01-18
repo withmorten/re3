@@ -659,6 +659,14 @@ CAnimManager::CreateAnimAssociation(AssocGroupId groupId, AnimationId animId)
 	return ms_aAnimAssocGroups[groupId].CopyAnimation(animId);
 }
 
+#ifdef ADAPT_PED_HIERARCHY
+CAnimBlendAssociation*
+CAnimManager::CreateAnimAssociation(int groupId, int animId, RpClump *clump)
+{
+	return CAnimManager::ms_aAnimAssocGroups[groupId].CopyAnimation(animId, clump);
+}
+#endif
+
 CAnimBlendAssociation*
 CAnimManager::GetAnimAssociation(AssocGroupId groupId, AnimationId animId)
 {
@@ -674,7 +682,11 @@ CAnimManager::GetAnimAssociation(AssocGroupId groupId, const char *name)
 CAnimBlendAssociation*
 CAnimManager::AddAnimation(RpClump *clump, AssocGroupId groupId, AnimationId animId)
 {
+#ifdef ADAPT_PED_HIERARCHY
+	CAnimBlendAssociation *anim = CreateAnimAssociation(groupId, animId, clump);
+#else
 	CAnimBlendAssociation *anim = CreateAnimAssociation(groupId, animId);
+#endif
 	CAnimBlendClumpData *clumpData = *RPANIMBLENDCLUMPDATA(clump);
 	if(anim->IsMovement()){
 		CAnimBlendAssociation *syncanim = nil;
@@ -699,7 +711,11 @@ CAnimManager::AddAnimation(RpClump *clump, AssocGroupId groupId, AnimationId ani
 CAnimBlendAssociation*
 CAnimManager::AddAnimationAndSync(RpClump *clump, CAnimBlendAssociation *syncanim, AssocGroupId groupId, AnimationId animId)
 {
+#ifdef ADAPT_PED_HIERARCHY
+	CAnimBlendAssociation *anim = CreateAnimAssociation(groupId, animId, clump);
+#else
 	CAnimBlendAssociation *anim = CreateAnimAssociation(groupId, animId);
+#endif
 	CAnimBlendClumpData *clumpData = *RPANIMBLENDCLUMPDATA(clump);
 	if (anim->IsMovement() && syncanim){
 		anim->SyncAnimation(syncanim);

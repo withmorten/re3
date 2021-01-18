@@ -1282,14 +1282,22 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 	case MI_VCNMAV:
 	case MI_POLMAV:
 	case MI_COASTG:
-	case MI_RHINO:
-	case MI_BARRACKS:
+	//case MI_RHINO:
+	//case MI_BARRACKS:
+	case MI_FIRETRUCK:
+	case MI_AMBULAN:
+	//case MI_FBICAR:
+	case MI_POLICE:
+	case MI_ENFORCER:
+	case MI_PREDATOR:
+	//case MI_FBIRANCH:
+	//case MI_VICECHEE:
 		return true;
 	case MI_MRWHOOP:
 	case MI_HUNTER:
+	default:
 		return false;
 	}
-	return veh->UsesSiren();
 }
 
 bool

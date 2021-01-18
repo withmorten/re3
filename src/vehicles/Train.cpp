@@ -624,7 +624,7 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 	// end
 	interpLines[j].time = *totalDuration;
 }
-#include "AudioscriptObject.h"
+
 void
 PlayAnnouncement(uint8 sound, uint8 station)
 {

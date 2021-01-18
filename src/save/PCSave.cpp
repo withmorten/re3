@@ -4,9 +4,7 @@
 
 #include "FileMgr.h"
 #include "Font.h"
-#ifdef MORE_LANGUAGES
 #include "Game.h"
-#endif
 #include "GenericGameStorage.h"
 #include "Messages.h"
 #include "PCSave.h"

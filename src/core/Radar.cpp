@@ -713,26 +713,28 @@ void CRadar::DrawBlips()
 	}
 }
 
-void CRadar::DrawMap()
+void
+CRadar::UpdateRadar()
 {
-	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
+	if(!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
 #if 1 // from VC
 		CalculateCachedSinCos();
 #endif
-		if (FindPlayerVehicle()) {
+		if(FindPlayerVehicle()) {
 			float speed = FindPlayerSpeed().Magnitude();
-			if (speed < RADAR_MIN_SPEED)
+			if(speed < RADAR_MIN_SPEED)
 				m_radarRange = RADAR_MIN_RANGE;
-			else if (speed < RADAR_MAX_SPEED)
-				m_radarRange = (speed - RADAR_MIN_SPEED)/(RADAR_MAX_SPEED-RADAR_MIN_SPEED) * (RADAR_MAX_RANGE-RADAR_MIN_RANGE) + RADAR_MIN_RANGE;
+			else if(speed < RADAR_MAX_SPEED)
+				m_radarRange =
+				    (speed - RADAR_MIN_SPEED) / (RADAR_MAX_SPEED - RADAR_MIN_SPEED) * (RADAR_MAX_RANGE - RADAR_MIN_RANGE) + RADAR_MIN_RANGE;
 			else
 				m_radarRange = RADAR_MAX_RANGE;
-		}
-		else
+		} else
 			m_radarRange = RADAR_MIN_RANGE;
 
 		vec2DRadarOrigin = CVector2D(FindPlayerCentreOfWorld_NoSniperShift());
-		DrawRadarMap();
+
+		CHud::Sprites[HUD_RADARMASK].Draw(SCREEN_SCALE_X(48.5f), SCREEN_SCALE_FROM_BOTTOM(126.0f), SCREEN_SCALE_X(88.0f), SCREEN_SCALE_Y(88.0f), CRGBA(127, 120, 161, 195));
 	}
 }
 
@@ -1298,7 +1300,7 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 #endif
 	{
 #ifdef FIX_BUGS
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(88.0f) + SCREEN_SCALE_X(RADAR_LEFT);
 #else
 		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + RADAR_LEFT;
 #endif

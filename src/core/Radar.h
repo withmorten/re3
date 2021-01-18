@@ -86,11 +86,11 @@ struct sRadarTrace
 VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
-#define RADAR_LEFT (40.0f)
+#define RADAR_LEFT (48.0f)
 #ifdef PS2_HUD
 #define RADAR_BOTTOM (44.0f)
 #else
-#define RADAR_BOTTOM (47.0f)
+#define RADAR_BOTTOM (42.0f)
 #endif
 
 #ifdef FIX_RADAR
@@ -162,7 +162,7 @@ public:
 	static bool DisplayThisBlip(int32 i);
 	static void Draw3dMarkers();
 	static void DrawBlips();
-	static void DrawMap();
+	static void UpdateRadar();
 	static void DrawRadarMap();
 	static void DrawRadarMask();
 	static void DrawRadarSection(int32 x, int32 y);

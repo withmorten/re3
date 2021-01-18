@@ -2078,8 +2078,10 @@ CAutomobile::Render(void)
 		pos.x = mat.GetPosition().x;
 		pos.y = mat.GetPosition().y;
 		pos.z = m_aWheelPosition[CARWHEEL_FRONT_RIGHT];
-		// no damaged wheels or steering
-		mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, 0.0f);
+		if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle+0.3f*Sin(m_aWheelRotation[CARWHEEL_FRONT_RIGHT]));
+		else
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle);
 		mat.Scale(mi->m_wheelScale);
 		mat.Translate(pos);
 		mat.UpdateRW();
@@ -2091,8 +2093,10 @@ CAutomobile::Render(void)
 		pos.x = mat.GetPosition().x;
 		pos.y = mat.GetPosition().y;
 		pos.z = m_aWheelPosition[CARWHEEL_FRONT_LEFT];
-		// no damaged wheels or steering
-		mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI);
+		if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI+m_fSteerAngle+0.3f*Sin(-m_aWheelRotation[CARWHEEL_FRONT_LEFT]));
+		else
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI+m_fSteerAngle);
 		mat.Scale(mi->m_wheelScale);
 		mat.Translate(pos);
 		mat.UpdateRW();

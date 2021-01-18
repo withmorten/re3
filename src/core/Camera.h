@@ -37,8 +37,8 @@ enum
 #endif
 
 #define DEFAULT_CAR_ZOOM_VALUE_1 (0.05f)
-#define DEFAULT_CAR_ZOOM_VALUE_2 (1.9f)
-#define DEFAULT_CAR_ZOOM_VALUE_3 (3.9f)
+#define DEFAULT_CAR_ZOOM_VALUE_2 (1.6f)
+#define DEFAULT_CAR_ZOOM_VALUE_3 (2.4f)
 
 const float DefaultFOV = 70.0f; // beta: 80.0f
 

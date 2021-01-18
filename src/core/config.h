@@ -219,7 +219,7 @@ enum Config {
 
 #ifdef FINAL
 	// in all games
-#	define USE_MY_DOCUMENTS	// use my documents directory for user files
+//#	define USE_MY_DOCUMENTS	// use my documents directory for user files
 #else
 	// not in any game
 #	define CHATTYSPLASH	// print what the game is loading

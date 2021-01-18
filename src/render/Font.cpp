@@ -1523,9 +1523,9 @@ CFont::ParseToken(wchar *s)
 				Details.color.a = 255;
 			break;
 		case 'g':
-			Details.color.r = 255;
-			Details.color.g = 150;
-			Details.color.b = 225;
+			Details.color.r = 45;
+			Details.color.g = 155;
+			Details.color.b = 90;
 			Details.anonymous_23 = true;
 			break;
 		case 'h':
@@ -1559,9 +1559,9 @@ CFont::ParseToken(wchar *s)
 			Details.anonymous_23 = true;
 			break;
 		case 'r':
-			Details.color.r = 255;
-			Details.color.g = 150;
-			Details.color.b = 225;
+			Details.color.r = 45;
+			Details.color.g = 155;
+			Details.color.b = 90;
 			Details.anonymous_23 = true;
 			break;
 		case 't':

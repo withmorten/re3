@@ -775,6 +775,8 @@ extern bool gbRenderWorld2;
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
 		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
 
+		DebugMenuAddVarBool8("VCB", "SeaBed", &CWaterLevel::m_bRenderSeaBed, nil);
+
 		CTweakVars::AddDBG("Debug");
 	}
 }

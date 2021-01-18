@@ -551,10 +551,10 @@ void CMovingThing::Update()
 		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFFF) * TWOPI / 0x3FFFF;
 		float s = Sin(angle);
 		float c = Cos(angle);
-		m_pEntity->GetRight() = CVector(-c, -s, 0.0f);
-		m_pEntity->GetForward() = CVector(s, -c, 0.0f);
+		m_pEntity->GetRight() = CVector(-s, -c, 0.0f);
+		m_pEntity->GetForward() = CVector(c, -s, 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
-		m_pEntity->SetPosition(CVector(350.0f * c - 465.0f, 350.0f * s + 1163.0f, 260.0f));
+		m_pEntity->SetPosition(CVector(350.0f * s - 465.0f, 350.0f * c + 1163.0f, 260.0f));
 	}
 		break;
 	default:

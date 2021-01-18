@@ -1172,7 +1172,7 @@ CStats::ConstructStatLine(int rowIdx)
 	STAT_LINE_1(int, "FEST_FE", FiresExtinguished, 0);
 	STAT_LINE_1(int, "FIRELVL", HighestLevelFireMission, 0);
 
-	STAT_LINE_2(int, "ST_STOR", StoresKnockedOff, 0, 15, 0);
+	STAT_LINE_2(int, "ST_STOR", StoresKnockedOff, 0, 16, 0);
 
 	if (MovieStunts > 0.0f)
 		STAT_LINE_1(int, "ST_MOVI", MovieStunts, 0);

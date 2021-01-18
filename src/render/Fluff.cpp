@@ -116,7 +116,7 @@ void CMovingThings::Init()
 	 aScrollBars[7].Init(CVector(   85.473f, -1069.512f,   30.5f  ), SCROLL_STORE,          0.625f,  -0.3125f,  0.727f, 100, 100, 255, 0.5f);
 	 aScrollBars[8].Init(CVector(   74.823f, -1086.879f,   31.495f), SCROLL_ENTERTAINMENT, -0.2083f,  0.1041f,  0.5f,   255, 255, 128, 0.3f);
 	 aScrollBars[9].Init(CVector(  -36.459f, -1031.2371f,  32.534f), SCROLL_ENTERTAINMENT, -0.1442f,  0.0721f,  0.229f, 150, 255, 50,  0.3f);
-	//aScrollBars[10].Init(CVector( 1208.0f,     -62.208f,   19.157f), SCROLL_USED_CARS,      0.0642f, -0.20365f, 0.229f, 255, 128, 0,   0.3f);
+	// aScrollBars[10].Init(CVector( 1208.0f,     -62.208f,   19.157f), SCROLL_USED_CARS,      0.0642f, -0.20365f, 0.229f, 255, 128, 0,   0.3f);
 
 	// Initialize tower clocks
 	aTowerClocks[0].Init(CVector(59.4f, -1081.3f, 54.15f), -1.0f,  0.0f, 0, 0, 0, 80.0f, 2.0f);

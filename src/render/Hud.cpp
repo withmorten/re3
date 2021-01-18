@@ -606,7 +606,7 @@ void CHud::Draw()
 				|| FindPlayerPed()->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 
 				if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || CTimer::GetFrameCounter() & 4)
-					DrawAlphaProgressBar((34.0f), (156.0f), (34.0f), (112.0f), false);
+					DrawAlphaProgressBar((34.0f), (155.0f), (34.0f), (112.0f), false);
 
 			}
 		}
@@ -1057,7 +1057,7 @@ void CHud::Draw()
 			DrawRadar
 		*/
 		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
-			//CRadar::DrawMap();
+			CRadar::UpdateRadar();
 			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
 			rect.Translate(SCREEN_SCALE_X_FIX(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 

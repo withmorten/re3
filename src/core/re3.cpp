@@ -334,7 +334,7 @@ SpawnCar(int id)
 		if(carCol2)
 			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
 
-		if(CModelInfo::IsBoatModel(id))
+		if(!CModelInfo::IsBoatModel(id))
 			v->SetPosition(TheCamera.GetPosition() + TheCamera.GetForward()*15.0f);
 		else
 			v->SetPosition(ThePaths.m_pathNodes[node].GetPosition());

@@ -775,6 +775,7 @@ public:
 	bool IsPedShootable(void);
 	void Look(void);
 	void SetInTheAir(void);
+	void GetWantedLevelOnRedLight();
 	void RestoreHeadPosition(void);
 	void PointGunAt(void);
 	bool ServiceTalkingWhenDead(void);

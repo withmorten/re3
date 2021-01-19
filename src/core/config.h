@@ -147,7 +147,7 @@ enum Config {
 //#define GTA_XBOX
 
 // This enables things from the PS2 version on PC
-#define GTA_PS2_STUFF
+//#define GTA_PS2_STUFF
 
 // This is enabled for all released games.
 // any debug stuff that isn't left in any game is not in FINAL

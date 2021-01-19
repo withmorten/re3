@@ -16,6 +16,7 @@
 #include "Radar.h"
 #include "PedPlacement.h"
 #include "Shadows.h"
+#include "SpecialFX.h"
 #include "Weather.h"
 #include "ZoneCull.h"
 #include "Population.h"
@@ -1068,7 +1069,6 @@ CPed::AnnoyNearestPed()
 	}
 }
 
-#include "SpecialFX.h"
 void
 CPed::GetWantedLevelOnRedLight()
 {

@@ -963,8 +963,8 @@ CPlayerPed::ProcessAnimGroups(void)
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT) {
 				groupToSet = ASSOCGRP_PLAYER; // ASSOCGRP_PLAYERBBBAT;
 			} else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI) {
-				if (!GetWeapon()->IsType2Handed()) {
-					groupToSet = ASSOCGRP_PLAYER;
+				if (GetWeapon()->IsType2Handed()) {
+					groupToSet = ASSOCGRP_PLAYERBBBAT;
 				} else {
 					groupToSet = ASSOCGRP_PLAYER; // ASSOCGRP_PLAYER2ARMED;
 				}

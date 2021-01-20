@@ -1133,8 +1133,7 @@ CPed::GetWantedLevelOnRedLight()
 				                                                 marker->m_Matrix.GetPosition().z, 4.0f)) &&
 				   (CTrafficLights::LightForCars1() != CAR_LIGHTS_GREEN && CTrafficLights::LightForCars2() != CAR_LIGHTS_GREEN)) {
 					FindPlayerPed()->SetWantedLevelNoDrop(1);
-					FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(CRIME_RECKLESS_DRIVING, GetPosition(), (uintptr)this, false);
-					FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(CRIME_RUN_REDLIGHT, GetPosition(), (uintptr)this, false);
+					FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(CRIME_RUN_REDLIGHT, GetPosition(), (uintptr)this, true);
 					printf("WANTED LEVEL INCREASED");
 				}
 				i++;

@@ -201,7 +201,7 @@ enum Config {
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+//#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
@@ -365,7 +365,7 @@ enum Config {
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
-#define FREE_CAM		// Rotating cam
+//#define FREE_CAM		// Rotating cam
 
 // Audio
 #define RADIO_SCROLL_TO_PREV_STATION

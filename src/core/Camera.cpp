@@ -1083,7 +1083,7 @@ CCamera::CamControl(void)
 			if(PedZoomIndicator == CAM_ZOOM_1)
 				m_fPedZoomValue = 0.25f;
 			else if(PedZoomIndicator == CAM_ZOOM_2)
-				m_fPedZoomValue = 1.5f;
+				m_fPedZoomValue = 0.75f;
 			else if(PedZoomIndicator == CAM_ZOOM_3)
 				m_fPedZoomValue = 2.9f;
 

@@ -1073,7 +1073,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		// unused LastAngleWithNoPickedASide
 	}
 
-
 	TargetCoors = CameraTarget;
 	IdealSource = Source;
 	TargetCoors.z += m_fSyphonModeTargetZOffSet;
@@ -1113,6 +1112,31 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		 Beta = TargetOrientation;
 	}
 
+	// Look around
+	bool UseMouse = false;
+	float MouseX = CPad::GetPad(0)->GetMouseX();
+	float MouseY = CPad::GetPad(0)->GetMouseY();
+	float LookLeftRight, LookUpDown;
+	if((MouseX != 0.0f || MouseY != 0.0f) && !CPad::GetPad(0)->ArePlayerControlsDisabled()) {
+		UseMouse = true;
+		LookLeftRight = -2.5f * MouseX;
+		LookUpDown = 4.0f * MouseY;
+	} else {
+		LookLeftRight = -CPad::GetPad(0)->LookAroundLeftRight();
+		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
+	}
+	float AlphaOffset, BetaOffset;
+	if(UseMouse) {
+		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV / 80.0f;
+		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV / 80.0f;
+	} else {
+		BetaOffset = LookLeftRight * 0.01f * (1.0f / 14.0f) * FOV / 80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * 0.01f * (0.6f / 14.0f) * FOV / 80.0f * CTimer::GetTimeStep();
+	}
+
+	if(BetaOffset) Rotating = false;
+
+	Beta += BetaOffset;
 	while(Beta >= PI) Beta -= 2.0f * PI;
 	while(Beta < -PI) Beta += 2.0f * PI;
 
@@ -1148,11 +1172,8 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		TargetCoors.z -= m_fRoadOffSet;
 
 	// Figure out if and where we want to rotate
-
 	if(CPad::GetPad(0)->ForceCameraBehindPlayer() || Shooting){
-
 		// Center cam behind player
-
 		GoingBehind = true;
 		m_bCollisionChecksOn = true;
 		float OriginalBeta = Beta;
@@ -1177,85 +1198,9 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 		TargetCoors.z += 0.1f;
 		Beta = OriginalBeta;
-
-		if(PickedASide){
-			if(AngleToGoTo == 0.0f)
-				FixedTargetOrientation = TargetOrientation + PI;
-			Rotating = true;
-		}else{
-			FixedTargetOrientation = TargetOrientation + PI + AngleToGoTo;
-			Rotating = true;
-			PickedASide = true;
-		}
-	}else{
-
-		// Rotate cam to avoid clipping into buildings
-
-		TargetCoors.z -= 0.1f;
-
-		Center = GetPedBetaAngleForClearView(TargetCoors, CenterDist * RealGroundDist, 0.0f, true, false, false, true, false);
-		if(m_bCollisionChecksOn || PreviouslyObscured || Center != 0.0f || m_fCloseInPedHeightOffset > 0.00001f){
-			if(Center != 0.0f){
-				AngleToGoTo = Center;
-			}else{
-				LateralLeft = GetPedBetaAngleForClearView(TargetCoors, LateralDist * RealGroundDist, BetaOffsetAvoidBuildings, true, false, false, true, false);
-				LateralRight = GetPedBetaAngleForClearView(TargetCoors, LateralDist * RealGroundDist, -BetaOffsetAvoidBuildings, true, false, false, true, false);
-				if(LateralLeft == 0.0f && LateralRight != 0.0f){
-					AngleToGoTo += LateralRight;
-					if(m_fCloseInPedHeightOffset > 0.0f)
-						RwCameraSetNearClipPlane(Scene.camera, 0.7f);
-				}else if(LateralLeft != 0.0f && LateralRight == 0.0f){
-					AngleToGoTo += LateralLeft;
-					if(m_fCloseInPedHeightOffset > 0.0f)
-						RwCameraSetNearClipPlane(Scene.camera, 0.7f);
-				}
-			}
-			if(LateralLeft != 0.0f || LateralRight != 0.0f || Center != 0.0f)
-				BuildingCheckObscured = true;
-		}
-
-		TargetCoors.z += 0.1f;
 	}
-
-	if(m_fCloseInPedHeightOffset > 0.00001f)
-		TargetCoors.z += m_fRoadOffSet;
-
-
-	// Have to fix to avoid collision
-
-	if(AngleToGoTo != 0.0f){
-		Obscured = true;
-		Rotating = true;
-		if(CPad::GetPad(0)->ForceCameraBehindPlayer() || Shooting){
-			if(!PickedASide)
-				FixedTargetOrientation = Beta + AngleToGoTo;	// can this even happen?
-		}else
-			FixedTargetOrientation = Beta + AngleToGoTo;
-
-		// This calculation is only really used to figure out how fast to rotate out of collision
-
-		m_fAmountFractionObscured = 1.0f;
-		CVector PlayerPos = FindPlayerPed()->GetPosition();
-		float RotationDist = (AngleToGoTo == Center ? CenterDist : LateralDist) * RealGroundDist;
-		// What's going on here? - AngleToGoTo?
-		CVector RotatedSource = PlayerPos + CVector(Cos(Beta - AngleToGoTo), Sin(Beta - AngleToGoTo), 0.0f) * RotationDist;
-
-		CColPoint colpoint;
-		CEntity *entity;
-		if(CWorld::ProcessLineOfSight(PlayerPos, RotatedSource, colpoint, entity, true, false, false, true, false, false, false)){
-			if((PlayerPos - RotatedSource).Magnitude() != 0.0f)
-				m_fAmountFractionObscured = (PlayerPos - colpoint.point).Magnitude() / (PlayerPos - RotatedSource).Magnitude();
-			else
-				m_fAmountFractionObscured = 1.0f;
-		}
-	}
-	if(m_fAmountFractionObscured < 0.0f) m_fAmountFractionObscured = 0.0f;
-	if(m_fAmountFractionObscured > 1.0f) m_fAmountFractionObscured = 1.0f;
-
-
 
 	// Figure out speed values for Beta rotation
-
 	float Acceleration, MaxSpeed;
 	static float AccelerationMult = 0.35f;
 	static float MaxSpeedMult = 0.85f;
@@ -1290,73 +1235,12 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	if(Acceleration > AccelerationLimit) Acceleration = AccelerationLimit;
 	if(MaxSpeed > MaxSpeedLimit) MaxSpeed = MaxSpeedLimit;
 
-
-	int MoveState = ((CPed*)CamTargetEntity)->m_nMoveState;
-	if(MoveState != PEDMOVE_NONE && MoveState != PEDMOVE_STILL &&
-	   !CPad::GetPad(0)->ForceCameraBehindPlayer() && !Obscured && !Shooting){
-		Rotating = false;
-		BetaSpeed = 0.0f;
-	}
-
 	// Now do the Beta rotation
-
 	float RotDistance = (IdealSource - TargetCoors).Magnitude2D();
 	m_fDistanceBeforeChanges = RotDistance;
 
-	if(Rotating){
-		m_bFixingBeta = true;
-
-		while(FixedTargetOrientation >= PI) FixedTargetOrientation -= 2*PI;
-		while(FixedTargetOrientation < -PI) FixedTargetOrientation += 2*PI;
-
-		while(Beta >= PI) Beta -= 2*PI;
-		while(Beta < -PI) Beta += 2*PI;
-
-
-/*
-		// This is inlined WellBufferMe
-		DeltaBeta = FixedTargetOrientation - Beta;
-		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
-		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
-
-		float ReqSpeed = DeltaBeta * MaxSpeed;
-		// Add or subtract absolute depending on sign, genius!
-		if(ReqSpeed - BetaSpeed > 0.0f)
-			BetaSpeed += SpeedStep * Abs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
-		else
-			BetaSpeed -= SpeedStep * Abs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
-		// this would be simpler:
-		// BetaSpeed += SpeedStep * (ReqSpeed - BetaSpeed) * CTimer::ms_fTimeStep;
-
-		if(ReqSpeed < 0.0f && BetaSpeed < ReqSpeed)
-			BetaSpeed = ReqSpeed;
-		else if(ReqSpeed > 0.0f && BetaSpeed > ReqSpeed)
-			BetaSpeed = ReqSpeed;
-
-		Beta += BetaSpeed * Min(10.0f, CTimer::GetTimeStep());
-*/
-		WellBufferMe(FixedTargetOrientation, &Beta, &BetaSpeed, MaxSpeed, Acceleration, true);
-
-		if(ResetStatics){
-			Beta = FixedTargetOrientation;
-			BetaSpeed = 0.0f;
-		}
-
-		Source.x = TargetCoors.x + RotDistance * Cos(Beta);
-		Source.y = TargetCoors.y + RotDistance * Sin(Beta);
-
-		// Check if we can stop rotating
-		DeltaBeta = FixedTargetOrientation - Beta;
-		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
-		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
-		if(Abs(DeltaBeta) < DEGTORAD(1.0f) && !bBehindPlayerDesired){
-			// Stop rotation
-			PickedASide = false;
-			Rotating = false;
-			BetaSpeed = 0.0f;
-		}
-	}
-
+	Source.x = TargetCoors.x + RotDistance * Cos(Beta);
+	Source.y = TargetCoors.y + RotDistance * Sin(Beta);
 
 	if(TheCamera.m_bCamDirectlyBehind || TheCamera.m_bCamDirectlyInFront ||
 	   StandingInTrain || Rotating){
@@ -1378,10 +1262,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			m_fCamBufferedHeight = 0.0f;
 			m_fCamBufferedHeightSpeed = 0.0f;
 		}
-		// Beta and Source already set in the rotation code
-	}else{
-		Source = IdealSource;
-		BetaSpeed = 0.0f;
 	}
 
 	// Subtract m_fRoadOffSet from both?
@@ -1393,7 +1273,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	//  0.25 ->  0.20 for nearest dist
 	//  1.50 -> -0.05 for mid dist
 	//  2.90 -> -0.33 for far dist
-	Source.z += (2.5f - TheCamera.m_fPedZoomValueSmooth)*0.2f - 0.25f;
+	Source.z += (2.5f - TheCamera.m_fPedZoomValueSmooth)*0.2f - 0.05f;
 	// Zoom out camera
 	Front = TargetCoors - Source;
 	Front.Normalise();
@@ -1403,53 +1283,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	//   0.25
 	//   0.95
 	Source.z += (TheCamera.m_fPedZoomValueSmooth - 1.0f)*0.5f + m_fCloseInPedHeightOffset;
-
-
-	// Process height offset to avoid peds and cars
-
-	float TargetZOffSet = m_fRoadOffSet + m_fDimensionOfHighestNearCar;
-	TargetZOffSet = Max(TargetZOffSet, m_fPedBetweenCameraHeightOffset);
-	float TargetHeight = CameraTarget.z + TargetZOffSet - Source.z;
-
-	if(TargetHeight > m_fCamBufferedHeight){
-		// Have to go up
-		if(TargetZOffSet == m_fPedBetweenCameraHeightOffset && TargetZOffSet > m_fCamBufferedHeight)
-			WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.2f, 0.04f, false);
-		else if(TargetZOffSet == m_fRoadOffSet && TargetZOffSet > m_fCamBufferedHeight){
-			// TODO: figure this out
-			bool foo = false;
-			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
-			case SURFACE_GRASS:
-			case SURFACE_GRAVEL:
-			case SURFACE_PAVEMENT:
-			case SURFACE_THICK_METAL_PLATE:
-			case SURFACE_RUBBER:
-			case SURFACE_STEEP_CLIFF:
-				foo = true;
-			if(foo)
-				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.4f, 0.05f, false);
-			else
-				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.2f, 0.025f, false);
-		}else
-			WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.2f, 0.025f, false);
-		StartedCountingForGoDown = false;
-	}else{
-		// Have to go down
-		if(StartedCountingForGoDown){
-			if(CTimer::GetTimeInMilliseconds() != TimeIndicatedWantedToGoDown){
-				if(TargetHeight > 0.0f)
-					WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.2f, 0.01f, false);
-				else
-					WellBufferMe(0.0f, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.2f, 0.01f, false);
-			}
-		}else{
-			StartedCountingForGoDown = true;
-			TimeIndicatedWantedToGoDown = CTimer::GetTimeInMilliseconds();
-		}
-	}
-
-	Source.z += m_fCamBufferedHeight;
-
 
 	// Clip Source if necessary
 
@@ -1468,6 +1301,61 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	m_cvecTargetCoorsForFudgeInter = TargetCoors;
 
 	Front = TargetCoors - Source;
+
+	/*
+	 * Handle collisions - taken from FollowPedWithMouse
+	 */
+
+	CEntity *entity;
+	CColPoint colPoint;
+	// Clip Source and fix near clip
+	CWorld::pIgnoreEntity = CamTargetEntity;
+	entity = nil;
+	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, false, false, false, false, false, false)) {
+		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
+		float ColCamDist = Dist.Magnitude() - PedColDist;
+		if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f) {
+			// Ped in the way but not clipping through
+			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, false, false, false, false, false, false)) {
+				PedColDist = (TargetCoors - colPoint.point).Magnitude();
+				Source = colPoint.point;
+				if(PedColDist < DEFAULT_NEAR + 0.3f) RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist - 0.3f, 0.05f));
+			} else {
+				RwCameraSetNearClipPlane(Scene.camera, Min(ColCamDist - 0.35f, DEFAULT_NEAR));
+			}
+		} else {
+			Source = colPoint.point;
+			if(PedColDist < DEFAULT_NEAR + 0.3f) RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist - 0.3f, 0.05f));
+		}
+	}
+	CWorld::pIgnoreEntity = nil;
+	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
+	float ViewPlaneWidth = ViewPlaneHeight * CDraw::FindAspectRatio() * 1.05f;
+	float Near = RwCameraGetNearClipPlane(Scene.camera);
+	float radius = ViewPlaneWidth * Near;
+	entity = CWorld::TestSphereAgainstWorld(Source + Front * Near, radius, nil, true, true, false, true, false, false);
+	int i = 0;
+	while(entity) {
+		CVector CamToCol = gaTempSphereColPoints[0].point - Source;
+		float frontDist = DotProduct(CamToCol, Front);
+		float dist = (CamToCol - Front * frontDist).Magnitude() / ViewPlaneWidth;
+
+		// Try to decrease near clip
+		dist = Max(Min(Near, dist), 0.1f);
+		if(dist < Near) RwCameraSetNearClipPlane(Scene.camera, dist);
+
+		// Move forward a bit
+		if(dist == 0.1f) Source += (TargetCoors - Source) * 0.3f;
+
+		// Keep testing
+		Near = RwCameraGetNearClipPlane(Scene.camera);
+		radius = ViewPlaneWidth * Near;
+		entity = CWorld::TestSphereAgainstWorld(Source + Front * Near, radius, nil, true, true, false, true, false, false);
+
+		i++;
+		if(i > 5) entity = nil;
+	}
+
 	m_fRealGroundDist = Front.Magnitude2D();
 	m_fMinDistAwayFromCamWhenInterPolating = m_fRealGroundDist;	
 	Front.Normalise();

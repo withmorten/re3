@@ -10,6 +10,7 @@
 #include "WeaponEffects.h"
 #include "ModelIndices.h"
 #include "World.h"
+#include "TrafficLights.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
 #include "General.h"
@@ -1269,6 +1270,7 @@ CPlayerPed::ProcessControl(void)
 		RestoreSprintEnergy(0.3f);
 
 	if (m_nPedState == PED_DEAD) {
+		m_pClosestTrafficLight = nil;
 		ClearWeaponTarget();
 		return;
 	}
@@ -1279,7 +1281,10 @@ CPlayerPed::ProcessControl(void)
 		return;
 	}
 	if (m_nPedState == PED_DRIVING && m_objective != OBJECTIVE_LEAVE_CAR) {
-		GetWantedLevelOnRedLight();
+		if (ShouldReportRedLightCrime()) {
+			printf("Crossed a RED LIGHT\n");
+			CEventList::RegisterEvent(EVENT_RUN_REDLIGHT, EVENT_ENTITY_VEHICLE, m_pMyVehicle, this, 1000);
+		}
 
 		if (m_pMyVehicle->IsCar() && ((CAutomobile*)m_pMyVehicle)->Damage.GetDoorStatus(DOOR_FRONT_LEFT) == DOOR_STATUS_SWINGING) {
 			CAnimBlendAssociation *rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR);
@@ -1441,6 +1446,7 @@ CPlayerPed::ProcessControl(void)
 			ClearWeaponTarget();
 			break;
 		case PED_ARRESTED:
+			m_pClosestTrafficLight = nil;
 			if (m_nLastPedState == PED_DRAG_FROM_CAR && m_pVehicleAnim)
 				BeingDraggedFromCar();
 			break;
@@ -1534,3 +1540,67 @@ CPlayerPed::Load(uint8*& buf)
 #undef CopyFromBuf
 #undef CopyToBuf
 #endif
+
+bool
+CPlayerPed::ShouldReportRedLightCrime() {
+	/* If we're driving an emergency vehicle, we can violate as many red lights as we want */
+	if (m_pMyVehicle->IsLawEnforcementVehicle() || m_pMyVehicle->GetModelIndex() == MI_AMBULAN || m_pMyVehicle->GetModelIndex() == MI_FIRETRUCK)
+		return false;
+
+	CEntity* entity;
+
+	const CVector& vehPos  = m_pMyVehicle->GetPosition();
+	const float vehHeading = m_pMyVehicle->GetForward().Heading();
+	float entHeading;
+
+	int type;
+
+	/* If we've already come across a traffic light, check if we just went past it */
+	if (m_pClosestTrafficLight) {
+		/* If the traffic light is damaged, we're... lucky (insert evil laugh here) */
+		if (m_pClosestTrafficLight->bRenderDamaged) {
+			m_pClosestTrafficLight = nil;
+			return false;
+		}
+		/* Otherwise, if we're going away from the traffic light... */
+		const CVector& entPos = m_pClosestTrafficLight->GetPosition();
+		entHeading = m_pClosestTrafficLight->GetForward().Heading();
+		if (!m_pMyVehicle->IsSphereTouchingVehicle(entPos.x - 2.2f * Cos(entHeading), entPos.y - 2.2f * Sin(entHeading), entPos.z, m_pClosestTrafficLight->GetBoundRadius())) {
+			entity = m_pClosestTrafficLight;
+			m_pClosestTrafficLight = nil;
+
+			/* ...if it's red, oopsie! */
+			type = CTrafficLights::FindTrafficLightType(entity);
+			if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2() == CAR_LIGHTS_RED)) {
+				entHeading = entity->GetForward().Heading();
+				if (Abs(vehHeading - entHeading) > 1.0f || Abs((vehPos - entity->GetPosition()).Heading() - entHeading) < 1.5f)
+					return true;
+			}
+			/* ...if not, we're safe */
+			else
+				return false;
+		}
+	}
+
+	/* If we don't have any previous close traffic light, find one in the sector we're in */
+	for (CPtrNode* node = CWorld::GetSector(CWorld::GetSectorIndexX(vehPos.x), CWorld::GetSectorIndexY(vehPos.y))->m_lists[ENTITYLIST_OBJECTS].first; node; node = node->next) {
+		entity = (CEntity*)node->item;
+		if (entity->GetModelIndex() == MI_TRAFFICLIGHTS) {
+			if (!entity->bRenderDamaged) {
+				type = CTrafficLights::FindTrafficLightType(entity);
+				if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2())) {
+					const CVector& entPos = entity->GetPosition();
+					entHeading = entity->GetForward().Heading();
+					if (m_pMyVehicle->IsSphereTouchingVehicle(entPos.x - 2.2f * Cos(entHeading), entPos.y - 2.2f * Sin(entHeading), entPos.z, entity->GetBoundRadius())) {
+						/* Make sure we're entering from the "front" of the trafficlight */
+						if (Abs(vehHeading - entHeading) < 1.0f && Abs((vehPos - entPos).Heading() - entHeading) > 1.5f) {
+							m_pClosestTrafficLight = entity;
+							return false;
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}

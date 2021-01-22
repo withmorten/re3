@@ -16,7 +16,6 @@
 #include "Radar.h"
 #include "PedPlacement.h"
 #include "Shadows.h"
-#include "SpecialFX.h"
 #include "Weather.h"
 #include "ZoneCull.h"
 #include "Population.h"
@@ -1066,79 +1065,6 @@ CPed::AnnoyNearestPed()
 		}
 
 		charToAnnoy->Say(SOUND_PED_ATTACK);
-	}
-}
-
-void
-CPed::GetWantedLevelOnRedLight()
-{
-	int x, y;
-	int i = 0;
-	CPtrNode *node;
-
-	int sx, sy;
-	int xmin, xmax, ymin, ymax;
-
-	sx = CWorld::GetSectorIndexX(FindPlayerCoors().x);
-	sy = CWorld::GetSectorIndexY(FindPlayerCoors().y);
-
-	xmin = Max(sx - 1, 0);
-	xmax = Min(sx + 1, NUMSECTORS_X - 1);
-	ymin = Max(sy - 1, 0);
-	ymax = Min(sy + 1, NUMSECTORS_Y - 1);
-
-	// Search for cops around.
-	CPed *copPed = nil;
-	CVehicle *copVeh = nil;
-	for(int i = 0; i < m_numNearPeds; ++i) {
-		CPed *ped = m_nearPeds[i];
-
-		if(ped->GetModelIndex() == MI_COP) {
-			copPed = ped;
-			break;
-		}
-	}
-
-	for(x = xmin; x <= xmax; x++) {
-		for(y = ymin; y <= ymax; y++) {
-			CPtrList &list = CWorld::GetSector(x, y)->m_lists[ENTITYLIST_VEHICLES];
-			for(node = list.first; node; node = node->next) {
-				CVehicle *veh = (CVehicle *)node->item;
-
-				if(veh->GetModelIndex() == MI_POLICE || veh->GetModelIndex() == MI_ENFORCER) {
-					copVeh = veh;
-					break;
-				}
-			}
-		}
-	}
-
-	if(!copPed && !copVeh) return;
-
-	// Search for traffic lights.
-	for(x = xmin; x <= xmax; x++) {
-		for(y = ymin; y <= ymax; y++) {
-			CPtrList &list = CWorld::GetSector(x, y)->m_lists[ENTITYLIST_OBJECTS];
-			for(node = list.first; node; node = node->next) {
-				CEntity *light = (CEntity *)node->item;
-
-				if(light->GetModelIndex() != MI_TRAFFICLIGHTS) continue;
-
-				C3dMarker *marker = C3dMarkers::PlaceMarker(
-				    (uintptr)this + i, MARKERTYPE_CYLINDER, CVector(light->GetPosition().x, light->GetPosition().y, light->GetPosition().z),
-				    4.0f, SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, 0, SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
-
-				if(marker &&
-				   (FindPlayerVehicle()->IsSphereTouchingVehicle(marker->m_Matrix.GetPosition().x, marker->m_Matrix.GetPosition().y,
-				                                                 marker->m_Matrix.GetPosition().z, 4.0f)) &&
-				   (CTrafficLights::LightForCars1() != CAR_LIGHTS_GREEN && CTrafficLights::LightForCars2() != CAR_LIGHTS_GREEN)) {
-					FindPlayerPed()->SetWantedLevelNoDrop(1);
-					FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(CRIME_RUN_REDLIGHT, GetPosition(), (uintptr)this, true);
-					printf("WANTED LEVEL INCREASED");
-				}
-				i++;
-			}
-		}
 	}
 }
 

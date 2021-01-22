@@ -8,6 +8,9 @@ class CWanted;
 
 class CPlayerPed : public CPed
 {
+private:
+	CEntity* m_pClosestTrafficLight = nil;
+	bool ShouldReportRedLightCrime();
 public:
 	CWanted *m_pWanted;
 	CCopPed *m_pArrestingCop;

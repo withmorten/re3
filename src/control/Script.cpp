@@ -53,8 +53,6 @@
 #include <stdarg.h>
 #endif
 
-//--MIAMI: file done
-
 uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
@@ -1868,9 +1866,7 @@ void CMissionCleanup::Process()
 		default:
 			break;
 		}
-		m_sEntities[i].id = 0;
-		m_sEntities[i].type = CLEANUP_UNUSED;
-		m_nCount--;
+		RemoveEntityFromList(m_sEntities[i].id, m_sEntities[i].type);
 	}
 #ifdef SECUROM
 	if ((myrand() & 3) == 2){
@@ -2506,7 +2502,9 @@ int8 CRunningScript::ProcessOneCommand()
 	uint32 ip = m_nIp;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
+		m_nIp -= 2;
 		sprintf(commandInfo, m_nIp >= SIZE_MAIN_SCRIPT ? "M<%5d> " : "<%6d> ", m_nIp >= SIZE_MAIN_SCRIPT ? m_nIp - SIZE_MAIN_SCRIPT : m_nIp);
+		m_nIp += 2;
 		if (m_bNotFlag)
 			strcat(commandInfo, "NOT ");
 		if (commands[command].position == -1)
@@ -4545,7 +4543,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		return 0;
 	case COMMAND_IS_WANTED_LEVEL_GREATER:
 		CollectParameters(&m_nIp, 2);
-		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_pPed->m_pWanted->m_nWantedLevel > ScriptParams[1]);
+		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_pPed->m_pWanted->GetWantedLevel() > ScriptParams[1]);
 		return 0;
 	case COMMAND_CLEAR_WANTED_LEVEL:
 		CollectParameters(&m_nIp, 1);

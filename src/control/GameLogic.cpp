@@ -46,8 +46,6 @@ CVector CGameLogic::ShortCutDropOffForMission;
 float CGameLogic::ShortCutDropOffOrientationForMission;
 bool CGameLogic::MissionDropOffReadyToBeUsed;
 
-//--MIAMI: file done
-
 #define SHORTCUT_TAXI_COST (9)
 #define TOTAL_BUSTED_AUDIO (28)
 
@@ -222,7 +220,7 @@ CGameLogic::Update()
 			pPlayerInfo.m_WBState = WBSTATE_PLAYING;
 			int takeMoney;
 
-			switch (pPlayerInfo.m_pPed->m_pWanted->m_nWantedLevel) {
+			switch (pPlayerInfo.m_pPed->m_pWanted->GetWantedLevel()) {
 			case 0:
 			case 1:
 				takeMoney = 100;

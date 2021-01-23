@@ -1,8 +1,5 @@
-#include "common.h"
-
 #ifdef AUDIO_MSS
-#include <windows.h>
-#include <shobjidl.h>
+#include <shlobj.h>
 #include <shlguid.h>
 
 #include <time.h>
@@ -11,6 +8,7 @@
 #include "eax-util.h"
 #include "mss.h"
 
+#include "common.h"
 #include "sampman.h"
 #include "AudioManager.h"
 #include "MusicManager.h"
@@ -19,8 +17,6 @@
 #include "crossplatform.h"
 
 #pragma comment( lib, "mss32.lib" )
-
-// --MIAMI: file done
 
 cSampleManager SampleManager;
 uint32 BankStartOffset[MAX_SFX_BANKS];

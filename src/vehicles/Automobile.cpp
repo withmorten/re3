@@ -49,8 +49,7 @@
 #include "Object.h"
 #include "Automobile.h"
 #include "Bike.h"
-
-//--MIAMI: file done
+#include "Wanted.h"
 
 bool bAllCarCheat;
 
@@ -5130,7 +5129,6 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::DeadPedMakesTyresBloody(void)
 {
@@ -5154,7 +5152,6 @@ CPed::DeadPedMakesTyresBloody(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::MakeTyresMuddySectorList(CPtrList &list)
 {

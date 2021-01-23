@@ -5,8 +5,7 @@
 #include "2dEffect.h"
 #include "BaseModelInfo.h"
 #include "ModelInfo.h"
-
-//--MIAMI: file done
+#include "ColModel.h"
 
 CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {

@@ -186,26 +186,18 @@ cMusicManager::DisplayRadioStationName()
 
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+		CFont::SetScale(SCREEN_SCALE_X(0.60f), SCREEN_SCALE_Y(0.96f));
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetCentreOn();
-		// Reminder: Game doesn't have "scaling" at all, it just stretches, and it's team's decision here to not let centered text occupy all the screen.
-		//				Disable ASPECT_RATIO_SCALE and it'll go back to default behaviour; stretching.
-		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-#ifdef FIX_BUGS
-		CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(22.0f) + SCREEN_SCALE_Y(2.0f), pCurrentStation);
-#else
-		CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, SCREEN_SCALE_Y(22.0f) + 2.0f, pCurrentStation);
-#endif
+		CFont::SetCentreOff();
+		CFont::SetRightJustifyOn();
 
 		if(gNumRetunePresses)
-			CFont::SetColor(CRGBA(102, 133, 143, 255));
+			CFont::SetColor(CRGBA(155, 155, 1, 255));
 		else
-			CFont::SetColor(CRGBA(147, 196, 211, 255));
+			CFont::SetColor(CRGBA(255, 255, 1, 255));
 
-		CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_Y(22.0f), pCurrentStation);
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(60.0f), pCurrentStation);
 		CFont::DrawFonts();
 	}
 }

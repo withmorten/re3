@@ -86,11 +86,11 @@ struct sRadarTrace
 VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
-#define RADAR_LEFT (48.0f)
+#define RADAR_LEFT (52.0f)
 #ifdef PS2_HUD
 #define RADAR_BOTTOM (44.0f)
 #else
-#define RADAR_BOTTOM (42.0f)
+#define RADAR_BOTTOM (41.0f)
 #endif
 
 #ifdef FIX_RADAR
@@ -99,8 +99,8 @@ VALIDATE_SIZE(sRadarTrace, 0x30);
 		#define RADAR_WIDTH (82.0f)
 		#define RADAR_HEIGHT (82.0f)
 */
-#define RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (94.0f))	
-#define RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (76.0f))
+#define RADAR_WIDTH (82.0f)	
+#define RADAR_HEIGHT (82.0f)
 #else
 /*
 	broken since forever, someone tried to fix size for 640x512(PAL)
@@ -161,6 +161,7 @@ public:
 	static int ClipRadarPoly(CVector2D *out, const CVector2D *in);
 	static bool DisplayThisBlip(int32 i);
 	static void Draw3dMarkers();
+	static void DrawRadarCop(CVector2D in, CVector2D out);
 	static void DrawBlips();
 	static void UpdateRadar();
 	static void DrawRadarMap();

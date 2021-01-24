@@ -940,6 +940,7 @@ CMenuManager::DisplayHelperText()
 	CFont::SetColor(CRGBA(255, 255, 255, 255));
 	switch(m_nCurrScreen) {
 	case MENUPAGE_STATS:
+	case MENUPAGE_BRIEFS:
 		CFont::PrintString(x, SCREEN_SCALE_FROM_BOTTOM(20.0f), TheText.Get("FET_CIG"));
 		break;
 	case MENUPAGE_START_MENU:
@@ -1217,7 +1218,7 @@ CMenuManager::Draw()
 				CFont::SetRightJustifyOff();
 				leftText = GetNameOfSavedGame(i - 1);
 
-				if(Slots[i] != SLOT_EMPTY) rightText = GetSavedGameDateAndTime(i - 1);
+				//if(Slots[i] != SLOT_EMPTY) rightText = GetSavedGameDateAndTime(i - 1);
 
 				if(leftText[0] == '\0') {
 					sprintf(gString, "FEM_SL%d", i);
@@ -2649,7 +2650,7 @@ CMenuManager::DrawFrontEndNormal()
 	CRect backgroundRect = {MENU_X_LEFT_ALIGNED(0.0f), 0.0f, MENU_X_LEFT_ALIGNED(278.0f), SCREEN_HEIGHT};
 
 	bool hideBackground = m_nCurrScreen == MENUPAGE_STATS || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS;
-	bool hideLogo = m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS; 
+	bool hideLogo = m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS;
 	static int currentSprite = FE_0;
 	if(m_nCurrScreen == MENUPAGE_START_MENU) {
 		switch(m_nCurrOption) {
@@ -2658,65 +2659,62 @@ CMenuManager::DrawFrontEndNormal()
 		default: currentSprite = FE_2; break;
 		};
 	} else if(m_nCurrScreen == MENUPAGE_PAUSE_MENU) {
-		if (m_nCurrOption == 4) currentSprite = FE_1;
-		else if(m_nCurrOption == 5) currentSprite = FE_2;
-		else currentSprite = FE_4;
+		if(m_nCurrOption == 4)
+			currentSprite = FE_1;
+		else if(m_nCurrOption == 5)
+			currentSprite = FE_2;
+		else
+			currentSprite = FE_4;
 	} else if(m_nCurrScreen == MENUPAGE_OPTIONS) {
 		currentSprite = FE_1;
-	}
-	else if (m_nCurrScreen == MENUPAGE_EXIT)
+	} else if(m_nCurrScreen == MENUPAGE_EXIT)
 		currentSprite = FE_2;
 
-	if(!hideBackground)
-		m_aFrontEndSprites[currentSprite].Draw(CRect(backgroundRect), CRGBA(255, 255, 255, 255));
+	if(!hideBackground) m_aFrontEndSprites[currentSprite].Draw(CRect(backgroundRect), CRGBA(255, 255, 255, 255));
 
 	// GTA LOGO
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
 
 	if(!hideLogo) {
 		m_aFrontEndSprites[FE_GTALOGO].Draw(MENU_X_LEFT_ALIGNED(140.0f), MENU_Y(6.0f), MENU_X(360.0f), MENU_Y(170.0f), CRGBA(255, 255, 255, 255));
-		m_aFrontEndSprites[FE_RSTARLOGO].Draw(MENU_X_LEFT_ALIGNED(566.0f), SCREEN_SCALE_FROM_BOTTOM(68.0f), MENU_X(58.0f), MENU_Y(58.0f), CRGBA(255, 255, 255, 255));
-		m_aFrontEndSprites[FE_DMALOGO].Draw(MENU_X_LEFT_ALIGNED(4.0f), SCREEN_SCALE_FROM_BOTTOM(68.0f), MENU_X(58.0f), MENU_Y(58.0f), CRGBA(255, 255, 255, 255));
+		m_aFrontEndSprites[FE_RSTARLOGO].Draw(MENU_X_LEFT_ALIGNED(566.0f), SCREEN_SCALE_FROM_BOTTOM(68.0f), MENU_X(58.0f), MENU_Y(58.0f),
+		                                      CRGBA(255, 255, 255, 255));
+		m_aFrontEndSprites[FE_DMALOGO].Draw(MENU_X_LEFT_ALIGNED(4.0f), SCREEN_SCALE_FROM_BOTTOM(68.0f), MENU_X(58.0f), MENU_Y(58.0f),
+		                                    CRGBA(255, 255, 255, 255));
 	}
 
-	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
-	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-	switch (m_nCurrScreen) {
-		case MENUPAGE_SKIN_SELECT:
-			DrawPlayerSetupScreen();
-			break;
-		case MENUPAGE_KEYBOARD_CONTROLS:
-			DrawControllerSetupScreen();
-			break;
-		default:
-			Draw();
-			break;
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERNEAREST);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void *)rwTEXTUREADDRESSCLAMP);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
+	switch(m_nCurrScreen) {
+	case MENUPAGE_SKIN_SELECT: DrawPlayerSetupScreen(); break;
+	case MENUPAGE_KEYBOARD_CONTROLS: DrawControllerSetupScreen(); break;
+	default: Draw(); break;
 	}
 
 	CFont::DrawFonts();
 
 	// Draw mouse
-	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-	if (m_bShowMouse) {
-		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void *)rwTEXTUREADDRESSCLAMP);
+	if(m_bShowMouse) {
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 
 		CRect mouse(0.0f, 0.0f, MENU_X(16.0f), MENU_Y(16.0f));
 		CRect shad(MENU_X(10.0f), MENU_Y(3.0f), MENU_X(85.0f), MENU_Y(78.0f));
 
 		mouse.Translate(m_nMousePosX, m_nMousePosY);
 		shad.Translate(m_nMousePosX, m_nMousePosY);
-		if(field_518 == 4){
-			//m_aFrontEndSprites[FE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
-			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+		if(field_518 == 4) {
+			// m_aFrontEndSprites[FE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
 			m_aFrontEndSprites[FE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
-		}else{
-			//m_aFrontEndSprites[FE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
-			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+		} else {
+			// m_aFrontEndSprites[FE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
 			m_aFrontEndSprites[FE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}
 	}
@@ -3525,7 +3523,7 @@ CMenuManager::PrintBriefs()
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 
-	float nextY = BRIEFS_TOP_MARGIN;
+	float nextY = MENU_Y(BRIEFS_TOP_MARGIN);
 	CRGBA newColor;
 	for (int i = 4; i >= 0; i--) {
 		tPreviousBrief &brief = CMessages::PreviousBriefs[i];
@@ -3553,7 +3551,7 @@ CMenuManager::PrintBriefs()
 			newColor.a = FadeIn(255);
 			CFont::SetColor(newColor);
 #endif
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(BRIEFS_LINE_X), nextY, gUString);
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f - BRIEFS_LINE_X), (nextY), gUString);
 			nextY += MENU_Y(BRIEFS_LINE_HEIGHT);
 		}
 	}

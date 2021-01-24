@@ -21,6 +21,9 @@
 #include "Camera.h"
 #include "Shadows.h"
 #include "main.h"
+#include "CdStream.h"
+#include "MemoryMgr.h"
+#include "Directory.h"
 
 RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
@@ -635,30 +638,58 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 	return pMarker;
 }
 
-
-C3dMarker *
-C3dMarkers::PlaceBigArrow(CVector &pos)
+void
+C3dMarkers::PlaceBigArrow(CVector &posTarget)
 {
-	C3dMarker *pMarker;
+	RpAtomic *origAtomic;
+	origAtomic = nil;
+	RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_ARROW], MarkerAtomicCB, &origAtomic);
 
-	pMarker = nil;
-	float dist = Sqrt((pos.x - FindPlayerCentreOfWorld(0).x) * (pos.x - FindPlayerCentreOfWorld(0).x) +
-	                  (pos.y - FindPlayerCentreOfWorld(0).y) * (pos.y - FindPlayerCentreOfWorld(0).y));
+	RpAtomic *atomic = RpAtomicClone(origAtomic);
+	RwFrame *frame = RpClumpGetFrame(m_pRpClumpArray[MARKERTYPE_ARROW]);
 
-	pMarker = &m_aMarkerArray[0];
+	RpGeometry *geometry = RpAtomicGetGeometry(atomic);
+	RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
+	
+	CVector vec = posTarget - TheCamera.GetPosition();
+	RwV3d pos = {0.0f, 1.6f, 4.0f * 70.0f / TheCamera.Cams->FOV};
+	RwV3d axis1 = {1.0f, 0.0f, 0.0f};
+	RwV3d axis2 = {0.0f, 1.0f, 0.0f};
+	RwV3d axis3 = {0.0f, 0.0f, 1.0f};
+	RwRGBA color = {255, 255, 0, 255};
 
-	if(pMarker == nil) return pMarker;
+	float x, y, z;
 
-	pMarker->m_fCameraRange = dist;
-	pMarker->m_fSize = 1.0f;
+	if(frame) {
+		if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN) {
+			CVector2D dist = posTarget - FindPlayerPed()->GetForward();
+			pos.z += 1.0f;
+			x = 90.0f;
+			y = RADTODEG((CGeneral::GetATanOfXY(-vec.x, vec.y) - M_PI_2));
+			z = 90.0f;
 
-	pMarker->m_Matrix.GetPosition() = pos;
-	pMarker->AddMarker(0, 1, 1.0f, 225, 0, 0, 255, 0.0f, 0.0f, 0.0f);
+			color.alpha = 0;
+		} else {
+			x = -5.0f;
+			y = RADTODEG(PI - TheCamera.GetForward().Heading() + (CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2));
+			z = 90.0f;
+		}
+		RpMaterialSetColor(RpGeometryGetMaterial(geometry, 0), &color);
 
-	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
-	pMarker->m_Matrix.UpdateRW();
-	pMarker->m_bIsUsed = true;
-	return pMarker;
+		RwFrameTransform(frame, RwFrameGetMatrix(RwCameraGetFrame(Scene.camera)), rwCOMBINEREPLACE);
+		RwFrameTranslate(frame, &pos, rwCOMBINEPRECONCAT);
+
+		RwFrameRotate(frame, &axis1, (x), rwCOMBINEPRECONCAT);
+		RwFrameRotate(frame, &axis2, (y), rwCOMBINEPRECONCAT);
+		RwFrameRotate(frame, &axis3, (z), rwCOMBINEPRECONCAT);
+
+		RemoveExtraDirectionalLights(Scene.world);
+		ActivateDirectional();
+		RwFrameUpdateObjects(frame);
+		SetBrightMarkerColours(1.0f);
+		RpClumpRender(m_pRpClumpArray[MARKERTYPE_ARROW]);
+		ReSetAmbientAndDirectionalColours();
+	}
 }
 
 void

@@ -15,6 +15,9 @@
 #include "World.h"
 #include "Streaming.h"
 #include "SpecialFX.h"
+#include "Ped.h"
+#include "Wanted.h"
+#include "PlayerPed.h"
 
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
@@ -435,6 +438,50 @@ void CRadar::Draw3dMarkers()
 	}
 }
 
+void
+CRadar::DrawRadarCop(CVector2D in, CVector2D out)
+{
+	if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
+		return;
+
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEARMIPLINEAR);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void *>(TRUE));
+
+	int x, y;
+	CPtrNode *node;
+
+	int sx, sy;
+	int xmin, xmax, ymin, ymax;
+
+	sx = CWorld::GetSectorIndexX(FindPlayerCoors().x);
+	sy = CWorld::GetSectorIndexY(FindPlayerCoors().y);
+
+	xmin = Max(sx - 1, 0);
+	xmax = Min(sx + 1, NUMSECTORS_X - 1);
+	ymin = Max(sy - 1, 0);
+	ymax = Min(sy + 1, NUMSECTORS_Y - 1);
+
+	CVehicle *copVeh = nil;
+	for(x = xmin; x <= xmax; x++) {
+		for(y = ymin; y <= ymax; y++) {
+			CPtrList &list = CWorld::GetSector(x, y)->m_lists[ENTITYLIST_VEHICLES];
+			for(node = list.first; node; node = node->next) {
+				CVehicle *veh = (CVehicle *)node->item;
+
+				if(veh->IsLawEnforcementVehicle() && veh->m_fHealth > 0.0f) {
+					CVector pos = veh->GetPosition();
+					TransformRealWorldPointToRadarSpace(in, pos);
+					LimitRadarPoint(in);
+					TransformRadarPointToScreenSpace(out, in);
+					float angle = veh->GetForward().Heading() - (PI + TheCamera.GetForward().Heading());
+					float dist = LimitRadarPoint(in);
+					DrawRotatingRadarSprite(&CopcarSprite, out.x, out.y, angle, CalculateBlipAlpha(dist));
+				}
+			}
+		}
+	}
+}
+
 void CRadar::DrawBlips()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
@@ -462,7 +509,7 @@ void CRadar::DrawBlips()
 			else
 				angle = FindPlayerHeading() - (PI + TheCamera.GetForward().Heading());
 
-			DrawRotatingRadarSprite(&CentreSprite, out.x, out.y, angle, 255);
+			//DrawRotatingRadarSprite(&CentreSprite, out.x, out.y, angle, 255);
 
 			CVector2D vec2d;
 			vec2d.x = vec2DRadarOrigin.x;
@@ -471,6 +518,7 @@ void CRadar::DrawBlips()
 			LimitRadarPoint(in);
 			TransformRadarPointToScreenSpace(out, in);
 			DrawRadarSprite(RADAR_SPRITE_NORTH, out.x, out.y, 255);
+			DrawRadarCop(in, out);
 #ifdef MENU_MAP
 		}
 #endif
@@ -585,6 +633,7 @@ void CRadar::DrawBlips()
 					break;
 			}
 		}
+
 		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
 			if (!ms_RadarTrace[blipId].m_bInUse)
 				continue;
@@ -690,6 +739,9 @@ void CRadar::DrawBlips()
 									else mode = BLIP_MODE_SQUARE;
 								}
 								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+
+								if((FindPlayerPed()->GetPosition() - ms_RadarTrace[blipId].m_vecPos).MagnitudeSqr() > sq(7.0f))
+									C3dMarkers::PlaceBigArrow(ms_RadarTrace[blipId].m_vecPos);
 							}
 #else
 								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
@@ -700,6 +752,7 @@ void CRadar::DrawBlips()
 				default:
 					break;
 			}
+
 		}
 #ifdef MENU_MAP
 		if (CMenuManager::bMenuMapActive) {
@@ -720,21 +773,11 @@ CRadar::UpdateRadar()
 #if 1 // from VC
 		CalculateCachedSinCos();
 #endif
-		if(FindPlayerVehicle()) {
-			float speed = FindPlayerSpeed().Magnitude();
-			if(speed < RADAR_MIN_SPEED)
-				m_radarRange = RADAR_MIN_RANGE;
-			else if(speed < RADAR_MAX_SPEED)
-				m_radarRange =
-				    (speed - RADAR_MIN_SPEED) / (RADAR_MAX_SPEED - RADAR_MIN_SPEED) * (RADAR_MAX_RANGE - RADAR_MIN_RANGE) + RADAR_MIN_RANGE;
-			else
-				m_radarRange = RADAR_MAX_RANGE;
-		} else
-			m_radarRange = RADAR_MIN_RANGE;
-
+		m_radarRange = 50.0f;
 		vec2DRadarOrigin = CVector2D(FindPlayerCentreOfWorld_NoSniperShift());
 
-		CHud::Sprites[HUD_RADARMASK].Draw(SCREEN_SCALE_X(48.0f), SCREEN_SCALE_FROM_BOTTOM(126.0f), SCREEN_SCALE_X(88.0f), SCREEN_SCALE_Y(88.0f), CRGBA(127, 120, 161, 195));
+		CHud::Sprites[HUD_RADARMASK].Draw(SCREEN_SCALE_X(48.0f), SCREEN_SCALE_FROM_BOTTOM(126.0f), SCREEN_SCALE_X(88.0f), SCREEN_SCALE_Y(88.0f),
+		                                  CRGBA(127, 120, 161, 195));
 	}
 }
 
@@ -1300,7 +1343,7 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 #endif
 	{
 #ifdef FIX_BUGS
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(88.0f) + SCREEN_SCALE_X(RADAR_LEFT);
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
 #else
 		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + RADAR_LEFT;
 #endif

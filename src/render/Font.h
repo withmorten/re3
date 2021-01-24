@@ -180,7 +180,7 @@ public:
 	static void SetBackGroundOnlyTextOn(void) { Details.backgroundOnlyText = true; }
 	static void SetBackGroundOnlyTextOff(void) { Details.backgroundOnlyText = false; }
 	static void SetPropOn(void) { Details.proportional = true; }
-	static void SetPropOff(void) { Details.proportional = false; }
+	static void SetPropOff(void) { Details.proportional = true; }
 	static void SetFontStyle(int16 style) { Details.style = style; }
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }

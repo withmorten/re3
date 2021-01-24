@@ -157,7 +157,8 @@
 	X("Otherside_subway",	MI_SUBPLATFORM_SUB) \
 	X("subplatform_sub",	MI_SUBPLATFORM_SUB2) \
 	X("files",		MI_FILES) \
-	X("jailfree", MI_PICKUP_JAILFREE)
+	X("jailfree", MI_PICKUP_JAILFREE) \
+	X("freecare", MI_PICKUP_FREECARE)
 
 #define X(name, var) extern int16 var;
 	MODELINDICES
@@ -475,7 +476,8 @@ IsPickupModel(int16 id)
 		id == MI_PICKUP_BRIBE ||
 		id == MI_PICKUP_KILLFRENZY ||
 		id == MI_PICKUP_CAMERA || 
-		id == MI_PICKUP_JAILFREE;
+		id == MI_PICKUP_JAILFREE ||
+		id == MI_PICKUP_FREECARE;
 }
 
 inline bool

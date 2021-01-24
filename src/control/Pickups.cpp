@@ -127,8 +127,8 @@ bool
 CPickup::CanBePickedUp(CPlayerPed *player)
 {
 	bool cannotBePickedUp =
-		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f) ||
+	    (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && (CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree ? player->m_fHealth > 124.5f : player->m_fHealth > 99.5f))
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
 	return !cannotBePickedUp;
@@ -449,7 +449,11 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_HEALTH) {
-		player->m_fHealth = 100.0f;
+		if(CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree)
+			player->m_fHealth = 125.0f;
+		else
+			player->m_fHealth = 100.0f;
+
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_HEALTH, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BONUS) {

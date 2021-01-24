@@ -3684,7 +3684,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 	case MI_MALE01:
 		return GetNormalMaleTalkSfx(sound);
 	case MI_TAXI_D:
-		return GetTaxiDriverTalkSfx(sound);
+		return GetNormalMaleTalkSfx(sound);//GetTaxiDriverTalkSfx(sound);
 	case MI_PIMP:
 		return GetPimpTalkSfx(sound);
 	case MI_GANG01:

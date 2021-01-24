@@ -1367,6 +1367,186 @@ RenderEffects(void)
 	CRenderer::RenderFirstPersonVehicle();
 }
 
+
+void
+DrawSniperScope()
+{
+	bool properScaling = CDraw::ms_bProperScaling;
+
+	if(properScaling) {
+		CDraw::ms_bProperScaling = false;
+	}
+
+	float x1, y1, x2, y2;
+
+	// Left
+	x1 = 0.0f;
+	y1 = 0.0f;
+	x2 = -68.0f;
+	y2 = 14.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -124.0f;
+	y2 = 44.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -174.0f;
+	y2 = 94.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -204.0f;
+	y2 = 154.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -214.0f;
+	y2 = 214.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	// Bottom
+	x1 = x2;
+	y1 = y2;
+	x2 = -204.0f;
+	y2 = 284.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -174.0f;
+	y2 = 344.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -124.0f;
+	y2 = 404.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = -68.0f;
+	y2 = 434.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 0.0f;
+	y2 = 448.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	// Right
+	x1 = 0.0f;
+	y1 = 0.0f;
+	x2 = 68.0f;
+	y2 = 14.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 124.0f;
+	y2 = 44.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 174.0f;
+	y2 = 94.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 204.0f;
+	y2 = 154.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 214.0f;
+	y2 = 214.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, 0.0f, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, 0.0f,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	// Bottom
+	x1 = x2;
+	y1 = y2;
+	x2 = 204.0f;
+	y2 = 284.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 174.0f;
+	y2 = 344.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 124.0f;
+	y2 = 404.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 68.0f;
+	y2 = 434.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	x1 = x2;
+	y1 = y2;
+	x2 = 0.0f;
+	y2 = 448.0f;
+	CSprite2d::Draw2DPolygon(SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_HEIGHT,
+	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
+	                         CRGBA(0, 0, 0, 255));
+
+	if(properScaling)
+		CDraw::ms_bProperScaling = properScaling;
+}
+
 void
 Render2dStuff(void)
 {
@@ -1410,8 +1590,9 @@ Render2dStuff(void)
 			CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170), SCREEN_WIDTH, SCREEN_HEIGHT), black);
 		}
 		else {
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+			//CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
+			//CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+			DrawSniperScope();
 		}
 		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
 		CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);

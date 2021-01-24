@@ -28,11 +28,13 @@ enum eSprites
 	HUD_DETONATOR,
 	HUD_RADARMASK,
 	HUD_BARFILLED,
-	HUD_UNK,
 	HUD_PAGERON,
 	HUD_PAGEROFF,
 	HUD_WANTED,
-	HUD_SITESNIPER = 20,
+	HUD_HEALTH,
+	HUD_ARMOUR,
+	HUD_JAILFREE,
+	HUD_SITESNIPER,
 	HUD_SITEM16,
 	HUD_SITEROCKET,
 	NUM_HUD_SPRITES,
@@ -83,4 +85,5 @@ public:
 	static void SetMessage(wchar *message);
 	static void SetBigMessage(wchar *message, uint16 style);
 	static void SetPagerMessage(wchar *message);
+	static void DrawGamePaused();
 };

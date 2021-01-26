@@ -1,4 +1,4 @@
-#if defined RW_D3D9 || defined RWLIBS
+#if defined RW_D3D9 || defined RWLIBS || defined __MWERKS__
 
 #define _WIN32_WINDOWS 0x0500
 #define WINVER 0x0500
@@ -18,6 +18,10 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4005)
+
+#ifdef __MWERKS__
+#define MAPVK_VK_TO_CHAR (2) // this is missing from codewarrior win32 headers - but it gets used ... how?
+#endif
 
 #include <ddraw.h>
 #include <DShow.h>
@@ -249,6 +253,10 @@ psGrabScreen(RwCamera *pCamera)
 		RwImageSetFromRaster(pImage, pRaster);
 		return pImage;
 	}
+#else
+	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	if(image)
+		return image;
 #endif
 	return nil;
 }
@@ -2142,12 +2150,18 @@ WinMain(HINSTANCE instance,
 	ShowWindow(PSGLOBAL(window), cmdShow);
 	UpdateWindow(PSGLOBAL(window));
 	
-	// This part is needed because controller initialisation overwrites loaded settings.
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
-		
+
 		if ( gta3set )
 		{
 			ControlsManager.LoadSettings(gta3set);
@@ -2158,6 +2172,10 @@ WinMain(HINSTANCE instance,
 
 #ifdef LOAD_INI_SETTINGS
 		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
 #endif
 	}
 	

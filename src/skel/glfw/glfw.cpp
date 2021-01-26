@@ -202,6 +202,10 @@ psGrabScreen(RwCamera *pCamera)
 		RwImageSetFromRaster(pImage, pRaster);
 		return pImage;
 	}
+#else
+	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	if(image)
+		return image;
 #endif
 	return nil;
 }
@@ -1598,10 +1602,16 @@ main(int argc, char *argv[])
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &NewStickyKeys, SPIF_SENDCHANGE);
 #endif
 
-	// This part is needed because controller initialisation overwrites loaded settings.
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
 		
 		if ( gta3set )
@@ -1614,6 +1624,10 @@ main(int argc, char *argv[])
 
 #ifdef LOAD_INI_SETTINGS
 		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
 #endif
 	}
 	
@@ -2053,22 +2067,30 @@ void CapturePad(RwInt32 padID)
 	const float *axes = glfwGetJoystickAxes(glfwPad, &numAxes);
 	GLFWgamepadstate gamepadState;
 
-	if (ControlsManager.m_bFirstCapture == false)
-	{
+	if (ControlsManager.m_bFirstCapture == false) {
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(ControlsManager.m_NewState));
+	} else {
+		// In case connected gamepad doesn't have L-R trigger axes.
+		ControlsManager.m_NewState.mappedButtons[15] = ControlsManager.m_NewState.mappedButtons[16] = 0;
 	}
 
 	ControlsManager.m_NewState.buttons = (uint8*)buttons;
 	ControlsManager.m_NewState.numButtons = numButtons;
 	ControlsManager.m_NewState.id = glfwPad;
-	ControlsManager.m_NewState.isGamepad = glfwJoystickIsGamepad(glfwPad);
+	ControlsManager.m_NewState.isGamepad = glfwGetGamepadState(glfwPad, &gamepadState);
 	if (ControlsManager.m_NewState.isGamepad) {
-		glfwGetGamepadState(glfwPad, &gamepadState);
 		memcpy(&ControlsManager.m_NewState.mappedButtons, gamepadState.buttons, sizeof(gamepadState.buttons));
-		ControlsManager.m_NewState.mappedButtons[15] = gamepadState.axes[4] > -0.8f;
-		ControlsManager.m_NewState.mappedButtons[16] = gamepadState.axes[5] > -0.8f;
+		float lt = gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER], rt = gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER];
+
+		// glfw returns 0.0 for non-existent axises(which is bullocks) so we treat it as deadzone, and keep value of previous frame.
+		// otherwise if this axis is present, -1 = released, 1 = pressed
+		if (lt != 0.0f)
+			ControlsManager.m_NewState.mappedButtons[15] = lt > -0.8f;
+
+		if (rt != 0.0f)
+			ControlsManager.m_NewState.mappedButtons[16] = rt > -0.8f;
 	}
-	// TODO I'm not sure how to find/what to do with L2-R2, if joystick isn't registered in SDL database.
+	// TODO? L2-R2 axes(not buttons-that's fine) on joysticks that don't have SDL gamepad mapping AREN'T handled, and I think it's impossible to do without mapping.
 
 	if (ControlsManager.m_bFirstCapture == true) {
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(ControlsManager.m_NewState));
@@ -2082,12 +2104,13 @@ void CapturePad(RwInt32 padID)
 	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
 	
 	// Gamepad axes are guaranteed to return 0.0f if that particular gamepad doesn't have that axis.
+	// And that's really good for sticks, because gamepads return 0.0 for them when sticks are in released state.
 	if ( glfwPad != -1 ) {
-		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 1 ? axes[0] : 0.0f;
-		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 2 ? axes[1] : 0.0f;
+		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] : numAxes >= 1 ? axes[0] : 0.0f;
+		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] : numAxes >= 2 ? axes[1] : 0.0f;
 
-		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 3 ? axes[2] : 0.0f;
-		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 4 ? axes[3] : 0.0f;
+		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] : numAxes >= 3 ? axes[2] : 0.0f;
+		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] : numAxes >= 4 ? axes[3] : 0.0f;
 	}
 	
 	{
@@ -2127,6 +2150,12 @@ void joysChangeCB(int jid, int event)
 			PSGLOBAL(joy1id) = jid;
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+#endif
+			// This is behind LOAD_INI_SETTINGS, because otherwise the Init call below will destroy/overwrite your bindings.
+#ifdef LOAD_INI_SETTINGS
+			int count;
+			glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+			ControlsManager.InitDefaultControlConfigJoyPad(count);
 #endif
 		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;

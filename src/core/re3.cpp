@@ -244,6 +244,14 @@ const char *iniKeyboardButtons[] = {"ESC","F1","F2","F3","F4","F5","F6","F7","F8
 
 void LoadINIControllerSettings()
 {
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	ReadIniIfExists("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
+	// force to default GTA behaviour (never overwrite bindings on joy change/initialization) if user init'ed/set bindings before we introduced that
+	if (!ReadIniIfExists("Controller", "PadButtonsInited", &ControlsManager.ms_padButtonsInited)) {
+		ControlsManager.ms_padButtonsInited = cfg.category_size("Bindings") != 0 ? 16 : 0;
+	}
+
 	for (int32 i = 0; i < MAX_CONTROLLERACTIONS; i++) {
 		char value[128];
 		if (ReadIniIfExists("Bindings", iniControllerActions[i], value, 128)) {
@@ -335,12 +343,17 @@ void SaveINIControllerSettings()
 		StoreIni("Bindings", iniControllerActions[i], value, 128);
 	}
 
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
+	StoreIni("Controller", "PadButtonsInited", ControlsManager.ms_padButtonsInited);
 	cfg.write_file("re3.ini");
 }
 
-void LoadINISettings()
+bool LoadINISettings()
 {
-	cfg.load_file("re3.ini");
+	if (!cfg.load_file("re3.ini"))
+		return false;
 
 #ifdef IMPROVED_VIDEOMODE
 	ReadIniIfExists("VideoMode", "Width", &FrontEndMenuManager.m_nPrefsWidth);
@@ -394,40 +407,6 @@ void LoadINISettings()
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-	// Written by assuming the codes below will run after _InputInitialiseJoys().
-	std::string strval = cfg.get("Controller", "JoystickName", "");
-	const char *value = strval.c_str();
-	strcpy(gSelectedJoystickName, value);
-	
-	if(gSelectedJoystickName[0] != '\0') {
-		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
-			if (glfwJoystickPresent(i) && strncmp(gSelectedJoystickName, glfwGetJoystickName(i), strlen(gSelectedJoystickName)) == 0) {
-				if (PSGLOBAL(joy1id) != -1) {
-					PSGLOBAL(joy2id) = PSGLOBAL(joy1id);
-				}
-				PSGLOBAL(joy1id) = i;
-				int count;
-				glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
-				
-				// We need to init and reload bindings, because;
-				//	1-joypad button number may differ with saved/prvly connected one
-				//	2-bindings are not init'ed if there is no joypad at the start
-				ControlsManager.InitDefaultControlConfigJoyPad(count);
-				CFileMgr::SetDirMyDocuments();
-				int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
-				if (gta3set) {
-					ControlsManager.LoadSettings(gta3set);
-					CFileMgr::CloseFile(gta3set);
-				}
-				CFileMgr::SetDir("");
-				// We call LoadINIControllerSettings after this func., so calling here isn't needed
-				break;
-			}
-		}
-	}
-#endif
-
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	bool migrate = cfg.category_size("FrontendOptions") != 0;
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -453,6 +432,8 @@ void LoadINISettings()
 		}
 	}
 #endif
+
+	return true;
 }
 
 void SaveINISettings()
@@ -507,10 +488,6 @@ void SaveINISettings()
 #endif
 #ifdef FIX_SPRITES
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
-#endif
-
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -959,7 +936,7 @@ extern bool gbRenderWorld2;
 			"Uzi Money", "Toyminator", "Rigged To Blow", "Bullion Run", "Rumble", "The Exchange"
 		};
 
-		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 79, missions);
+		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, ARRAY_SIZE(missions) - 1, missions);
 		DebugMenuEntrySetWrap(missionEntry, true);
 		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
 #endif
@@ -983,9 +960,13 @@ extern bool gbRenderWorld2;
 }
 #endif
 
+#ifndef __MWERKS__
+#ifndef MASTER
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
+#endif
 
+#ifndef MASTER
 void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func)
 {
 #ifdef _WIN32
@@ -1039,9 +1020,11 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	assert(false);
 #endif
 }
+#endif
 
 void re3_debug(const char *format, ...)
 {
+#ifndef MASTER
 	va_list va;
 	va_start(va, format);
 #ifdef _WIN32
@@ -1053,8 +1036,10 @@ void re3_debug(const char *format, ...)
 
 	printf("%s", re3_buff);
 	CDebug::DebugAddText(re3_buff);
+#endif
 }
 
+#ifndef MASTER
 void re3_trace(const char *filename, unsigned int lineno, const char *func, const char *format, ...)
 {
 	char buff[re3_buffsize *2];
@@ -1074,7 +1059,9 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 
 	OutputDebugString(buff);
 }
+#endif
 
+#ifndef MASTER
 void re3_usererror(const char *format, ...)
 {
 	va_list va;
@@ -1094,6 +1081,8 @@ void re3_usererror(const char *format, ...)
 	assert(false);
 #endif
 }
+#endif
+#endif
 
 #ifdef VALIDATE_SAVE_SIZE
 int32 _saveBufCount;

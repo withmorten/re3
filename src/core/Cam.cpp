@@ -1075,7 +1075,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 	TargetCoors = CameraTarget;
 	IdealSource = Source;
-	TargetCoors.z += m_fSyphonModeTargetZOffSet;
+	TargetCoors.z += m_fSyphonModeTargetZOffSet + 0.15f;
 
 	TargetCoors = DoAverageOnVector(TargetCoors);
 	TargetCoors.z += m_fRoadOffSet;
@@ -1273,7 +1273,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	//  0.25 ->  0.20 for nearest dist
 	//  1.50 -> -0.05 for mid dist
 	//  2.90 -> -0.33 for far dist
-	Source.z += (2.5f - TheCamera.m_fPedZoomValueSmooth)*0.2f - 0.05f;
+	Source.z += (2.5f - TheCamera.m_fPedZoomValueSmooth)*0.2f - 0.25f;
 	// Zoom out camera
 	Front = TargetCoors - Source;
 	Front.Normalise();
@@ -2556,7 +2556,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	static float DontLookThroughWorldFixer = 0.0f;
 	CVector TargetCoors;
 
-	FOV = DefaultFOV;
+	FOV = DefaultFOV + 10.0f;
 	TargetCoors = CameraTarget;
 	if(CamTargetEntity->m_rwObject == nil)
 		return;
@@ -2655,7 +2655,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		CamPos.x = 0.0f;
 		CamPos.y += 0.08f;
 		CamPos.z += 0.62f;
-		FOV = 60.0f;
+		FOV = 80.0f;
 		Source = Multiply3x3(CamTargetEntity->GetMatrix(), CamPos);
 		Source += CamTargetEntity->GetPosition();
 		if(((CVehicle*)CamTargetEntity)->IsBoat())
@@ -2688,6 +2688,8 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	}
 
 	ResetStatics = false;
+
+	RwCameraSetNearClipPlane(Scene.camera, 0.05f);
 }
 
 static CVector vecHeadCamOffset(0.06f, 0.05f, 0.0f);

@@ -702,7 +702,13 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 					m_pFirstPersonVehicle = (CVehicle*)ent;
 					ent->bNoBrightHeadLights = false;
 				}
-				return VIS_OFFSCREEN;
+
+				if(ent->IsVehicle() && 
+					ent->GetModelIndex() != MI_BUS &&
+					ent->GetModelIndex() != MI_COACH)
+					return VIS_VISIBLE;
+				else
+					return VIS_OFFSCREEN;
 			}
 			// All sorts of Clumps
 			if(ent->m_rwObject == nil || !ent->bIsVisible)

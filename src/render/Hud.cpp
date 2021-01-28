@@ -325,7 +325,7 @@ CHud::DrawAlphaProgressBar(float x, float y, float w, float h, bool bArmour)
 
 	float fValue;
 	if(!bArmour) {
-		fValue = 1.0f - (CWorld::Players[0].m_pPed->m_fHealth * (CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree ? 125 : 100)) / 10000;
+		fValue = 1.0f - (Min(CWorld::Players[0].m_pPed->m_fHealth, 100) * 100) / 10000;
 		fOffset = 0.70f;
 		vecUV[0] = CVector2D(0.330f, 0.0f + fValue);
 		vecUV[1] = CVector2D(0.660f, 0.0f + fValue);
@@ -565,10 +565,12 @@ void CHud::Draw()
 		   FindPlayerPed()->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 			if(FindPlayerPed()->m_fHealth >= 10 || FindPlayerPed()->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 
-				if(!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss ||
-				   CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 ||
-				   CTimer::GetFrameCounter() & 4)
-					DrawAlphaProgressBar((34.0f), (155.0f), (34.0f), (112.0f), false);
+
+				if(CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree ? 1 : (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss) ||
+					   (CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000) ||
+					   CTimer::GetFrameCounter() & 4)
+						DrawAlphaProgressBar((34.0f), (155.0f), (34.0f), (112.0f), false);
+				
 			}
 		}
 
@@ -579,30 +581,34 @@ void CHud::Draw()
 		/*
 		        DrawArmour
 		*/
-		if(m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_ARMOUR) {
-			CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+		if(FindPlayerPed()->m_fArmour > 1.0f) {
+			if(m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_ARMOUR) {
+				CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 
-			if(FindPlayerPed()->m_fArmour > 1.0f) {
-				Sprites[HUD_ARMOUR].Draw(SCREEN_SCALE_X(124.0f), SCREEN_SCALE_FROM_BOTTOM(130.0f), SCREEN_SCALE_X(22.0f), SCREEN_SCALE_Y(20.0f),
-				                         CRGBA(255, 255, 255, 255));
+				if(!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss ||
+				   CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss + 2000 ||
+				   CTimer::GetFrameCounter() & 4) {
+					Sprites[HUD_ARMOUR].Draw(SCREEN_SCALE_X(124.0f), SCREEN_SCALE_FROM_BOTTOM(130.0f), SCREEN_SCALE_X(22.0f),
+					                         SCREEN_SCALE_Y(20.0f), CRGBA(255, 255, 255, 255));
 
-				AsciiToUnicode("[", sPrintIcon);
+					AsciiToUnicode("[", sPrintIcon);
 #ifdef FIX_BUGS
-				sprintf(sTemp, "%d", int32((FindPlayerPed()->m_fArmour + 0.5f)) / 10);
+					sprintf(sTemp, "%d", int32((FindPlayerPed()->m_fArmour + 0.5f)) / 10);
 #else
-				sprintf(sTemp, "%03d", (int32)FindPlayerPed()->m_fArmour);
+					sprintf(sTemp, "%03d", (int32)FindPlayerPed()->m_fArmour);
 #endif
-				AsciiToUnicode(sTemp, sPrint);
+					AsciiToUnicode(sTemp, sPrint);
 
-				CFont::SetJustifyOff();
-				CFont::SetRightJustifyOff();
-				CFont::SetCentreOn();
-				CFont::SetBackgroundOff();
-				CFont::SetFontStyle(FONT_BANK);
-				CFont::SetDropShadowPosition(0);
-				CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
-				CFont::SetColor(ARMOUR_COLOR);
-				CFont::PrintString(SCREEN_SCALE_X(135.0f), SCREEN_SCALE_FROM_BOTTOM(127.0f), sPrint);
+					CFont::SetJustifyOff();
+					CFont::SetRightJustifyOff();
+					CFont::SetCentreOn();
+					CFont::SetBackgroundOff();
+					CFont::SetFontStyle(FONT_BANK);
+					CFont::SetDropShadowPosition(0);
+					CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
+					CFont::SetColor(ARMOUR_COLOR);
+					CFont::PrintString(SCREEN_SCALE_X(135.0f), SCREEN_SCALE_FROM_BOTTOM(127.0f), sPrint);
+				}
 			}
 		}
 
@@ -613,14 +619,32 @@ void CHud::Draw()
 		if(CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree)
 			Sprites[HUD_JAILFREE].Draw(SCREEN_SCALE_X(138.0f), SCREEN_SCALE_FROM_BOTTOM(102.0f), SCREEN_SCALE_X(22.0f), SCREEN_SCALE_Y(20.0f),
 			                           CRGBA(255, 255, 255, 255));
-
+		
 		/*
 		                DrawHealthIcon
 		*/
 
-		if(CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree)
-			Sprites[HUD_HEALTH].Draw(SCREEN_SCALE_X(96.0f), SCREEN_SCALE_FROM_BOTTOM(146.0f), SCREEN_SCALE_X(22.0f), SCREEN_SCALE_Y(20.0f),
-			                           CRGBA(255, 255, 255, 255));
+		if(CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree) {
+			if(!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss ||
+			   CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 ||
+			   CTimer::GetFrameCounter() & 4) {
+				Sprites[HUD_HEALTH].Draw(SCREEN_SCALE_X(96.0f), SCREEN_SCALE_FROM_BOTTOM(146.0f), SCREEN_SCALE_X(22.0f), SCREEN_SCALE_Y(20.0f),
+				                         CRGBA(255, 255, 255, 255));
+
+				sprintf(sTemp, "%d", (int32(FindPlayerPed()->m_fHealth * 125) / 125) - 100);
+				AsciiToUnicode(sTemp, sPrint);
+
+				CFont::SetJustifyOff();
+				CFont::SetRightJustifyOff();
+				CFont::SetCentreOn();
+				CFont::SetBackgroundOff();
+				CFont::SetFontStyle(FONT_BANK);
+				CFont::SetDropShadowPosition(0);
+				CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
+				CFont::SetColor(HEALTH_COLOR);
+				CFont::PrintString(SCREEN_SCALE_X(107.0f), SCREEN_SCALE_FROM_BOTTOM(144.0f), sPrint);
+			}
+		}
 	
 
 		/*

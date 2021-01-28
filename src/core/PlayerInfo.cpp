@@ -68,6 +68,7 @@ CPlayerInfo::Clear(void)
 	m_bGetOutOfHospitalFree = false;
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
+	m_WastedCase = WCASE_DEFAULT;
 }
 
 void
@@ -520,7 +521,9 @@ CPlayerInfo::KillPlayer()
 	m_WBState = WBSTATE_WASTED;
 	m_nWBTime = CTimer::GetTimeInMilliseconds();
 	CDarkel::ResetOnPlayerDeath();
-	CMessages::AddBigMessage(TheText.Get("DEAD"), 4000, 2);
+
+	char *str[] = {"DEAD", "KABOOM", "SPLAT", "PANCAK", "SOAKED"};
+	CMessages::AddBigMessage(TheText.Get(str[m_WastedCase]), 4000, 2);
 	CStats::TimesDied++;
 }
 

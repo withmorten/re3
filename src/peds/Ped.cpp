@@ -6400,6 +6400,31 @@ CPed::SetDead(void)
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
 
+	if(CWorld::Players[CWorld::PlayerInFocus].m_pPed == this) {
+		int wastedCase;
+
+		switch(m_lastWepDam) {
+		case WEAPONTYPE_DROWNING:
+			wastedCase = WCASE_DROWN;
+			break;
+		case WEAPONTYPE_RAMMEDBYCAR:
+		case WEAPONTYPE_RUNOVERBYCAR:
+			wastedCase = WCASE_HIT_BY_CAR;
+			break;
+		case WEAPONTYPE_FALL:
+			wastedCase = WCASE_FALL;
+			break;
+		case WEAPONTYPE_EXPLOSION:
+			wastedCase = WCASE_EXPLOSION;
+			break;
+		default:
+			wastedCase = WCASE_DEFAULT; 
+			break;
+		}
+
+		CWorld::Players[CWorld::PlayerInFocus].m_WastedCase = wastedCase;
+		printf("WASTED CASE: %d", wastedCase);
+	}
 	SetPedState(PED_DEAD);
 	m_pVehicleAnim = nil;
 	m_pCollidingEntity = nil;

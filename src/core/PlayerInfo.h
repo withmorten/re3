@@ -10,6 +10,14 @@ enum eWastedBustedState
 	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
+enum eWastedCase {
+	WCASE_DEFAULT,
+	WCASE_EXPLOSION,
+	WCASE_FALL,
+	WCASE_HIT_BY_CAR,
+	WCASE_DROWN
+};
+
 class CEntity;
 class CPed;
 class CVehicle;
@@ -58,6 +66,7 @@ public:
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 #endif
+	int8 m_WastedCase; // eWastedCase
 
 	void MakePlayerSafe(bool);
 	void AwardMoneyForExplosion(CVehicle *vehicle);	

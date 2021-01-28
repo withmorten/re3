@@ -471,6 +471,10 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 	} else if(modelIndex == MI_PICKUP_JAILFREE) {
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
+	} else if(modelIndex == MI_PICKUP_FREECARE) {
+		player->m_fHealth = 125.0f;
+		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
+		return true;
 	}
 	return false;
 }
@@ -707,7 +711,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			colorId = 12;
 		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
 			colorId = 13;
-		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
+		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS || entity->GetModelIndex() == MI_PICKUP_FREECARE)
 			colorId = 14;
 		else if(entity->GetModelIndex() == MI_PICKUP_JAILFREE )
 			colorId = 16;

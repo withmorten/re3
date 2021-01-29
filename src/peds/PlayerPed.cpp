@@ -1270,7 +1270,6 @@ CPlayerPed::ProcessControl(void)
 		RestoreSprintEnergy(0.3f);
 
 	if (m_nPedState == PED_DEAD) {
-		m_pClosestTrafficLight = nil;
 		ClearWeaponTarget();
 		return;
 	}
@@ -1281,10 +1280,7 @@ CPlayerPed::ProcessControl(void)
 		return;
 	}
 	if (m_nPedState == PED_DRIVING && m_objective != OBJECTIVE_LEAVE_CAR) {
-		if (ShouldReportRedLightCrime()) {
-			printf("Crossed a RED LIGHT\n");
-			CEventList::RegisterEvent(EVENT_RUN_REDLIGHT, EVENT_ENTITY_VEHICLE, m_pMyVehicle, this, 1000);
-		}
+		ProcessRedLightCrime();
 
 		if (m_pMyVehicle->IsCar() && ((CAutomobile*)m_pMyVehicle)->Damage.GetDoorStatus(DOOR_FRONT_LEFT) == DOOR_STATUS_SWINGING) {
 			CAnimBlendAssociation *rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR);
@@ -1446,7 +1442,6 @@ CPlayerPed::ProcessControl(void)
 			ClearWeaponTarget();
 			break;
 		case PED_ARRESTED:
-			m_pClosestTrafficLight = nil;
 			if (m_nLastPedState == PED_DRAG_FROM_CAR && m_pVehicleAnim)
 				BeingDraggedFromCar();
 			break;
@@ -1541,11 +1536,11 @@ CPlayerPed::Load(uint8*& buf)
 #undef CopyToBuf
 #endif
 
-bool
-CPlayerPed::ShouldReportRedLightCrime() {
+void
+CPlayerPed::ProcessRedLightCrime() {
 	/* If we're driving an emergency vehicle, we can violate as many red lights as we want */
 	if (m_pMyVehicle->IsLawEnforcementVehicle() || m_pMyVehicle->GetModelIndex() == MI_AMBULAN || m_pMyVehicle->GetModelIndex() == MI_FIRETRUCK)
-		return false;
+		return;
 
 	CEntity* entity;
 
@@ -1557,28 +1552,38 @@ CPlayerPed::ShouldReportRedLightCrime() {
 
 	/* If we've already come across a traffic light, check if we just went past it */
 	if (m_pClosestTrafficLight) {
-		/* If the traffic light is damaged, we're... lucky (insert evil laugh here) */
-		if (m_pClosestTrafficLight->bRenderDamaged) {
-			m_pClosestTrafficLight = nil;
-			return false;
-		}
-		/* Otherwise, if we're going away from the traffic light... */
-		const CVector& entPos = m_pClosestTrafficLight->GetPosition();
-		entHeading = m_pClosestTrafficLight->GetForward().Heading();
-		if (!m_pMyVehicle->IsSphereTouchingVehicle(entPos.x - 2.2f * Cos(entHeading), entPos.y - 2.2f * Sin(entHeading), entPos.z, m_pClosestTrafficLight->GetBoundRadius())) {
-			entity = m_pClosestTrafficLight;
-			m_pClosestTrafficLight = nil;
-
-			/* ...if it's red, oopsie! */
-			type = CTrafficLights::FindTrafficLightType(entity);
-			if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2() == CAR_LIGHTS_RED)) {
-				entHeading = entity->GetForward().Heading();
-				if (Abs(vehHeading - entHeading) > 1.0f || Abs((vehPos - entity->GetPosition()).Heading() - entHeading) < 1.5f)
-					return true;
+		/* Continue checking if the trafficlight is not damaged ofc... */
+		if (!m_pClosestTrafficLight->bRenderDamaged) {
+			/* Get trafficlight position and heading */
+			const CVector& entPos = m_pClosestTrafficLight->GetPosition();
+			entHeading = m_pClosestTrafficLight->GetForward().Heading();
+			/* Get a point at about the center of the trafficlight radius */
+			CVector trafficLightCenterPos(entPos.x - 2.2f * Cos(entHeading), entPos.y - 2.2f * Sin(entHeading), 0);
+			/* Check if we're going away from the traffic light... */
+			if ((vehPos - trafficLightCenterPos).Magnitude2D() > m_pClosestTrafficLight->GetBoundRadius()) {
+				type = CTrafficLights::FindTrafficLightType(m_pClosestTrafficLight);
+				if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2() == CAR_LIGHTS_RED)) {
+					if (Abs(vehHeading - entHeading) > 1.0f || Abs((vehPos - entPos).Heading() - entHeading) < 1.5f) {
+						printf("Crossed a RED LIGHT.\n");
+#if 0
+						/* This is probably what we should be doing */
+						CEventList::RegisterEvent(EVENT_RUN_REDLIGHT, EVENT_ENTITY_OBJECT, entity, FindPlayerPed(), 2000);
+#else
+						/* This is kind of a hack to increase police detection range around the **trafficlight**; if it works we should change CEventList... */
+						if (CWanted::WorkOutPolicePresence(trafficLightCenterPos, 20.0f) != 0) {
+							m_pWanted->RegisterCrime_Immediately(CRIME_RUN_REDLIGHT, trafficLightCenterPos, (uintptr)m_pClosestTrafficLight, false);
+							m_pWanted->SetWantedLevelNoDrop(1);
+						}
+						else
+							m_pWanted->RegisterCrime(CRIME_RUN_REDLIGHT, trafficLightCenterPos, (uintptr)m_pClosestTrafficLight, false);
+#endif
+						m_pClosestTrafficLight = nil;
+						return;
+					}
+				}
 			}
-			/* ...if not, we're safe */
 			else
-				return false;
+				return;
 		}
 	}
 
@@ -1588,19 +1593,22 @@ CPlayerPed::ShouldReportRedLightCrime() {
 		if (entity->GetModelIndex() == MI_TRAFFICLIGHTS) {
 			if (!entity->bRenderDamaged) {
 				type = CTrafficLights::FindTrafficLightType(entity);
-				if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2())) {
+				if ((type == 1 && CTrafficLights::LightForCars1() == CAR_LIGHTS_RED) || (type == 2 && CTrafficLights::LightForCars2() == CAR_LIGHTS_RED)) {
 					const CVector& entPos = entity->GetPosition();
 					entHeading = entity->GetForward().Heading();
 					if (m_pMyVehicle->IsSphereTouchingVehicle(entPos.x - 2.2f * Cos(entHeading), entPos.y - 2.2f * Sin(entHeading), entPos.z, entity->GetBoundRadius())) {
 						/* Make sure we're entering from the "front" of the trafficlight */
 						if (Abs(vehHeading - entHeading) < 1.0f && Abs((vehPos - entPos).Heading() - entHeading) > 1.5f) {
 							m_pClosestTrafficLight = entity;
-							return false;
+							return;
 						}
 					}
 				}
 			}
 		}
 	}
-	return false;
+
+	/* If we don't find anything, remove closest trafficlight either way */
+	m_pClosestTrafficLight = nil;
+	return;
 }

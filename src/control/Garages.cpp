@@ -1285,7 +1285,7 @@ bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle * pException)
 	uint32 i = CPools::GetVehiclePool()->GetSize();
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || pVehicle == pException)
+		if (!pVehicle || pVehicle == pException || pVehicle->GetStatus() == STATUS_WRECKED)
 			continue;
 		if (!IsEntityTouching3D(pVehicle))
 			continue;
@@ -1997,7 +1997,11 @@ float CGarages::FindDoorHeightForMI(int32 mi)
 void CGarage::TidyUpGarage()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (pVehicle && (pVehicle->IsCar() || pVehicle->IsBike())) {
 			if (IsPointInsideGarage(pVehicle->GetPosition())) {
@@ -2013,7 +2017,11 @@ void CGarage::TidyUpGarage()
 void CGarage::TidyUpGarageClose()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle)
 			continue;

@@ -861,7 +861,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 8);
 		CDarkel::StartFrenzy((eWeaponType)ScriptParams[0], ScriptParams[1], ScriptParams[2],
 			ScriptParams[3], text, ScriptParams[4], ScriptParams[5],
-			ScriptParams[6], ScriptParams[7] != 0, true);
+			ScriptParams[6], ScriptParams[7], true);
 		return 0;
 	}
 	case COMMAND_ACTIVATE_MILITARY_CRANE:

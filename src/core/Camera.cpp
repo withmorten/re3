@@ -164,7 +164,7 @@ CCamera::Init(void)
 	m_WideScreenOn = false;
 	m_fFOV_Wide_Screen = 0.0f;
 	m_bRestoreByJumpCut = false;
-	CarZoomIndicator = CAM_ZOOM_2;
+	CarZoomIndicator = CAM_ZOOM_1;
 	PedZoomIndicator = CAM_ZOOM_2;
 	CarZoomValueSmooth = 0.0f;
 	m_fPedZoomValueSmooth = 0.0f;
@@ -1026,12 +1026,14 @@ CCamera::CamControl(void)
 			if(CPad::GetPad(0)->CycleCameraModeUpJustDown() && !CReplay::IsPlayingBack() &&
 			   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 			   !m_WideScreenOn && !m_bFailedCullZoneTestPreviously){
+#ifdef PC_PLAYER_CONTROLS
 				if(FrontEndMenuManager.m_ControlMethod == CONTROL_STANDARD){
 					if(PedZoomIndicator == CAM_ZOOM_TOPDOWN)
 						PedZoomIndicator = CAM_ZOOM_1;
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
+#endif
 					PedZoomIndicator--;
 			}
 			if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&

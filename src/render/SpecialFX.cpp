@@ -482,6 +482,7 @@ C3dMarkers::Init()
 	CTxdStore::SetCurrentTxd(txdSlot);
 	CFileMgr::ChangeDir("\\");
 	m_pRpClumpArray[MARKERTYPE_ARROW] = CFileLoader::LoadAtomicFile2Return("models/generic/arrow.dff");
+	m_pRpClumpArray[MARKERTYPE_BIGARROW] = CFileLoader::LoadAtomicFile2Return("models/generic/bigarrow.dff");
 	m_pRpClumpArray[MARKERTYPE_CYLINDER] = CFileLoader::LoadAtomicFile2Return("models/generic/sphere.dff");
 	CTxdStore::PopCurrentTxd();
 }
@@ -604,13 +605,13 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		pMarker->DeleteMarkerObject();
 
 	pMarker->AddMarker(identifier, type, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
-	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_2) {
+	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_BIGARROW) {
 		float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
 		if (z != 0.0f)
 			pos.z = z - 0.05f * size;
 	}
 	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
-	if (type == MARKERTYPE_2) {
+	if (type == MARKERTYPE_BIGARROW) {
 		pMarker->m_Matrix.RotateX(PI);
 		pMarker->m_Matrix.GetPosition() = pos;
 	}
@@ -643,10 +644,10 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 {
 	RpAtomic *origAtomic;
 	origAtomic = nil;
-	RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_ARROW], MarkerAtomicCB, &origAtomic);
+	RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_BIGARROW], MarkerAtomicCB, &origAtomic);
 
 	RpAtomic *atomic = RpAtomicClone(origAtomic);
-	RwFrame *frame = RpClumpGetFrame(m_pRpClumpArray[MARKERTYPE_ARROW]);
+	RwFrame *frame = RpClumpGetFrame(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
 
 	RpGeometry *geometry = RpAtomicGetGeometry(atomic);
 	RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
@@ -687,7 +688,7 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 		ActivateDirectional();
 		RwFrameUpdateObjects(frame);
 		SetBrightMarkerColours(1.0f);
-		RpClumpRender(m_pRpClumpArray[MARKERTYPE_ARROW]);
+		RpClumpRender(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
 		ReSetAmbientAndDirectionalColours();
 	}
 }

@@ -3801,7 +3801,10 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	
 	if ( veh->GetModelIndex() == MI_BUS )
 		optedDoorNode = CAR_DOOR_RF;
-	
+
+	if(veh->GetModelIndex() == MI_RHINO)
+		optedDoorNode = CAR_DOOR_RR;
+
 	bool someoneExitsFromOurExitDoor = false;
 	bool someoneEntersFromOurExitDoor = false;
 	switch (optedDoorNode) {
@@ -4127,36 +4130,35 @@ void
 CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 {
 	CVector *enterOffset = nil;
-	if (m_vehDoor == CAR_DOOR_LF && veh->pDriver
-		|| m_vehDoor == CAR_DOOR_RF && veh->pPassengers[0]
-		|| m_vehDoor == CAR_DOOR_LR && veh->pPassengers[1]
-		|| m_vehDoor == CAR_DOOR_RR && veh->pPassengers[2])
-	{
+	if(m_vehDoor == CAR_DOOR_LF && veh->pDriver || m_vehDoor == CAR_DOOR_RF && veh->pPassengers[0] || m_vehDoor == CAR_DOOR_LR && veh->pPassengers[1] ||
+	   m_vehDoor == CAR_DOOR_RR && veh->pPassengers[2]) {
 		enterOffset = &vecPedQuickDraggedOutCarAnimOffset;
 	}
 
 	CVector lfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_LF);
 	CVector rfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
+	CVector rrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
 
 	// Left front door is closer
-	if ((lfPos - GetPosition()).MagnitudeSqr2D() < (rfPos - GetPosition()).MagnitudeSqr2D()) {
+	if((lfPos - GetPosition()).MagnitudeSqr2D() < (rfPos - GetPosition()).MagnitudeSqr2D()) {
 
-		if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
+		if(veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
 			m_vehDoor = CAR_DOOR_LF;
 			posToOpen = lfPos;
-		} else if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, enterOffset)) {
+		} else if(veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, enterOffset)) {
 			m_vehDoor = CAR_DOOR_RF;
 			posToOpen = rfPos;
 		}
 	} else {
 
-		if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, enterOffset)) {
+		if(veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, enterOffset)) {
 
 			CPed *rfPassenger = veh->pPassengers[0];
-			if (rfPassenger && (rfPassenger->m_leader == this || rfPassenger->bDontDragMeOutCar ||
-						veh->VehicleCreatedBy == MISSION_VEHICLE && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
-					&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)
-				|| (veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF) && veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
+			if(rfPassenger &&
+			       (rfPassenger->m_leader == this || rfPassenger->bDontDragMeOutCar ||
+			        veh->VehicleCreatedBy == MISSION_VEHICLE && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER) &&
+			       veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset) ||
+			   (veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF) && veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
 
 				m_vehDoor = CAR_DOOR_LF;
 				posToOpen = lfPos;
@@ -4164,18 +4166,23 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 				m_vehDoor = CAR_DOOR_RF;
 				posToOpen = rfPos;
 			}
-		} else if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
+		} else if(veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
 			m_vehDoor = CAR_DOOR_LF;
 			posToOpen = lfPos;
 		}
 	}
-	
-	if ( veh->GetModelIndex() == MI_BUS )
-	{
+
+	if(veh->GetModelIndex() == MI_BUS) {
 		m_vehDoor = CAR_DOOR_RF;
 		posToOpen = rfPos;
 	}
+
+	if(veh->GetModelIndex() == MI_RHINO) {
+		m_vehDoor = CAR_DOOR_RR;
+		posToOpen = rrPos;
+	}
 }
+
 
 bool
 CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
@@ -4191,6 +4198,9 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
 			return true;
 		case MI_RHINO:
+			m_vehDoor = CAR_DOOR_RR;
+			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
+			return true;
 		default:
 			break;
 	}
@@ -4246,6 +4256,12 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 	{
 		m_vehDoor = CAR_DOOR_RF;
 		posToOpen = rfPos;
+	}
+
+	if ( veh->GetModelIndex() == MI_RHINO )
+	{
+		m_vehDoor = CAR_DOOR_RR;
+		posToOpen = rrPos;
 	}
 	
 	return canEnter;

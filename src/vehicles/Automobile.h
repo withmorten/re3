@@ -1,4 +1,6 @@
 #pragma once
+#define TRAILER_FRONT_DISTANCE (4.2f)
+#define TRAILER_MAX_ATTACH (1.4f)
 
 #include "Vehicle.h"
 #include "DamageManager.h"
@@ -184,6 +186,14 @@ public:
 	static const uint32 nSaveStructSize;
 
 	static void SetAllTaxiLights(bool set);
+	CVector GetTowHitchPos(CMatrix matrix, CVector vec);
+	void SetTowLink(CAutomobile *car);
+	void BreakTowLink();
+	void LinkUp(CAutomobile *car);
+	void AssignTrailer(CAutomobile *car);
+	void TowControl();
+	void AddTowPoint(float dist);
+	CVehicle* ScanForTowLink();
 };
 
 VALIDATE_SIZE(CAutomobile, 0x5A8);

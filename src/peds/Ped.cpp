@@ -6708,7 +6708,7 @@ CPed::SeekCar(void)
 {
 	CVehicle *vehToSeek = m_carInObjective;
 	CVector dest(0.0f, 0.0f, 0.0f);
-	if (!vehToSeek) {
+	if (!vehToSeek || vehToSeek->GetModelIndex() == MI_YANKEE) {
 		RestorePreviousState();
 		return;
 	}

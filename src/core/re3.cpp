@@ -307,6 +307,8 @@ void NastyLimbsCheat();
 DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
 
+bool bTrailer = false;
+
 void
 SpawnCar(int id)
 {
@@ -316,7 +318,7 @@ SpawnCar(int id)
 	if(CStreaming::HasModelLoaded(id)){
 		playerpos = FindPlayerCoors();
 		int node;
-		if(!CModelInfo::IsBoatModel(id)){
+		if(CModelInfo::IsBoatModel(id)){
 			node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
 			if(node < 0)
 				return;
@@ -339,11 +341,26 @@ SpawnCar(int id)
 		else
 			v->SetPosition(ThePaths.m_pathNodes[node].GetPosition());
 
-		v->GetMatrix().GetPosition().z += 4.0f;
 		v->SetOrientation(0.0f, 0.0f, 3.49f);
 		v->SetStatus(STATUS_ABANDONED);
 		v->m_nDoorLock = CARLOCK_UNLOCKED;
 		CWorld::Add(v);
+		((CAutomobile *)v)->PlaceOnRoadProperly();
+
+		if (v && bTrailer && id == MI_LINERUN) {
+			CStreaming::RequestModel(MI_YANKEE, 0);
+			CStreaming::LoadAllRequestedModels(false);
+			if(CStreaming::HasModelLoaded(MI_YANKEE)) {
+				CAutomobile *v2;
+				v2 = new CAutomobile(MI_YANKEE, RANDOM_VEHICLE);
+				v2->SetStatus(STATUS_ABANDONED);
+				v2->m_nDoorLock = CARLOCK_UNLOCKED;
+				CWorld::Add(v2);
+				((CAutomobile *)v)->SetTowLink(v2);
+				((CAutomobile *)v2)->PlaceOnRoadProperly();
+				bTrailer = false;
+			}
+		}
 	}
 }
 
@@ -572,6 +589,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
+		DebugMenuAddCmd("Spawn", "Spawn Truck with Trailer", []() { bTrailer = true; SpawnCar(MI_LINERUN); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);

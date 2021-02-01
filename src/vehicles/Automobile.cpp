@@ -44,6 +44,7 @@
 #include "PlayerPed.h"
 #include "Object.h"
 #include "Automobile.h"
+#include "Debug.h"
 
 bool bAllCarCheat;	// unused
 
@@ -203,6 +204,11 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		bExplosionProof = true;
 		bBulletProof = true;
 	}
+
+	m_bHasVehicleLinked = false;
+	m_vecTowPos = {0.0f, 0.0f, 0.0f};
+	m_pLinkedVehicle = nil;
+	m_nLastTimeVehicleLostLink = 0;
 }
 
 
@@ -493,6 +499,13 @@ CAutomobile::ProcessControl(void)
 	case MI_YARDIE:
 	case MI_ESPERANT:
 		HydraulicControl();
+		break;
+	case MI_LINERUN:
+		TowControl();
+		AddTowPoint(-TRAILER_FRONT_DISTANCE);
+		break;
+	case MI_YANKEE: 
+		AddTowPoint(TRAILER_FRONT_DISTANCE);
 		break;
 	default:
 		if(CVehicle::bCheat3){
@@ -1673,90 +1686,89 @@ CAutomobile::PreRender(void)
 		lightL -= GetRight()*2.0f*headLightPos.x;
 
 		// Headlight coronas
-		if(behindness < 0.0f){
-			// In front of car
-			float intensity = -0.5f*behindness + 0.3f;
-			float size = 1.0f - behindness;
+		if(GetModelIndex() != MI_YANKEE) {
+			if(behindness < 0.0f) {
+				// In front of car
+				float intensity = -0.5f * behindness + 0.3f;
+				float size = 1.0f - behindness;
 
-			if(behindness < -0.97f && camDist < 30.0f){
-				// Directly in front and not too far away
-				if(pHandling->Flags & HANDLING_HALOGEN_LIGHTS){
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 6, 150, 150, 195, 255,
-							lightL, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 7, 150, 150, 195, 255,
-							lightR, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
-				}else{
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 6, 160, 160, 140, 255,
-							lightL, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 7, 160, 160, 140, 255,
-							lightR, 1.2f, 45.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_HEADLIGHT, CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, angle);
+				if(behindness < -0.97f && camDist < 30.0f) {
+					// Directly in front and not too far away
+					if(pHandling->Flags & HANDLING_HALOGEN_LIGHTS) {
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 6, 150, 150, 195, 255, lightL, 1.2f,
+								                 45.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_HEADLIGHT,
+								                 CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_OFF, angle);
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 7, 150, 150, 195, 255, lightR, 1.2f,
+								                 45.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_HEADLIGHT,
+								                 CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_OFF, angle);
+					} else {
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 6, 160, 160, 140, 255, lightL, 1.2f,
+								                 45.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_HEADLIGHT,
+								                 CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_OFF, angle);
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 7, 160, 160, 140, 255, lightR, 1.2f,
+								                 45.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_HEADLIGHT,
+								                 CCoronas::FLARE_HEADLIGHTS, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_OFF, angle);
+					}
 				}
-			}
 
-			if(alarmOff){
+				if(alarmOff) {
+					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
+						CCoronas::RegisterCorona((uintptr)this, 0, 0, 0, 0, lightL, size, 0.0f, CCoronas::TYPE_STREAK,
+							                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+							                 CCoronas::STREAK_ON, angle);
+					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+						CCoronas::RegisterCorona((uintptr)this + 1, 0, 0, 0, 0, lightR, size, 0.0f, CCoronas::TYPE_STREAK,
+							                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+							                 CCoronas::STREAK_ON, angle);
+				} else {
+					if(pHandling->Flags & HANDLING_HALOGEN_LIGHTS) {
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this, 190 * intensity, 190 * intensity, 255 * intensity, 255, lightL,
+								                 size, 50.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_STREAK,
+								                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_ON, angle);
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 1, 190 * intensity, 190 * intensity, 255 * intensity, 255,
+								                 lightR, size, 50.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_STREAK,
+								                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_ON, angle);
+					} else {
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this, 210 * intensity, 210 * intensity, 195 * intensity, 255, lightL,
+								                 size, 50.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_STREAK,
+								                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_ON, angle);
+						if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+							CCoronas::RegisterCorona((uintptr)this + 1, 210 * intensity, 210 * intensity, 195 * intensity, 255,
+								                 lightR, size, 50.0f * TheCamera.LODDistMultiplier, CCoronas::TYPE_STREAK,
+								                 CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF,
+								                 CCoronas::STREAK_ON, angle);
+					}
+				}
+			} else {
+				// Behind car
 				if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-					CCoronas::RegisterCorona((uintptr)this, 0, 0, 0, 0,
-						lightL, size, 0.0f,
-						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
+					CCoronas::UpdateCoronaCoors((uintptr)this, lightL, 50.0f * TheCamera.LODDistMultiplier, angle);
 				if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-					CCoronas::RegisterCorona((uintptr)this + 1, 0, 0, 0, 0,
-						lightR, size, 0.0f,
-						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
-			}else{
-				if(pHandling->Flags & HANDLING_HALOGEN_LIGHTS){
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this, 190*intensity, 190*intensity, 255*intensity, 255,
-							lightL, size, 50.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 1, 190*intensity, 190*intensity, 255*intensity, 255,
-							lightR, size, 50.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
-				}else{
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this, 210*intensity, 210*intensity, 195*intensity, 255,
-							lightL, size, 50.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
-					if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 1, 210*intensity, 210*intensity, 195*intensity, 255,
-							lightR, size, 50.0f*TheCamera.LODDistMultiplier,
-							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
-							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
-				}
+					CCoronas::UpdateCoronaCoors((uintptr)this + 1, lightR, 50.0f * TheCamera.LODDistMultiplier, angle);
 			}
-		}else{
-			// Behind car
-			if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this, lightL, 50.0f*TheCamera.LODDistMultiplier, angle);
-			if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this + 1, lightR, 50.0f*TheCamera.LODDistMultiplier, angle);
+
+			// bright lights
+			if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
+				CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
+			if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
+				CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
 		}
 
-		// bright lights
-		if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
-			CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
-		if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
-			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
-
 		// Taillights
-
 		CVector tailLightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
 		lightR = GetMatrix() * tailLightPos;
 		lightL = lightR;
@@ -1827,34 +1839,39 @@ CAutomobile::PreRender(void)
 			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_REAR);
 
 		// Light shadows
-		if(!alarmOff){
-			CVector pos = GetPosition();
-			CVector2D fwd(GetForward());
-			fwd.Normalise();
-			float f = headLightPos.y + 6.0f;
-			pos += CVector(f*fwd.x, f*fwd.y, 2.0f);
+			if(!alarmOff) {
+				CVector pos = GetPosition();
+				CVector2D fwd(GetForward());
+				fwd.Normalise();
+				float f = headLightPos.y + 6.0f;
+				pos += CVector(f * fwd.x, f * fwd.y, 2.0f);
 
-			if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK ||
-			   Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-				CShadows::StoreCarLightShadow(this, (uintptr)this + 22, gpShadowHeadLightsTex, &pos,
-					7.0f*fwd.x, 7.0f*fwd.y, 7.0f*fwd.y, -7.0f*fwd.x, 45, 45, 45, 7.0f);
+						if(GetModelIndex() != MI_YANKEE) {
 
-			f = (tailLightPos.y - 2.5f) - (headLightPos.y + 6.0f);
-			pos += CVector(f*fwd.x, f*fwd.y, 0.0f);
+					if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK ||
+					   Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+						CShadows::StoreCarLightShadow(this, (uintptr)this + 22, gpShadowHeadLightsTex, &pos, 7.0f * fwd.x, 7.0f * fwd.y,
+						                              7.0f * fwd.y, -7.0f * fwd.x, 45, 45, 45, 7.0f);
+				}
+				f = (tailLightPos.y - 2.5f) - (headLightPos.y + 6.0f);
+				pos += CVector(f * fwd.x, f * fwd.y, 0.0f);
+			
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK ||
 			   Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
 				CShadows::StoreCarLightShadow(this, (uintptr)this + 25, gpShadowExplosionTex, &pos,
 					3.0f, 0.0f, 0.0f, -3.0f, 35, 0, 0, 4.0f);
 		}
 
-		if(this == FindPlayerVehicle() && !alarmOff){
-			if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK ||
-			   Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
-				CPointLights::AddLight(CPointLights::LIGHT_DIRECTIONAL, GetPosition(), GetForward(),
-					20.0f, 1.0f, 1.0f, 1.0f,
-					FindPlayerVehicle()->m_vecMoveSpeed.MagnitudeSqr2D() < sq(0.45f) ? CPointLights::FOG_NORMAL : CPointLights::FOG_NONE,
-					false);
-			CVector pos = GetPosition() - 4.0f*GetForward();
+		if((this == FindPlayerVehicle() || (FindPlayerVehicle() && this == ((CAutomobile *)FindPlayerVehicle())->m_pLinkedVehicle)) && !alarmOff) {
+			if(GetModelIndex() != MI_YANKEE) {
+				if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK ||
+				   Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK)
+					CPointLights::AddLight(CPointLights::LIGHT_DIRECTIONAL, GetPosition(), GetForward(), 20.0f, 1.0f, 1.0f, 1.0f,
+						               FindPlayerVehicle()->m_vecMoveSpeed.MagnitudeSqr2D() < sq(0.45f) ? CPointLights::FOG_NORMAL
+						                                                                                : CPointLights::FOG_NONE,
+						               false);
+			}
+			CVector pos = GetPosition() - 4.0f * GetForward();
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK ||
 			   Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK) {
 				if(m_fBrakePedal > 0.0f)
@@ -2150,6 +2167,10 @@ CAutomobile::Render(void)
 int32
 CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 {
+	if(ent == m_pLinkedVehicle || ((CAutomobile*)ent)->m_pLinkedVehicle == this) { 
+		return false;
+	}
+
 	int i;
 	CColModel *colModel;
 
@@ -4697,6 +4718,174 @@ CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
 }
+
+CVector
+CAutomobile::GetTowHitchPos(CMatrix matrix, CVector vec)
+{
+	CVector pos;
+	pos.x = matrix.GetPosition().x + vec.x * matrix.GetRight().x + vec.y * matrix.GetForward().x + vec.z * matrix.GetUp().x;
+	pos.y = matrix.GetPosition().y + vec.x * matrix.GetRight().y + vec.y * matrix.GetForward().y + vec.z * matrix.GetUp().y;
+	pos.z = matrix.GetPosition().z + vec.x * matrix.GetRight().z + vec.y * matrix.GetForward().z + vec.z * matrix.GetUp().z;
+	return pos;
+}
+
+void
+CAutomobile::SetTowLink(CAutomobile *car)
+{
+	float angle = Atan2(-GetMatrix().GetForward().x, GetMatrix().GetForward().y);
+	car->GetMatrix().SetRotateZOnly(angle);
+
+	CVector vec(0.0f, 0.0f, 0.0f);
+	vec = GetPosition();
+	vec.x += GetForward().x * -TRAILER_FRONT_DISTANCE;
+	vec.y += GetForward().y * -TRAILER_FRONT_DISTANCE;
+
+	car->GetMatrix().GetPosition() = vec;
+	car->GetMatrix().UpdateRW();
+	AssignTrailer(car);
+}
+
+void
+CAutomobile::BreakTowLink()
+{
+	m_nLastTimeVehicleLostLink = CTimer::GetTimeInMilliseconds() + 1500;
+	//m_pLinkedVehicle->PlaceOnRoadProperly();
+	m_pLinkedVehicle = nil;
+	m_bHasVehicleLinked = false;
+	printf("Vehicle detached.");
+}
+
+void 
+CAutomobile::LinkUp(CAutomobile *car)
+{
+	CBaseModelInfo *mi = CModelInfo::GetModelInfo(car->GetModelIndex());
+	CVector pointA = GetTowHitchPos(GetMatrix(), CVector(0.0f, -TRAILER_FRONT_DISTANCE, 0.0f));
+	CVector pointB = GetTowHitchPos(car->GetMatrix(), CVector(0.0f, -TRAILER_FRONT_DISTANCE, 0.0f));
+
+	float dist = (pointA - pointB).Magnitude();
+	float cos_x = (pointA - pointB).Magnitude2D() / dist;
+	float sin_x = (pointA.z - pointB.z) / dist;
+	float cos_y = GetMatrix().GetRight().Magnitude();
+	float sin_y = -(GetMatrix().GetRight().z) * GetMoveSpeed().Magnitude2D();
+	float cos_z = (pointA.y - pointB.y) / (dist * cos_x);
+	float sin_z = (pointB.x - pointA.x) / (dist * cos_x);
+
+	// Attach matrix to the vehicle we want to linkup.
+	CMatrix m;
+	m.m_hasRwMatrix = false;
+	m.m_attachment = nil;
+	m.Attach(&car->GetMatrix().m_matrix);
+
+	// Set location and rotation.
+	m.GetForward() = CVector(sin_x * sin_y * cos_z - cos_x * sin_z, sin_x * sin_y * sin_z + cos_x * cos_z, sin_x * cos_y);
+	m.GetPosition() = pointA;
+	m.GetPosition() = GetTowHitchPos(m, CVector(0.0f, -TRAILER_FRONT_DISTANCE, 0.0f));
+
+	m.UpdateRW();
+	m.Detach();
+
+	// Break link in case things get crazy.
+	float groundZ = Abs(CGeneral::LimitRadianAngle(car->GetDistanceFromCentreOfMassToBaseOfModel() + CWorld::FindGroundZFor3DCoord(car->GetPosition().x, car->GetPosition().y, car->GetPosition().z + 2.0f, nil) - car->GetMatrix().GetPosition().z));
+
+	float a1 = (GetForward().Heading());
+	float a2 = (car->GetForward().Heading());
+	float angleXY = Abs(CGeneral::LimitRadianAngle(a2 - a1));
+
+	if((groundZ > DEGTORAD(95.0f) && car->m_nWheelsOnGround < 2) || angleXY > DEGTORAD(85.0f)) {  
+		BreakTowLink();
+		return;
+	}
+
+	// Update wheels rotation.
+	for(int i = 0; i < 4; i++) car->m_aWheelRotation[i] = m_aWheelRotation[i];
+
+	// Update speed.
+	float s = GetMoveSpeed().Magnitude2D();
+	CVector vecSpeed;
+	float ForwardSpeed = DotProduct(GetMoveSpeed(), GetForward());
+	if(ForwardSpeed < 0.0f) {
+		vecSpeed.x = s * sin_z;
+		vecSpeed.y = -s * cos_z;
+	} else {
+		vecSpeed.x = -s * sin_z;
+		vecSpeed.y = s * cos_z;
+	}
+
+	car->m_vecMoveSpeed.x = vecSpeed.x;
+	car->m_vecMoveSpeed.y = vecSpeed.y;
+
+	// Update components.
+	car->bLightsOn = bLightsOn;
+	car->bEngineOn = bEngineOn;
+	car->m_nAlarmState = m_nAlarmState;
+	car->m_fGasPedal = m_fGasPedal;
+	car->m_fBrakePedal = m_fBrakePedal;
+}
+
+void
+CAutomobile::AssignTrailer(CAutomobile* car)
+{
+	m_pLinkedVehicle = (CAutomobile *)car;
+	m_bHasVehicleLinked = true;
+}
+
+void
+CAutomobile::TowControl()
+{
+	if(CTimer::GetTimeInMilliseconds() < m_nLastTimeVehicleLostLink)
+		return;
+
+	CVehicle *veh = ScanForTowLink();
+
+	// If trailer has been found and it's close enough to our point, attach it.
+	if(m_pLinkedVehicle == nil && (veh && veh->m_vecTowPos != CVector(0.0f, 0.0f, 0.0f) && (m_vecTowPos - veh->m_vecTowPos).MagnitudeSqr() < TRAILER_MAX_ATTACH / 4)) {
+		printf("Vehicle linked at: %f, %f, %f", veh->m_vecTowPos.x, veh->m_vecTowPos.y, veh->m_vecTowPos.z);
+		AssignTrailer((CAutomobile *)veh);
+	}
+
+	// Update attachment each frame.
+	if(m_pLinkedVehicle && m_bHasVehicleLinked) { 
+		LinkUp(m_pLinkedVehicle);
+	}
+
+	// Detach trailer.
+	if(m_pLinkedVehicle && m_bHasVehicleLinked && (CPad::GetPad(0)->GetLookBehindForPed() || (m_vecTowPos - m_pLinkedVehicle->m_vecTowPos).MagnitudeSqr() > TRAILER_MAX_ATTACH)) { 
+		BreakTowLink();
+	}
+}
+
+void
+CAutomobile::AddTowPoint(float dist)
+{
+	CVector vec(0.0f, 0.0f, 0.0f);
+	vec = GetTowHitchPos(GetMatrix(), CVector(0.0f, dist, 0.0f));
+
+	CCoronas::RegisterCorona((uintptr)this, 255, 0, 0, 0, vec, 0.2f, 25.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF,
+	                         CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+
+	m_vecTowPos = vec;
+}
+
+CVehicle*
+CAutomobile::ScanForTowLink()
+{
+	int16 lastVehicle;
+	CEntity *vehicles[8];
+	CWorld::FindObjectsInRange(GetPosition(), 10.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+	CVehicle *foundVeh = nil;
+	for(int i = 0; i < lastVehicle; i++) {
+		CVehicle *nearVeh = (CVehicle *)vehicles[i];
+
+		if(nearVeh->GetStatus() != STATUS_WRECKED && nearVeh->GetModelIndex() == MI_YANKEE) { foundVeh = nearVeh; }
+	}
+
+	if(!foundVeh)
+		return nil;
+
+
+	return foundVeh;
+}
+
 
 #ifdef COMPATIBLE_SAVES
 void

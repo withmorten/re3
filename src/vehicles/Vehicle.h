@@ -191,6 +191,10 @@ public:
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
 	eVehicleType m_vehType;
+	CVector m_vecTowPos;
+	CAutomobile *m_pLinkedVehicle;
+	bool m_bHasVehicleLinked;
+	uint32 m_nLastTimeVehicleLostLink;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t sz, int slot);

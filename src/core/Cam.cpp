@@ -2025,6 +2025,16 @@ CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientati
 	CBaseModelInfo *mi = CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
 	CVector Dimensions = mi->GetColModel()->boundingBox.max - mi->GetColModel()->boundingBox.min;
 	CVector TargetCoors = CameraTarget;
+
+	// Trailer support.
+	CVehicle *trailer = ((CVehicle *)(CamTargetEntity))->m_pLinkedVehicle;
+	if(trailer != nil) {
+		CBaseModelInfo *mi2 = CModelInfo::GetModelInfo(trailer->GetModelIndex());
+		Dimensions.x += (mi2->GetColModel()->boundingBox.max - mi2->GetColModel()->boundingBox.min).x;
+		Dimensions.y += (mi2->GetColModel()->boundingBox.max - mi2->GetColModel()->boundingBox.min).y;
+	}
+	//
+
 	float BaseDist = Dimensions.Magnitude2D();
 
 	TargetCoors.z += Dimensions.z - 0.35f;
@@ -2556,7 +2566,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	static float DontLookThroughWorldFixer = 0.0f;
 	CVector TargetCoors;
 
-	FOV = DefaultFOV + 10.0f;
+	FOV = DefaultFOV;
 	TargetCoors = CameraTarget;
 	if(CamTargetEntity->m_rwObject == nil)
 		return;
@@ -2655,7 +2665,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		CamPos.x = 0.0f;
 		CamPos.y += 0.08f;
 		CamPos.z += 0.62f;
-		FOV = 80.0f;
+		FOV = 60.0f;
 		Source = Multiply3x3(CamTargetEntity->GetMatrix(), CamPos);
 		Source += CamTargetEntity->GetPosition();
 		if(((CVehicle*)CamTargetEntity)->IsBoat())

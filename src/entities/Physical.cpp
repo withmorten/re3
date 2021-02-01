@@ -484,11 +484,12 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
 
 	// what is this?
-	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
-	a = Min(a, 1.0f);
-	float b = Abs(impulse / (speedB * m_fMass));
-	if(a < b)
-		impulse *= a/b;
+	if(GetModelIndex() != MI_YANKEE) {
+		float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
+		a = Min(a, 1.0f);
+		float b = Abs(impulse / (speedB * m_fMass));
+		if(a < b) impulse *= a / b;
+	}
 
 	ApplyMoveForce(springDir*impulse);
 	ApplyTurnForce(springDir*impulse, point);
@@ -555,6 +556,9 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 			ispedcontactB = true;
 	}else
 		massFactorB = B->bIsHeavy ? 2.0f : 1.0f;
+
+	if(B->GetModelIndex() == MI_YANKEE) massFactorB = 2.0f;
+
 
 	float speedA, speedB;
 	if(B->GetIsStatic()){

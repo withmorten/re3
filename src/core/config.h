@@ -352,7 +352,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #endif
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-//#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
+#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
 #endif
 
 #ifdef MASTER

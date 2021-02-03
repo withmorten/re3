@@ -579,6 +579,10 @@ CCarCtrl::GenerateOneRandomCar()
 	CWorld::Add(pVehicle);
 	if (carClass == COPS)
 		CCarAI::AddPoliceCarOccupants(pVehicle);
+	else if(carClass == MI_FIRETRUCK)
+		CCarAI::AddFiretruckOccupants(pVehicle);
+	else if(carClass == MI_AMBULAN)
+		CCarAI::AddAmbulanceOccupants(pVehicle);
 	else
 		pVehicle->SetUpDriver();
 	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */
@@ -611,7 +615,15 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass)
 		} else if(pZone->carThreshold[5] > rand) {
 			model = ChooseCarModel(*pClass = BIG);
 		} else if(pZone->copThreshold > rand) {
-			*pClass = COPS, model = ChoosePoliceCarModel();
+			int emergency = CGeneral::GetRandomNumberInRange(0, 2);
+
+			if(emergency == 0)
+				*pClass = SPECIAL, model = MI_FIRETRUCK;
+			else if(emergency == 0)
+				*pClass = SPECIAL, model = MI_AMBULAN;
+			else
+				*pClass = COPS, model = ChoosePoliceCarModel();
+
 		} else {
 			model = ChooseCarModel(*pClass = 6);
 		}

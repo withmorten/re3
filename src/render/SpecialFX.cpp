@@ -24,6 +24,7 @@
 #include "CdStream.h"
 #include "MemoryMgr.h"
 #include "Directory.h"
+#include "Debug.h"
 
 RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
@@ -642,6 +643,15 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 void
 C3dMarkers::PlaceBigArrow(CVector &posTarget)
 {
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void *)rwSHADEMODEFLAT);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)(FALSE));
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)TRUE);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void *)rwSHADEMODEGOURAUD);
+
 	RpAtomic *origAtomic;
 	origAtomic = nil;
 	RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_BIGARROW], MarkerAtomicCB, &origAtomic);
@@ -657,7 +667,7 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 	RwV3d axis1 = {1.0f, 0.0f, 0.0f};
 	RwV3d axis2 = {0.0f, 1.0f, 0.0f};
 	RwV3d axis3 = {0.0f, 0.0f, 1.0f};
-	RwRGBA color = {255, 255, 0, 255};
+	RwRGBA color = {255, 255, 1, 255};
 
 	float x, y, z;
 
@@ -683,13 +693,37 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 		RwFrameRotate(frame, &axis1, (x), rwCOMBINEPRECONCAT);
 		RwFrameRotate(frame, &axis2, (y), rwCOMBINEPRECONCAT);
 		RwFrameRotate(frame, &axis3, (z), rwCOMBINEPRECONCAT);
-
-		RemoveExtraDirectionalLights(Scene.world);
-		ActivateDirectional();
 		RwFrameUpdateObjects(frame);
-		SetBrightMarkerColours(1.0f);
+		ActivateDirectional();
+
+		RwRGBAReal AmbientColor = {0.65f, 0.65f, 0.65f, 1.0f};
+		SetAmbientColours(&AmbientColor);
+
+		RwRGBAReal DirectionalLightColourForFrame;
+		DirectionalLightColourForFrame.red = 1.0f;
+		DirectionalLightColourForFrame.green = 1.0f;
+		DirectionalLightColourForFrame.blue = 1.0f;
+		RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
+
+		CVector vec1, vec2, vecsun;
+		RwMatrix mat;
+		vecsun = CVector(0.0f, 0.0f, -1.0f);
+
+		vec1 = CVector(0.0f, 0.0f, 1.0f);
+		vec2 = CrossProduct(vec1, vecsun);
+		vec2.Normalise();
+		vec1 = CrossProduct(vec2, vecsun);
+		mat.at.x = -vecsun.x;
+		mat.at.y = -vecsun.y;
+		mat.at.z = -vecsun.z;
+		mat.right.x = vec1.x;
+		mat.right.y = vec1.y;
+		mat.right.z = vec1.z;
+		mat.up.x = vec2.x;
+		mat.up.y = vec2.y;
+		mat.up.z = vec2.z;
+		RwFrameTransform(RpLightGetFrame(pDirect), &mat, rwCOMBINEREPLACE);
 		RpClumpRender(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
-		ReSetAmbientAndDirectionalColours();
 	}
 }
 

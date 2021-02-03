@@ -152,6 +152,7 @@ public:
 	static void ToggleTargetMarker(float, float);
 #endif
 	static uint8 CalculateBlipAlpha(float dist);
+	static uint8 CalculateBlipAlpha2(float dist);
 	static void ChangeBlipBrightness(int32 i, int32 bright);
 	static void ChangeBlipColour(int32 i, int32);
 	static void ChangeBlipDisplay(int32 i, eBlipDisplay display);

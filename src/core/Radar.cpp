@@ -222,20 +222,26 @@ int LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &
 	return edge;
 }
 
+uint8
+CRadar::CalculateBlipAlpha(float dist)
+{
+#ifdef MENU_MAP
+	if(CMenuManager::bMenuMapActive) return 255;
+#endif
+	if(dist <= 1.0f) return 255;
 
-uint8 CRadar::CalculateBlipAlpha(float dist)
+	if(dist <= 5.0f) return (128.0f * ((dist - 1.0f) / 4.0f)) + ((1.0f - (dist - 1.0f) / 4.0f) * 255.0f);
+
+	return 128;
+}
+
+uint8 CRadar::CalculateBlipAlpha2(float dist)
 {
 #ifdef MENU_MAP
 	if (CMenuManager::bMenuMapActive)
 		return 255;
 #endif
-	if (dist <= 1.0f)
-		return 255;
-
-	if (dist <= 5.0f)
-		return (128.0f * ((dist - 1.0f) / 4.0f)) + ((1.0f - (dist - 1.0f) / 4.0f) * 255.0f);
-
-	return 128;
+		return 255 * -Abs(clamp(dist * 0.7f, 0.0f, 1.0f));
 }
 
 void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
@@ -482,34 +488,70 @@ CRadar::DrawRadarCop(CVector2D in, CVector2D out)
 	}
 }
 
-void CRadar::DrawBlips()
+float
+FindClosest(float *array, int size, int &id)
 {
-	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+	// Calculating sum for finding average first
+	float sum = 0.0;
+	for(int i = 0; i < size; i++) { 
+		if(array[i] == 0.0f) continue;
+
+		sum += array[i] * 1.0;
+	}
+	// Here is our average
+	float average = sum / size;
+	// Assuming initial answer is very huge so that every other comparison is less than this
+	float answer = (float)INT_MAX;
+	for(int i = 0; i < size; i++) {
+		if(array[i] == 0.0f) continue;
+
+		// Finding the difference for current element
+		float temp = Abs(array[i] - average);
+		float temp1 = Abs(answer - average);
+		// If current difference is less than previous one that replace the previous answer
+		if(temp < temp1) {
+			answer = array[i];
+			id = i;
+		}
+		// If they are equal then accept the minor one
+		else if(temp == temp1) {
+			if(array[i] < answer) { 
+				answer = array[i];
+				id = i;
+			}
+		}
+	}
+
+	return answer;
+}
+
+void
+CRadar::DrawBlips()
+{
+	if(!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE);
+		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)FALSE);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)FALSE);
 
 		CVector2D out;
 		CVector2D in = CVector2D(0.0f, 0.0f);
-		TransformRadarPointToScreenSpace(out, in);
 
 #ifdef MENU_MAP
-		if (!CMenuManager::bMenuMapActive) {
+		if(!CMenuManager::bMenuMapActive) {
 #endif
 			float angle;
-			if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN)
-				angle = PI + FindPlayerHeading();
+			if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN) angle = PI + FindPlayerHeading();
 #ifdef FIX_BUGS
-			else if (TheCamera.GetLookDirection() != LOOKING_FORWARD)
-				angle = FindPlayerHeading() - (PI + (TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind).Heading());
+			else if(TheCamera.GetLookDirection() != LOOKING_FORWARD)
+				angle = FindPlayerHeading() - (PI + (TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() -
+				                                     TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind)
+				                                        .Heading());
 #endif
 			else
 				angle = FindPlayerHeading() - (PI + TheCamera.GetForward().Heading());
-
-			//DrawRotatingRadarSprite(&CentreSprite, out.x, out.y, angle, 255);
 
 			CVector2D vec2d;
 			vec2d.x = vec2DRadarOrigin.x;
@@ -517,8 +559,9 @@ void CRadar::DrawBlips()
 			TransformRealWorldPointToRadarSpace(in, vec2d);
 			LimitRadarPoint(in);
 			TransformRadarPointToScreenSpace(out, in);
-			DrawRadarSprite(RADAR_SPRITE_NORTH, out.x, out.y, 255);
+			// DrawRadarSprite(RADAR_SPRITE_NORTH, out.x, out.y, 255);
 			DrawRadarCop(in, out);
+
 #ifdef MENU_MAP
 		}
 #endif
@@ -527,235 +570,254 @@ void CRadar::DrawBlips()
 		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
 #ifdef MENU_MAP
 			// A little hack to reuse cleared blips in menu map. hehe
-			if (!CMenuManager::bMenuMapActive || ms_RadarTrace[blipId].m_eBlipType == BLIP_CAR ||
-				ms_RadarTrace[blipId].m_eBlipType == BLIP_CHAR || ms_RadarTrace[blipId].m_eBlipType == BLIP_OBJECT)
+			if(!CMenuManager::bMenuMapActive || ms_RadarTrace[blipId].m_eBlipType == BLIP_CAR || ms_RadarTrace[blipId].m_eBlipType == BLIP_CHAR ||
+			   ms_RadarTrace[blipId].m_eBlipType == BLIP_OBJECT)
 #endif
-			if (!ms_RadarTrace[blipId].m_bInUse)
-				continue;
+				if(!ms_RadarTrace[blipId].m_bInUse) continue;
 
-			switch (ms_RadarTrace[blipId].m_eBlipType) {
-				case BLIP_CAR:
-				case BLIP_CHAR:
-				case BLIP_OBJECT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
-						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON) {
+			switch(ms_RadarTrace[blipId].m_eBlipType) {
+			case BLIP_CAR:
+			case BLIP_CHAR:
+			case BLIP_OBJECT:
+				if(ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE ||
+				   ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON) {
 
-						switch (ms_RadarTrace[blipId].m_eBlipType) {
-							case BLIP_CAR:
-								blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								break;
-							case BLIP_CHAR:
-								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity != nil) {
-									if (((CPed*)blipEntity)->InVehicle())
-										blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
-								}
-								break;
-							case BLIP_OBJECT:
-								blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								break;
-							default:
-								break;
+					switch(ms_RadarTrace[blipId].m_eBlipType) {
+					case BLIP_CAR: blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle); break;
+					case BLIP_CHAR:
+						blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+						if(blipEntity != nil) {
+							if(((CPed *)blipEntity)->InVehicle()) blipEntity = ((CPed *)blipEntity)->m_pMyVehicle;
 						}
-						if (blipEntity) {
-							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
-							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-								if (CTheScripts::IsDebugOn()) {
-									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
-									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
-									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
-										ms_RadarTrace[blipId].m_Radius = 5.0f;
-								}
-							}
-							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
-								float dist = LimitRadarPoint(in);
-								TransformRadarPointToScreenSpace(out, in);
-								if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
-									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
-								} else {
-#ifdef TRIANGULAR_BLIPS
-								    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-									const CVector &blipPos = blipEntity->GetPosition();
-									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
-									if (blipPos.z - pos.z <= 2.0f) {
-										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
-										else mode = BLIP_MODE_SQUARE;
-									}
-									ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
-#else
-									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
-#endif
-								}
-							}
-						}
+						break;
+					case BLIP_OBJECT: blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle); break;
+					default: break;
 					}
-					break;
-				case BLIP_COORD:
-				case BLIP_CONTACT_POINT:
-					if ((ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
-						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON)
-						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
-
+					if(blipEntity) {
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
-						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-							if (CTheScripts::IsDebugOn()) {
-								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+						if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+						   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+							if(CTheScripts::IsDebugOn()) {
+								ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
 								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
-								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
-									ms_RadarTrace[blipId].m_Radius = 5.0f;
+								if(ms_RadarTrace[blipId].m_Radius < 1.0f) ms_RadarTrace[blipId].m_Radius = 5.0f;
 							}
 						}
-						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
+						if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+						   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+							TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
 							float dist = LimitRadarPoint(in);
 							TransformRadarPointToScreenSpace(out, in);
-							if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
-								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
+							if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
+								if(ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE)
+									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y,
+									                CalculateBlipAlpha2(dist));
+								else
+									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y,
+									                CalculateBlipAlpha(dist));
 							} else {
 #ifdef TRIANGULAR_BLIPS
-							    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-							    const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+								const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								const CVector &blipPos = blipEntity->GetPosition();
 								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
-								if (blipPos.z - pos.z <= 2.0f) {
-									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
-									else mode = BLIP_MODE_SQUARE;
+								if(blipPos.z - pos.z <= 2.0f) {
+									if(blipPos.z - pos.z < -4.0f)
+										mode = BLIP_MODE_TRIANGULAR_DOWN;
+									else
+										mode = BLIP_MODE_SQUARE;
 								}
-								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+								                         (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
 #else
-								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+								               (uint8)(color >> 16), (uint8)(color >> 8), 255);
 #endif
 							}
 						}
 					}
-					break;
-				default:
-					break;
+				}
+				break;
+			case BLIP_COORD:
+			case BLIP_CONTACT_POINT:
+				if((ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE ||
+				    ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY ||
+				    ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON) &&
+				   (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
+
+					uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+					if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+					   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+						if(CTheScripts::IsDebugOn()) {
+							ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+							ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+							if(ms_RadarTrace[blipId].m_Radius < 1.0f) ms_RadarTrace[blipId].m_Radius = 5.0f;
+						}
+					}
+					if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+					   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+						TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
+						float dist = LimitRadarPoint(in);
+						TransformRadarPointToScreenSpace(out, in);
+						if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
+							if(ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE)
+								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha2(dist));
+							else
+								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
+						} else {
+#ifdef TRIANGULAR_BLIPS
+							const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+							const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+							uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+							if(blipPos.z - pos.z <= 2.0f) {
+								if(blipPos.z - pos.z < -4.0f)
+									mode = BLIP_MODE_TRIANGULAR_DOWN;
+								else
+									mode = BLIP_MODE_SQUARE;
+							}
+							ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+							                         (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+#else
+							ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16),
+							               (uint8)(color >> 8), 255);
+#endif
+						}
+					}
+				}
+				break;
+			default: break;
 			}
 		}
 
 		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
-			if (!ms_RadarTrace[blipId].m_bInUse)
-				continue;
+			if(!ms_RadarTrace[blipId].m_bInUse) continue;
 
-			switch (ms_RadarTrace[blipId].m_eBlipType) {
-				case BLIP_CAR:
-				case BLIP_CHAR:
-				case BLIP_OBJECT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
-						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON) {
+			switch(ms_RadarTrace[blipId].m_eBlipType) {
+			case BLIP_CAR:
+			case BLIP_CHAR:
+			case BLIP_OBJECT:
+				if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE &&
+				   ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON) {
 
-						switch (ms_RadarTrace[blipId].m_eBlipType) {
-							case BLIP_CAR:
-								blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								break;
-							case BLIP_CHAR:
-								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity != nil) {
-									if (((CPed*)blipEntity)->InVehicle())
-										blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
-								}
-								break;
-							case BLIP_OBJECT:
-								blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								break;
-							default:
-								break;
+					switch(ms_RadarTrace[blipId].m_eBlipType) {
+					case BLIP_CAR: blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle); break;
+					case BLIP_CHAR:
+						blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+						if(blipEntity != nil) {
+							if(((CPed *)blipEntity)->InVehicle()) blipEntity = ((CPed *)blipEntity)->m_pMyVehicle;
 						}
-
-						if (blipEntity) {
-							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
-							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-								if (CTheScripts::IsDebugOn()) {
-									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
-									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
-									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
-										ms_RadarTrace[blipId].m_Radius = 5.0f;
-								}
-							}
-							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
-								float dist = LimitRadarPoint(in);
-								TransformRadarPointToScreenSpace(out, in);
-								if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
-									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
-								else
-#ifdef TRIANGULAR_BLIPS
-								{
-								    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-									const CVector &blipPos = blipEntity->GetPosition();
-									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
-									if (blipPos.z - pos.z <= 2.0f) {
-										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
-										else mode = BLIP_MODE_SQUARE;
-									}
-									ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
-								}
-#else
-									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
-#endif
-							}
-						}
+						break;
+					case BLIP_OBJECT: blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle); break;
+					default: break;
 					}
-					break;
-				default:
-					break;
-			}
-		}
-		for (int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
-			if (!ms_RadarTrace[blipId].m_bInUse)
-				continue;
 
-			switch (ms_RadarTrace[blipId].m_eBlipType) {
-				case BLIP_COORD:
-				case BLIP_CONTACT_POINT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
-						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON
-						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
-
+					if(blipEntity) {
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
-						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-							if (CTheScripts::IsDebugOn()) {
-								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+						if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+						   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+							if(CTheScripts::IsDebugOn()) {
+								ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
 								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
-								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
-									ms_RadarTrace[blipId].m_Radius = 5.0f;
+								if(ms_RadarTrace[blipId].m_Radius < 1.0f) ms_RadarTrace[blipId].m_Radius = 5.0f;
 							}
 						}
-						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
+						if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+						   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+							TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
 							float dist = LimitRadarPoint(in);
 							TransformRadarPointToScreenSpace(out, in);
-							if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
-								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
+							if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
+								if(ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE)
+									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y,
+									                CalculateBlipAlpha2(dist));
+								else
+									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y,
+									                CalculateBlipAlpha(dist));
 							else
 #ifdef TRIANGULAR_BLIPS
 							{
-							    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-							    const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+								const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								const CVector &blipPos = blipEntity->GetPosition();
 								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
-								if (blipPos.z - pos.z <= 2.0f) {
-									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
-									else mode = BLIP_MODE_SQUARE;
+								if(blipPos.z - pos.z <= 2.0f) {
+									if(blipPos.z - pos.z < -4.0f)
+										mode = BLIP_MODE_TRIANGULAR_DOWN;
+									else
+										mode = BLIP_MODE_SQUARE;
 								}
-								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
-
-								if((FindPlayerPed()->GetPosition() - ms_RadarTrace[blipId].m_vecPos).MagnitudeSqr() > sq(7.0f))
-									C3dMarkers::PlaceBigArrow(ms_RadarTrace[blipId].m_vecPos);
+								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+								                         (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
 							}
 #else
-								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+								               (uint8)(color >> 16), (uint8)(color >> 8), 255);
 #endif
 						}
 					}
-					break;
-				default:
-					break;
+				}
+				break;
+			default: break;
 			}
-
 		}
+		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
+			if(!ms_RadarTrace[blipId].m_bInUse) continue;
+
+			switch(ms_RadarTrace[blipId].m_eBlipType) {
+			case BLIP_COORD:
+			case BLIP_CONTACT_POINT:
+				if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE &&
+				   ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON &&
+				   (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
+
+					uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+					if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+					   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+						if(CTheScripts::IsDebugOn()) {
+							ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+							ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+							if(ms_RadarTrace[blipId].m_Radius < 1.0f) ms_RadarTrace[blipId].m_Radius = 5.0f;
+						}
+					}
+					if(ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH ||
+					   ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+						TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
+						float dist = LimitRadarPoint(in);
+						TransformRadarPointToScreenSpace(out, in);
+						if(ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
+							if(ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE)
+								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha2(dist));
+							else
+								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
+						else
+#ifdef TRIANGULAR_BLIPS
+						{
+							const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+							const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+							uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+							if(blipPos.z - pos.z <= 2.0f) {
+								if(blipPos.z - pos.z < -4.0f)
+									mode = BLIP_MODE_TRIANGULAR_DOWN;
+								else
+									mode = BLIP_MODE_SQUARE;
+							}
+							ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24),
+							                         (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+						}
+#else
+							ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16),
+							               (uint8)(color >> 8), 255);
+#endif
+					}
+				}
+				break;
+			default: break;
+			}
+		}
+		out = CVector2D(0.0f, 0.0f);
+		in = CVector2D(0.0f, 0.0f);
+		TransformRadarPointToScreenSpace(out, in);
+		DrawRotatingRadarSprite(&CentreSprite, out.x, out.y, angle, 255);
 #ifdef MENU_MAP
-		if (CMenuManager::bMenuMapActive) {
+		if(CMenuManager::bMenuMapActive) {
 			CVector2D in, out;
 			TransformRealWorldPointToRadarSpace(in, FindPlayerCentreOfWorld_NoSniperShift());
 			LimitRadarPoint(in);
@@ -763,12 +825,52 @@ void CRadar::DrawBlips()
 			DrawYouAreHereSprite(out.x, out.y);
 		}
 #endif
+
+		// Place big arrow and point it to the nearest objective.
+		float blipDist[NUMRADARBLIPS];
+		CVector vec[NUMRADARBLIPS];
+		int i = 0;
+		CEntity *ent = nil;
+		bool found = false;
+		for(i = 0; i < NUMRADARBLIPS; i++) {
+			if(ms_RadarTrace[i].m_bInUse && ms_RadarTrace[i].m_eRadarSprite == RADAR_SPRITE_NONE) {
+				switch(ms_RadarTrace[i].m_eBlipType) {
+				case BLIP_CAR: ent = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle); break;
+				case BLIP_CHAR:
+					ent = CPools::GetPedPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
+					if(((CPed *)ent)->InVehicle()) ent = ((CPed *)ent)->m_pMyVehicle;
+					break;
+				case BLIP_OBJECT: ent = CPools::GetObjectPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle); break;
+				}
+
+				if(ent) {
+					blipDist[i] = (FindPlayerPed()->GetPosition() - ent->GetPosition()).MagnitudeSqr();
+					vec[i] = ent->GetPosition();
+				} else {
+					blipDist[i] = (FindPlayerPed()->GetPosition() - ms_RadarTrace[i].m_vecPos).MagnitudeSqr();
+					vec[i] = ms_RadarTrace[i].m_vecPos;
+				}
+				found = true;
+			} else {
+				blipDist[i] = 0.0f;
+				vec[i] = CVector(0.0f, 0.0f, 0.0f);
+			}
+		}
+		if(found) {
+			int id;
+			FindClosest(blipDist, NUMRADARBLIPS, id);
+
+			if((FindPlayerPed()->GetPosition() - vec[id]).MagnitudeSqr() > sq(6.0f)) C3dMarkers::PlaceBigArrow(vec[id]);
+		}
 	}
 }
 
 void
 CRadar::UpdateRadar()
 {
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEARMIPLINEAR);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void *>(TRUE));
+
 	if(!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
 #if 1 // from VC
 		CalculateCachedSinCos();
@@ -953,16 +1055,10 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 	int32 c;
 	switch (color) {
 	case RADAR_TRACE_RED:
-		if (bright)
-			c = 0x712B49FF;
-		else
-			c = 0x7F0000FF;
+		c = 0xDD2410FF;
 		break;
-	case RADAR_TRACE_GREEN:
-		if (bright)
-			c = 0x5FA06AFF;
-		else
-			c = 0x007F00FF;
+	case RADAR_TRACE_GREEN: 
+		c = 0x4BFF41FF;
 		break;
 	case RADAR_TRACE_LIGHT_BLUE:
 		if (bright)
@@ -982,11 +1078,8 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 		else
 			c = 0x7F7F00FF;
 		break;
-	case RADAR_TRACE_MAGENTA:
-		if (bright)
-			c = 0xFF00FFFF;
-		else
-			c = 0x7F007FFF;
+	case RADAR_TRACE_MAGENTA: 
+		c = 0xFF37BEFF;
 		break;
 	case RADAR_TRACE_CYAN:
 		if (bright)
@@ -1216,7 +1309,7 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
 		return;
 
-	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
+	//CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 }
 
@@ -1225,20 +1318,22 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
 		return;
 
+	if(CTimer::GetTimeInMilliseconds() % (600 + 600) < 600) return;
+
 	switch (mode)
 	{
 	case BLIP_MODE_TRIANGULAR_UP:
 		// size++; // VC does size + 1 for triangles
-		CSprite2d::Draw2DPolygon(x + SCREEN_SCALE_X(size + 3.0f), y + SCREEN_SCALE_Y(size + 2.0f), x - (SCREEN_SCALE_X(size + 3.0f)), y + SCREEN_SCALE_Y(size + 2.0f), x, y - (SCREEN_SCALE_Y(size + 3.0f)), x, y - (SCREEN_SCALE_Y(size + 3.0f)), CRGBA(0, 0, 0, alpha));
+		//CSprite2d::Draw2DPolygon(x + SCREEN_SCALE_X(size + 3.0f), y + SCREEN_SCALE_Y(size + 2.0f), x - (SCREEN_SCALE_X(size + 3.0f)), y + SCREEN_SCALE_Y(size + 2.0f), x, y - (SCREEN_SCALE_Y(size + 3.0f)), x, y - (SCREEN_SCALE_Y(size + 3.0f)), CRGBA(0, 0, 0, alpha));
 		CSprite2d::Draw2DPolygon(x + SCREEN_SCALE_X(size + 1.0f), y + SCREEN_SCALE_Y(size + 1.0f), x - (SCREEN_SCALE_X(size + 1.0f)), y + SCREEN_SCALE_Y(size + 1.0f), x, y - (SCREEN_SCALE_Y(size + 1.0f)), x, y - (SCREEN_SCALE_Y(size + 1.0f)), CRGBA(red, green, blue, alpha));
 		break;
 	case BLIP_MODE_TRIANGULAR_DOWN:
 		// size++; // VC does size + 1 for triangles
-		CSprite2d::Draw2DPolygon(x, y + SCREEN_SCALE_Y(size + 2.0f), x, y + SCREEN_SCALE_Y(size + 3.0f), x + SCREEN_SCALE_X(size + 3.0f), y - (SCREEN_SCALE_Y(size + 2.0f)), x - (SCREEN_SCALE_X(size + 3.0f)), y - (SCREEN_SCALE_Y(size + 2.0f)), CRGBA(0, 0, 0, alpha));
+		//CSprite2d::Draw2DPolygon(x, y + SCREEN_SCALE_Y(size + 2.0f), x, y + SCREEN_SCALE_Y(size + 3.0f), x + SCREEN_SCALE_X(size + 3.0f), y - (SCREEN_SCALE_Y(size + 2.0f)), x - (SCREEN_SCALE_X(size + 3.0f)), y - (SCREEN_SCALE_Y(size + 2.0f)), CRGBA(0, 0, 0, alpha));
 		CSprite2d::Draw2DPolygon(x, y + SCREEN_SCALE_Y(size + 1.0f), x, y + SCREEN_SCALE_Y(size + 1.0f), x + SCREEN_SCALE_X(size + 1.0f), y - (SCREEN_SCALE_Y(size + 1.0f)), x - (SCREEN_SCALE_X(size + 1.0f)), y - (SCREEN_SCALE_Y(size + 1.0f)), CRGBA(red, green, blue, alpha));
 		break;
 	case BLIP_MODE_SQUARE:
-		CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
+		//CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
 		CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 		break;
 	}

@@ -189,15 +189,15 @@ cMusicManager::DisplayRadioStationName()
 		CFont::SetScale(SCREEN_SCALE_X(0.60f), SCREEN_SCALE_Y(0.96f));
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetCentreOff();
-		CFont::SetRightJustifyOn();
+		CFont::SetRightJustifyOff();
+		CFont::SetCentreOn();
 
 		if(gNumRetunePresses)
-			CFont::SetColor(CRGBA(155, 155, 1, 255));
+			CFont::SetColor(CRGBA(205, 205, 55, 255));
 		else
 			CFont::SetColor(CRGBA(255, 255, 1, 255));
 
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(60.0f), pCurrentStation);
+		CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_Y(12.0f), pCurrentStation);
 		CFont::DrawFonts();
 	}
 }

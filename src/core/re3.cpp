@@ -31,6 +31,7 @@
 #include "custompipes.h"
 #include "MemoryHeap.h"
 #include "FileMgr.h"
+#include "PCSave.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "ControllerConfig.h"
@@ -444,6 +445,17 @@ SwitchToMission(void)
 }
 #endif
 
+static void
+SaveGame(int saveSlot)
+{
+	int8 SaveSlot = PcSaveHelper.SaveSlot(saveSlot);
+
+	if(SaveSlot)
+		CHud::SetHelpMessage(TheText.Get("FESZ_L1"), true);
+	else
+		CHud::SetHelpMessage(TheText.Get("FEC_SVU"), true);
+}
+
 #ifdef USE_CUSTOM_ALLOCATOR
 static void ParseHeap(void) { gMainHeap.ParseHeap(); }
 #endif
@@ -726,6 +738,15 @@ extern bool gbRenderWorld2;
 		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 79, missions);
 		DebugMenuEntrySetWrap(missionEntry, true);
 		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
+
+		static int saveSlotId = 0;
+		static const char *slotNames[] = {
+		    "SAVE SLOT 1", "SAVE SLOT 2", "SAVE SLOT 3", "SAVE SLOT 4", "SAVE SLOT 5", "SAVE SLOT 6", "SAVE SLOT 7", "SAVE SLOT 8",
+		};
+		e = DebugMenuAddVar("Debug", "Save Slot Id", &saveSlotId, nil, 1, 0, 7, slotNames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddCmd("Debug", "Save Game on Selected Slot", []() { SaveGame(saveSlotId); });
+
 #endif
 
 		extern bool PrintDebugCode;

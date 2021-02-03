@@ -2056,7 +2056,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		return false;
 
 	if (bOnlyDamagedByPlayer && damagedBy != player && damagedBy != FindPlayerVehicle() &&
-		method != WEAPONTYPE_DROWNING && method != WEAPONTYPE_EXPLOSION)
+		method != WEAPONTYPE_DROWNING)
 		return false;
 
 	float healthImpact;

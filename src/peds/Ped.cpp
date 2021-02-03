@@ -6424,6 +6424,7 @@ CPed::SetDead(void)
 
 		CWorld::Players[CWorld::PlayerInFocus].m_WastedCase = wastedCase;
 		printf("WASTED CASE: %d", wastedCase);
+		printf("death by; %d", m_lastWepDam);
 	}
 	SetPedState(PED_DEAD);
 	m_pVehicleAnim = nil;

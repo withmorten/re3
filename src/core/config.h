@@ -313,6 +313,11 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 #	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+
+#	ifdef XINPUT
+#		define GAMEPAD_MENU		// Add gamepad menu
+#	endif
+
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 //#	define TRIANGLE_BACK_BUTTON
 #	define CIRCLE_BACK_BUTTON
@@ -339,6 +344,10 @@ enum Config {
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 //#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
+
+#if SCRIPT_LOG_FILE_LEVEL == 0
+#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#endif
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 //#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
@@ -468,6 +477,7 @@ enum Config {
 #undef RADIO_OFF_TEXT
 
 #undef MENU_MAP
+#undef GAMEPAD_MENU
 #undef SCROLLABLE_STATS_PAGE
 #undef CUSTOM_FRONTEND_OPTIONS
 

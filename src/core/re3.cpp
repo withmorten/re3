@@ -369,6 +369,7 @@ bool LoadINISettings()
 	ReadIniIfExists("Controller", "HorizantalMouseSens", &TheCamera.m_fMouseAccelHorzntl);
 	ReadIniIfExists("Controller", "InvertMouseVertically", &MousePointerStateHelper.bInvertVertically);
 	ReadIniIfExists("Controller", "DisableMouseSteering", &CVehicle::m_bDisableMouseSteering);
+	ReadIniIfExists("Controller", "Vibration", &FrontEndMenuManager.m_PrefsUseVibration);
 	ReadIniIfExists("Audio", "SfxVolume", &FrontEndMenuManager.m_PrefsSfxVolume);
 	ReadIniIfExists("Audio", "MusicVolume", &FrontEndMenuManager.m_PrefsMusicVolume);
 	ReadIniIfExists("Audio", "Radio", &FrontEndMenuManager.m_PrefsRadioStation);
@@ -395,6 +396,9 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "RimlightMult", &CustomPipes::RimlightMult);
 	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
 	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
+#endif
+#ifdef NEW_RENDERER
+	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
 #endif
 
 #ifdef PROPER_SCALING
@@ -452,6 +456,7 @@ void SaveINISettings()
 	StoreIni("Controller", "HorizantalMouseSens", TheCamera.m_fMouseAccelHorzntl);
 	StoreIni("Controller", "InvertMouseVertically", MousePointerStateHelper.bInvertVertically);
 	StoreIni("Controller", "DisableMouseSteering", CVehicle::m_bDisableMouseSteering);
+	StoreIni("Controller", "Vibration", FrontEndMenuManager.m_PrefsUseVibration);
 	StoreIni("Audio", "SfxVolume", FrontEndMenuManager.m_PrefsSfxVolume);
 	StoreIni("Audio", "MusicVolume", FrontEndMenuManager.m_PrefsMusicVolume);
 	StoreIni("Audio", "Radio", FrontEndMenuManager.m_PrefsRadioStation);
@@ -478,6 +483,9 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
 	StoreIni("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
+#endif
+#ifdef NEW_RENDERER
+	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
 #endif
 
 #ifdef PROPER_SCALING	
@@ -684,7 +692,7 @@ void CTweakVars::Add(CTweakVar *var)
 		TweakVarsListSize = 0;
 	}
 	if(TweakVarsListSize > 63)
-		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(*var));
+		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(CTweakVar*));
 
 	TweakVarsList[TweakVarsListSize++] = var;
 //	TweakVarsList.push_back(var);

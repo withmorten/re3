@@ -68,6 +68,7 @@
 #include "screendroplets.h"
 #include "MemoryHeap.h"
 #include "Frontend.h"
+#include "crossplatform.h"
 
 GlobalScene Scene;
 
@@ -575,9 +576,15 @@ GetRandomSplashScreen(void)
 	if(index2 == 6)
 		index2 = 0;*/
 
-	index = CGeneral::GetRandomNumberInRange(0, 4);
-	sprintf(splashName, "loadsc%d", index);
-	return splashName;
+	index = CGeneral::GetRandomNumberInRange(0, 12);
+
+	static char *adName[] = {
+		"ammunation", "dogfood", "donovan",  "dormatron", "equanox", "fernando", "isueyou",
+		"maibatsu", "military", "mommas", "petsovernight", "pogo", "sexclub7"
+	};
+
+	//sprintf(splashName, "loadsc%d", index);;
+	return adName[index];
 }
 
 Const char*
@@ -634,31 +641,43 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CFont::InitPerFrame();
 		DefinedState();
 		RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-		splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
 
-		CSprite2d::DrawRect(CRect(SCALE_AND_CENTER_X(0.0f), SCREEN_SCALE_Y(80.0f), SCALE_AND_CENTER_X(0.0f) + SCREEN_SCALE_X(640.0f), SCREEN_SCALE_Y(170.0f)),
-		                    CRGBA(100, 0, 0, 125));
+		if(NumberOfChunksLoaded < 130.0f) {
+			splash->Draw(CRect(SCALE_AND_CENTER_X(0.0f), 0.0f, SCALE_AND_CENTER_X(640.0f), SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 
-		wchar str[64];
-		CFont::SetRightJustifyOff();
-		CFont::SetCentreOn();
-		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetColor(CRGBA(255, 255, 255, 255));
-		CFont::SetWrapx(SCREEN_SCALE_X(240.0f));
-		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(0.8f));
+			wchar str[64];
+			CFont::SetRightJustifyOff();
+			CFont::SetCentreOff();
+			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetColor(CRGBA(255, 255, 255, 255));
+			CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.6f));
+			CFont::SetRightJustifyOn();
+			CFont::SetRightJustifyWrap(0.0f);
+			CFont::SetFontStyle(FONT_HEADING);
+			AsciiToUnicode("LOADING", str);
+			CFont::PrintString(SCALE_AND_CENTER_X(600.0f), SCREEN_SCALE_FROM_BOTTOM(80.0f), str); // TheText.Get("PCLOAD"));
 
-		CFont::SetFontStyle(FONT_HEADING);
-		AsciiToUnicode("Informations:", str);
-		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(90.0f), str);
+			float x = SCALE_AND_CENTER_X(370.0f);
+			float y = SCREEN_SCALE_FROM_BOTTOM(36.0f);
+			float w = SCREEN_SCALE_X(244.0f);
+			float h = SCREEN_SCALE_Y(4.0f);
+			float percentage = clamp(NumberOfChunksLoaded / 100.0f, 0.0f, 1.0f);
 
-		CFont::SetFontStyle(FONT_BANK);
-		AsciiToUnicode("If you press the jump button, guess what? You jump!", str);
-		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(120.0f), str);
+			// Draw progress bar.
+			CSprite2d::DrawRect(CRect(x, y, x + w, y + h), CRGBA(255, 255, 255, 255));
+			CSprite2d::DrawRect(CRect(x, y, x + (w * percentage), y + h), CRGBA(225, 0, 0, 255));
+		}
 
-		AsciiToUnicode("Now get your ass out of here.", str);
-		CFont::PrintString(SCALE_AND_CENTER_X(320.0f), SCREEN_SCALE_Y(140.0f), str);
+		// Update progress
+		NumberOfChunksLoaded += frameTime * 0.02f * (30.0f / frameTime);
 
-		if(str1){
+		gGameState = GS_INIT_PLAYING_GAME;
+		if(NumberOfChunksLoaded > 150.0f)
+			gGameState = GS_PLAYING_GAME;
+		
+
+		/*if(str1){
 			NumberOfChunksLoaded += 1;
 
 			float hpos = SCREEN_SCALE_X(40);
@@ -694,7 +713,7 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 				CFont::PrintString(hpos, vpos, tmpstr);
 			}
 #endif
-		}
+		}*/
 
 		CFont::DrawFonts();
  		DoRWStuffEndOfFrame();
@@ -1880,7 +1899,10 @@ FrontendIdle(void)
 void
 InitialiseGame(void)
 {
-	LoadingScreen(nil, nil, "loadsc0");
+	if(CdStreamGetNumImages() != nil)
+		return;
+
+	LoadingScreen(nil, nil, nil);
 	CGame::Initialise("DATA\\GTA3.DAT");
 }
 

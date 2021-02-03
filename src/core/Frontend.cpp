@@ -3736,16 +3736,9 @@ CMenuManager::Process(void)
 #ifdef PC_PLAYER_CONTROLS
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 #endif
-				if (m_PrefsVsyncDisp != m_PrefsVsync)
-					m_PrefsVsync = m_PrefsVsyncDisp;
-				DMAudio.Service();
-				m_bWantToRestart = true;
-				RequestFrontEndShutDown();
+				DoSettingsBeforeStartingAGame();
 				m_bWantToLoad = true;
 				b_FoundRecentSavedGameWantToLoad = true;
-				DMAudio.SetEffectsFadeVol(0);
-				DMAudio.SetMusicFadeVol(0);
-				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
 			} else
 				SaveLoadFileError_SetUpErrorScreen();
 		}
@@ -4641,7 +4634,7 @@ CMenuManager::ProcessButtonPresses(void)
 						m_PrefsFrameLimiter = true;
 						m_PrefsBrightness = 256;
 						m_PrefsVsyncDisp = true;
-						m_PrefsLOD = 1.2f;
+						m_PrefsLOD = 1.8f;
 						m_PrefsVsync = true;
 						CRenderer::ms_lodDistScale = 1.2f;
 #ifdef ASPECT_RATIO_SCALE

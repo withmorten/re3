@@ -656,6 +656,15 @@ bool CGame::Initialise(const char* datFile)
 	CCollision::ms_collisionInMemory = currLevel;
 	for (int i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
+
+
+	if(FrontEndMenuManager.m_bWantToLoad) {
+		CGame::ShutDownForRestart();
+		CGame::InitialiseWhenRestarting();
+		DMAudio.ChangeMusicMode(MUSICMODE_GAME);
+		// LoadSplash(GetLevelSplashScreen(CGame::currLevel));
+		FrontEndMenuManager.m_bWantToLoad = false;
+	}
 	return true;
 }
 

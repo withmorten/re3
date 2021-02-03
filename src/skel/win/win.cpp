@@ -2399,10 +2399,12 @@ WinMain(HINSTANCE instance,
 						if ( FrontEndMenuManager.m_bWantToLoad )
 #endif
 						{
-							InitialiseGame();
-							FrontEndMenuManager.m_bGameNotLoaded = false;
-							gGameState = GS_PLAYING_GAME;
-							TRACE("gGameState = GS_PLAYING_GAME;");
+							//InitialiseGame();
+							//FrontEndMenuManager.m_bGameNotLoaded = false;
+							//gGameState = GS_PLAYING_GAME;
+							//TRACE("gGameState = GS_PLAYING_GAME;");
+						    //LoadingScreen(nil, nil, nil);
+
 						}
 						break;
 					}
@@ -2437,7 +2439,8 @@ WinMain(HINSTANCE instance,
 
 						FrontEndMenuManager.m_bGameNotLoaded = false;
 #endif
-						gGameState = GS_PLAYING_GAME;
+						//gGameState = GS_PLAYING_GAME;
+					    LoadingScreen(nil, nil, nil);
 						TRACE("gGameState = GS_PLAYING_GAME;");
 						break;
 					}
@@ -2513,16 +2516,16 @@ WinMain(HINSTANCE instance,
 		
 		break;
 #else
-		if ( FrontEndMenuManager.m_bWantToLoad )
-		{
-			CGame::ShutDownForRestart();
-			CGame::InitialiseWhenRestarting();
-			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
-			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-			FrontEndMenuManager.m_bWantToLoad = false;
-		}
-		else
-		{
+		//if ( FrontEndMenuManager.m_bWantToLoad )
+		//{
+			//CGame::ShutDownForRestart();
+			//CGame::InitialiseWhenRestarting();
+			//DMAudio.ChangeMusicMode(MUSICMODE_GAME);
+			//LoadSplash(GetLevelSplashScreen(CGame::currLevel));
+			//FrontEndMenuManager.m_bWantToLoad = false;
+		//}
+		//else
+		//{
 #ifndef MASTER
 			if ( gbModelViewer )
 				CAnimViewer::Shutdown();
@@ -2543,7 +2546,7 @@ WinMain(HINSTANCE instance,
 				gGameState = GS_INIT_PLAYING_GAME;
 				TRACE("gGameState = GS_INIT_PLAYING_GAME;");
 			}
-		}
+		//}
 		
 		FrontEndMenuManager.m_bFirstTime = false;
 		FrontEndMenuManager.m_bWantToRestart = false;

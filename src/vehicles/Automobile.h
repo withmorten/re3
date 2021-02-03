@@ -1,6 +1,6 @@
 #pragma once
 #define TRAILER_FRONT_DISTANCE (4.2f)
-#define TRAILER_MAX_ATTACH (1.4f)
+#define TRAILER_MAX_ATTACH (2.0f)
 
 #include "Vehicle.h"
 #include "DamageManager.h"

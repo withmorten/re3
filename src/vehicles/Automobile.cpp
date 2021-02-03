@@ -3891,7 +3891,11 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 	if(pDriver){
 		CDarkel::RegisterKillByPlayer(pDriver, WEAPONTYPE_EXPLOSION);
 		if(pDriver->GetPedState() == PED_DRIVING){
+#ifdef FIX_BUGS
+			pDriver->m_lastWepDam = WEAPONTYPE_EXPLOSION;
+#endif
 			pDriver->SetDead();
+
 			if(!pDriver->IsPlayer())
 				pDriver->FlagToDestroyWhenNextProcessed();
 		}else
@@ -3901,7 +3905,10 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 		if(pPassengers[i]){
 			CDarkel::RegisterKillByPlayer(pPassengers[i], WEAPONTYPE_EXPLOSION);
 			if(pPassengers[i]->GetPedState() == PED_DRIVING){
-				pPassengers[i]->SetDead();
+#ifdef FIX_BUGS
+				pDriver->m_lastWepDam = WEAPONTYPE_EXPLOSION;
+#endif
+				pDriver->SetDead();
 				if(!pPassengers[i]->IsPlayer())
 					pPassengers[i]->FlagToDestroyWhenNextProcessed();
 			}else
@@ -4838,7 +4845,7 @@ CAutomobile::TowControl()
 	CVehicle *veh = ScanForTowLink();
 
 	// If trailer has been found and it's close enough to our point, attach it.
-	if(m_pLinkedVehicle == nil && (veh && veh->m_vecTowPos != CVector(0.0f, 0.0f, 0.0f) && (m_vecTowPos - veh->m_vecTowPos).MagnitudeSqr() < TRAILER_MAX_ATTACH / 4)) {
+	if(m_pLinkedVehicle == nil && (veh && veh->m_vecTowPos != CVector(0.0f, 0.0f, 0.0f) && (m_vecTowPos - veh->m_vecTowPos).Magnitude() < TRAILER_MAX_ATTACH / 4)) {
 		printf("Vehicle linked at: %f, %f, %f", veh->m_vecTowPos.x, veh->m_vecTowPos.y, veh->m_vecTowPos.z);
 		AssignTrailer((CAutomobile *)veh);
 	}
@@ -4849,7 +4856,7 @@ CAutomobile::TowControl()
 	}
 
 	// Detach trailer.
-	if(m_pLinkedVehicle && m_bHasVehicleLinked && (CPad::GetPad(0)->GetLookBehindForPed() || (m_vecTowPos - m_pLinkedVehicle->m_vecTowPos).MagnitudeSqr() > TRAILER_MAX_ATTACH)) { 
+	if(m_pLinkedVehicle && m_bHasVehicleLinked && (CPad::GetPad(0)->GetLookBehindForPed() || (m_vecTowPos - m_pLinkedVehicle->m_vecTowPos).Magnitude() > TRAILER_MAX_ATTACH)) { 
 		BreakTowLink();
 	}
 }

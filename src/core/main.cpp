@@ -98,6 +98,7 @@ float NumberOfChunksLoaded;
 #else
 #define TOTALNUMCHUNKS 73.0f
 #endif
+int LastTimeScreenChanged = 0;
 
 bool g_SlowMode = false;
 char version_name[64];
@@ -603,13 +604,15 @@ GetLevelSplashScreen(int level)
 void
 ResetLoadingScreenBar()
 {
+	LastTimeScreenChanged = CTimer::GetTimeInMillisecondsPauseMode() + 1500;
 	NumberOfChunksLoaded = 0.0f;
 }
 
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
-	CSprite2d *splash;
+	CTimer::Update();
+	static CSprite2d *splash = nil;
 
 #ifdef DISABLE_LOADING_SCREEN
 	if (str1 && str2)
@@ -623,7 +626,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		splashscreen = "mainsc1";
 #endif
 
-	splash = LoadSplash(splashscreen);
+	if(CTimer::GetTimeInMillisecondsPauseMode() > LastTimeScreenChanged && NumberOfChunksLoaded < 100.0f) {
+		LastTimeScreenChanged = CTimer::GetTimeInMillisecondsPauseMode() + 1500;
+		splash = LoadSplash(GetRandomSplashScreen());
+	}
 
 #ifndef GTA_PS2
 	if(RsGlobal.quit)
@@ -644,7 +650,8 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
 
 		if(NumberOfChunksLoaded < 130.0f) {
-			splash->Draw(CRect(SCALE_AND_CENTER_X(0.0f), 0.0f, SCALE_AND_CENTER_X(640.0f), SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+			if(splash && splash->m_pTexture)
+				splash->Draw(CRect(SCALE_AND_CENTER_X(0.0f), 0.0f, SCALE_AND_CENTER_X(640.0f), SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 
 			wchar str[64];
 			CFont::SetRightJustifyOff();

@@ -2181,7 +2181,7 @@ WinMain(HINSTANCE instance,
 #ifndef MASTER
 	if (gbModelViewer) {
 		// This is TheModelViewer in LCS, but not compiled on III Mobile.
-		LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
+		LoadingScreen("Loading the ModelViewer", nil, nil);
 		CAnimViewer::Initialise();
 		CTimer::Update();
 #ifndef PS2_MENU

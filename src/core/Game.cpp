@@ -414,7 +414,7 @@ bool CGame::Initialise(const char* datFile)
 	currLevel = LEVEL_INDUSTRIAL;
 
 	PUSH_MEMID(MEMID_TEXTURES);
-	LoadingScreen("Loading the Game", "Loading generic textures", GetRandomSplashScreen());
+	LoadingScreen("Loading the Game", "Loading generic textures", nil);
 	gameTxdSlot = CTxdStore::AddTxdSlot("generic");
 	CTxdStore::Create(gameTxdSlot);
 	CTxdStore::AddRef(gameTxdSlot);
@@ -516,7 +516,7 @@ bool CGame::Initialise(const char* datFile)
 #if GTA_VERSION <= GTA3_PS2_160
 	TestModelIndices();
 #endif
-	LoadingScreen("Loading the Game", "Setup paths", GetRandomSplashScreen());
+	LoadingScreen("Loading the Game", "Setup paths", nil);
 	ThePaths.PreparePathData();
 #if GTA_VERSION > GTA3_PS2_160
 	for (int i = 0; i < NUMPLAYERS; i++)
@@ -545,7 +545,7 @@ bool CGame::Initialise(const char* datFile)
 	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
 #endif
 
-	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
+	LoadingScreen("Loading the Game", "Load animations", nil);
 	PUSH_MEMID(MEMID_ANIMATION);
 	CAnimManager::LoadAnimFiles();
 	POP_MEMID();

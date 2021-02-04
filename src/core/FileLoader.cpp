@@ -122,7 +122,7 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadMapZones(line + 8);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
 #ifndef DISABLE_LOADING_SCREEN
-			LoadSplash(GetRandomSplashScreen());
+			//LoadSplash(GetRandomSplashScreen());
 #endif
 #ifndef GTA_PS2
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){

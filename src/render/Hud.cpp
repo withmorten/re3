@@ -126,6 +126,7 @@ uint32 CHud::m_VehicleNameTimer;
 int32 CHud::m_VehicleFadeTimer;
 uint32 CHud::m_VehicleState;
 wchar *CHud::m_pVehicleNameToPrint;
+bool Wants_To_Draw_Blips = true;
 
 // These aren't really in CHud
 float BigMessageInUse[6];
@@ -1005,7 +1006,8 @@ void CHud::Draw()
 			rect.Grow(4.0f);
 #endif
 #endif
-			CRadar::DrawBlips();
+			if(Wants_To_Draw_Blips)
+				CRadar::DrawBlips();
 		}
 	}
 

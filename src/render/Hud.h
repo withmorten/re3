@@ -88,3 +88,5 @@ public:
 	static void SetPagerMessage(wchar *message);
 	static void DrawGamePaused();
 };
+
+extern bool Wants_To_Draw_Blips;

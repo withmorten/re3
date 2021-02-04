@@ -604,6 +604,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Truck with Trailer", []() { bTrailer = true; SpawnCar(MI_LINERUN); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVarBool8("Render", "Draw blips", &Wants_To_Draw_Blips, nil);
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
@@ -665,19 +666,7 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Don't render Peds", &gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
-		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
-		
-#ifdef PROPER_SCALING	
-		DebugMenuAddVarBool8("Draw", "Proper Scaling", &CDraw::ms_bProperScaling, nil);
-#endif
-#ifdef FIX_RADAR
-		DebugMenuAddVarBool8("Draw", "Fix Radar", &CDraw::ms_bFixRadar, nil);
-#endif
-#ifdef FIX_SPRITES
-		DebugMenuAddVarBool8("Draw", "Fix Sprites", &CDraw::ms_bFixSprites, nil);
-#endif
-
-		
+		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);		
 
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
@@ -747,14 +736,11 @@ extern bool gbRenderWorld2;
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Debug", "Save Game on Selected Slot", []() { SaveGame(saveSlotId); });
 
+
 #endif
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
-		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);
-#ifdef FREE_CAM
-		DebugMenuAddVarBool8("Cam", "Free Cam", &CCamera::bFreeCam, nil);
-#endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });

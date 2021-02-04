@@ -25,6 +25,10 @@
 #include "MemoryMgr.h"
 #include "Directory.h"
 #include "Debug.h"
+#include "PlayerInfo.h"
+#include "Ped.h"
+#include "Vehicle.h"
+#include "Hud.h"
 
 RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
@@ -456,6 +460,10 @@ C3dMarker C3dMarkers::m_aMarkerArray[NUM3DMARKERS];
 int32 C3dMarkers::NumActiveMarkers;
 RpClump* C3dMarkers::m_pRpClumpArray[NUMMARKERTYPES];
 
+float C3dMarkers::m_fBigArrowAlpha;
+bool C3dMarkers::m_fShow;
+CVector C3dMarkers::m_fArrowPoint;
+
 void
 C3dMarkers::Init()
 {
@@ -643,87 +651,142 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 void
 C3dMarkers::PlaceBigArrow(CVector &posTarget)
 {
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_FOLLOWPED && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_TOPDOWN &&
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_TOP_DOWN_PED && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_BEHINDBOAT &&
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_CAM_ON_A_STRING)
+		return;
+
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
-	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void *)rwSHADEMODEFLAT);
-	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)FALSE);
-	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE);
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)(FALSE));
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)(TRUE));
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void *)rwSHADEMODEGOURAUD);
 
-	RpAtomic *origAtomic;
-	origAtomic = nil;
-	RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_BIGARROW], MarkerAtomicCB, &origAtomic);
-
-	RpAtomic *atomic = RpAtomicClone(origAtomic);
-	RwFrame *frame = RpClumpGetFrame(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
-
-	RpGeometry *geometry = RpAtomicGetGeometry(atomic);
-	RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
-	
 	CVector vec = posTarget - TheCamera.GetPosition();
-	RwV3d pos = {0.0f, 1.6f, 4.0f * 70.0f / TheCamera.Cams->FOV};
-	RwV3d axis1 = {1.0f, 0.0f, 0.0f};
-	RwV3d axis2 = {0.0f, 1.0f, 0.0f};
-	RwV3d axis3 = {0.0f, 0.0f, 1.0f};
-	RwRGBA color = {255, 255, 1, 255};
+	RwV3d pos;
+	float w, h;
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN) {
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE);
+		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)FALSE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(CHud::Sprites[HUD_ARROW].m_pTexture));
 
-	float x, y, z;
+		CSprite::InitSpriteBuffer();
 
-	if(frame) {
-		if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN) {
-			CVector2D dist = posTarget - FindPlayerPed()->GetForward();
-			pos.z += 1.0f;
-			x = 90.0f;
-			y = RADTODEG((CGeneral::GetATanOfXY(-vec.x, vec.y) - M_PI_2));
-			z = 90.0f;
+		CVector plr = FindPlayerCoors();
+		CVector target = posTarget;
+		float distX, distY;
+	
+		if(plr.x > target.x)
+			distX = ((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude());
+		else
+			distX = -((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude());
 
-			color.alpha = 0;
-		} else {
-			x = -5.0f;
-			y = RADTODEG(PI - TheCamera.GetForward().Heading() + (CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2));
-			z = 90.0f;
+		if(plr.y > target.y)
+			distY = ((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude());
+		else
+			distY = -((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude());
+
+		CVector tempPoint;
+		if((plr - posTarget).Magnitude2D() > 7.0f)
+			tempPoint = CVector(plr.x - clamp((distX * 0.2f), -2.0f, 2.0f), plr.y - clamp((distY * 0.2f), -2.0f, 2.0f), plr.z);
+		else
+			tempPoint = posTarget;
+
+		m_fArrowPoint.x = interpF(m_fArrowPoint.x, tempPoint.x, CTimer::GetTimeStep() * 0.2f);
+		m_fArrowPoint.y = interpF(m_fArrowPoint.y, tempPoint.y, CTimer::GetTimeStep() * 0.2f);
+		m_fArrowPoint.z = interpF(m_fArrowPoint.z, tempPoint.z, CTimer::GetTimeStep() * 0.2f);
+
+		if(CSprite::CalcScreenCoors(m_fArrowPoint, &pos, &w, &h, false) && CHud::m_ItemToFlash != ITEM_RADAR) { 
+			float recipz = 1.0f;
+			float angle = RADTODEG(CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2);
+
+			CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(pos.x, pos.y, pos.z, SCREEN_SCALE_X(20.0f * 0.5f), SCREEN_SCALE_Y(48.0f * 0.5f), 255, 255, 255, 255, recipz, angle, 255);
 		}
-		RpMaterialSetColor(RpGeometryGetMaterial(geometry, 0), &color);
 
-		RwFrameTransform(frame, RwFrameGetMatrix(RwCameraGetFrame(Scene.camera)), rwCOMBINEREPLACE);
-		RwFrameTranslate(frame, &pos, rwCOMBINEPRECONCAT);
+		CSprite::FlushSpriteBuffer();
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
+	} else {
+		RpAtomic *origAtomic;
+		origAtomic = nil;
+		RpClumpForAllAtomics(m_pRpClumpArray[MARKERTYPE_BIGARROW], MarkerAtomicCB, &origAtomic);
 
-		RwFrameRotate(frame, &axis1, (x), rwCOMBINEPRECONCAT);
-		RwFrameRotate(frame, &axis2, (y), rwCOMBINEPRECONCAT);
-		RwFrameRotate(frame, &axis3, (z), rwCOMBINEPRECONCAT);
-		RwFrameUpdateObjects(frame);
-		ActivateDirectional();
+		RpAtomic *atomic = RpAtomicClone(origAtomic);
+		RwFrame *frame = RpClumpGetFrame(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
 
-		RwRGBAReal AmbientColor = {0.65f, 0.65f, 0.65f, 1.0f};
-		SetAmbientColours(&AmbientColor);
+		RpGeometry *geometry = RpAtomicGetGeometry(atomic);
+		RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
 
-		RwRGBAReal DirectionalLightColourForFrame;
-		DirectionalLightColourForFrame.red = 1.0f;
-		DirectionalLightColourForFrame.green = 1.0f;
-		DirectionalLightColourForFrame.blue = 1.0f;
-		RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
+		RwV3d pos = {0.0f, 0.8f, 2.0f * 70.0f / TheCamera.Cams->FOV};
+		RwV3d axis1 = {1.0f, 0.0f, 0.0f};
+		RwV3d axis2 = {0.0f, 1.0f, 0.0f};
+		RwV3d axis3 = {0.0f, 0.0f, 1.0f};
+		RwRGBA color = {255, 255, 1, 0};
+		RwV3d scale = {0.5f, 0.5f, 0.5f};
 
-		CVector vec1, vec2, vecsun;
-		RwMatrix mat;
-		vecsun = CVector(0.0f, 0.0f, -1.0f);
+		float x, y, z;
+		x = -5.0f;
+		y = RADTODEG(PI - TheCamera.GetForward().Heading() + (CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2));
+		z = 90.0f;
 
-		vec1 = CVector(0.0f, 0.0f, 1.0f);
-		vec2 = CrossProduct(vec1, vecsun);
-		vec2.Normalise();
-		vec1 = CrossProduct(vec2, vecsun);
-		mat.at.x = -vecsun.x;
-		mat.at.y = -vecsun.y;
-		mat.at.z = -vecsun.z;
-		mat.right.x = vec1.x;
-		mat.right.y = vec1.y;
-		mat.right.z = vec1.z;
-		mat.up.x = vec2.x;
-		mat.up.y = vec2.y;
-		mat.up.z = vec2.z;
-		RwFrameTransform(RpLightGetFrame(pDirect), &mat, rwCOMBINEREPLACE);
-		RpClumpRender(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
+		if((FindPlayerPed()->GetPosition() - posTarget).Magnitude2D() > 7.0f)
+			m_fShow = true;
+		else
+			m_fShow = false;
+
+		if(m_fShow) {
+			m_fBigArrowAlpha += frameTime * 0.2f * (frameTime / 30.0f);
+			m_fBigArrowAlpha = clamp(m_fBigArrowAlpha, 0, 255);
+		} else {
+			m_fBigArrowAlpha += frameTime * -0.2f * (frameTime / 30.0f);
+			m_fBigArrowAlpha = clamp(m_fBigArrowAlpha, 0, 255);
+		}
+
+		color.alpha = static_cast<uint8>(m_fBigArrowAlpha);
+
+		if(frame) {
+			RpMaterialSetColor(RpGeometryGetMaterial(geometry, 0), &color);
+			RwFrameTransform(frame, RwFrameGetMatrix(RwCameraGetFrame(Scene.camera)), rwCOMBINEREPLACE);
+			RwFrameTranslate(frame, &pos, rwCOMBINEPRECONCAT);
+			RwFrameScale(frame, &scale, rwCOMBINEPRECONCAT);
+			RwFrameRotate(frame, &axis1, (x), rwCOMBINEPRECONCAT);
+			RwFrameRotate(frame, &axis2, (y), rwCOMBINEPRECONCAT);
+			RwFrameRotate(frame, &axis3, (z), rwCOMBINEPRECONCAT);
+			RwFrameUpdateObjects(frame);
+			ActivateDirectional();
+
+			RwRGBAReal AmbientColor = {0.8f, 0.8f, 0.8f, 1.0f};
+			SetAmbientColours(&AmbientColor);
+
+			RwRGBAReal DirectionalLightColourForFrame;
+			DirectionalLightColourForFrame.red = 1.0f;
+			DirectionalLightColourForFrame.green = 1.0f;
+			DirectionalLightColourForFrame.blue = 1.0f;
+			DirectionalLightColourForFrame.alpha = 1.0f;
+			RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
+
+			CVector vec1, vec2, vecsun;
+			RwMatrix mat;
+			vecsun = CVector(0.0f, 0.0f, -1.0f);
+
+			vec1 = CVector(0.0f, 0.0f, -0.2f);
+			vec2 = CrossProduct(vec1, vecsun);
+			vec2.Normalise();
+			vec1 = CrossProduct(vec2, vecsun);
+			mat.at.x = -vecsun.x;
+			mat.at.y = -vecsun.y;
+			mat.at.z = -vecsun.z;
+			mat.right.x = vec1.x;
+			mat.right.y = vec1.y;
+			mat.right.z = vec1.z;
+			mat.up.x = vec2.x;
+			mat.up.y = vec2.y;
+			mat.up.z = vec2.z;
+			RwFrameTransform(RpLightGetFrame(pDirect), &mat, rwCOMBINEREPLACE);
+			RpClumpRender(m_pRpClumpArray[MARKERTYPE_BIGARROW]);
+		}
 	}
 }
 

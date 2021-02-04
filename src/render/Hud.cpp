@@ -175,7 +175,8 @@ struct
 	{"jailfree", ""},
 	{"sitesniper", "sitesniperm"},
 	{"siteM16", "siteM16m"},
-	{"siterocket", "siterocket"}
+	{"siterocket", "siterocket"},
+	{"arrow",""}
 };
 
 void CHud::Initialise()

@@ -833,7 +833,7 @@ CRadar::DrawBlips()
 		CEntity *ent = nil;
 		bool found = false;
 		for(i = 0; i < NUMRADARBLIPS; i++) {
-			if(ms_RadarTrace[i].m_bInUse && ms_RadarTrace[i].m_eRadarSprite == RADAR_SPRITE_NONE) {
+			if(ms_RadarTrace[i].m_bInUse && ms_RadarTrace[i].m_eBlipType != BLIP_CONTACT_POINT && CTheScripts::IsPlayerOnAMission()) {
 				switch(ms_RadarTrace[i].m_eBlipType) {
 				case BLIP_CAR: ent = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle); break;
 				case BLIP_CHAR:
@@ -860,7 +860,7 @@ CRadar::DrawBlips()
 			int id;
 			FindClosest(blipDist, NUMRADARBLIPS, id);
 
-			if((FindPlayerPed()->GetPosition() - vec[id]).MagnitudeSqr() > sq(6.0f)) C3dMarkers::PlaceBigArrow(vec[id]);
+			C3dMarkers::PlaceBigArrow(vec[id]);
 		}
 	}
 }

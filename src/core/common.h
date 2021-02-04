@@ -321,6 +321,8 @@ void re3_usererror(const char *format, ...);
 #define norm(value, min, max) (((value) < (min)) ? 0 : (((value) > (max)) ? 1 : (((value) - (min)) / ((max) - (min)))))
 #define lerp(norm, min, max) ( (norm) * ((max) - (min)) + (min) )
 
+#define interpF(a, b, t) (t <= 0.5f ? (a + (b - a) * t) : (b - (b - a) * 1.0f - t))
+
 #define STRINGIFY(x)                    #x
 #define STR(x)                          STRINGIFY(x)
 #define CONCAT_(x,y) x##y

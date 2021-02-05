@@ -337,14 +337,21 @@ SpawnCar(int id)
 		if(carCol2)
 			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
 
+		CVector pos = TheCamera.GetPosition() + TheCamera.GetForward() * 10.0f;
+		float ground = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, nil);
+		pos.z = ground;
+
 		if(!CModelInfo::IsBoatModel(id))
-			v->SetPosition(TheCamera.GetPosition() + TheCamera.GetForward()*15.0f);
+			v->SetPosition(pos);
 		else
 			v->SetPosition(ThePaths.m_pathNodes[node].GetPosition());
 
-		v->SetOrientation(0.0f, 0.0f, 3.49f);
+		float angle = Atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y);
+		v->SetOrientation(0.0f, 0.0f, angle + HALFPI);
+
 		v->SetStatus(STATUS_ABANDONED);
 		v->m_nDoorLock = CARLOCK_UNLOCKED;
+
 		CWorld::Add(v);
 		((CAutomobile *)v)->PlaceOnRoadProperly();
 

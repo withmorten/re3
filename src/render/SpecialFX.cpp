@@ -389,7 +389,10 @@ C3dMarker::AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8
 
 	RpAtomic *origAtomic;
 	origAtomic = nil;
-	RpClumpForAllAtomics(C3dMarkers::m_pRpClumpArray[type], MarkerAtomicCB, &origAtomic);
+	if(C3dMarkers::m_pRpClumpArray[type])
+		RpClumpForAllAtomics(C3dMarkers::m_pRpClumpArray[type], MarkerAtomicCB, &origAtomic);
+	else
+		return nil;
 
 	RpAtomic *atomic = RpAtomicClone(origAtomic);
 	RwFrame *frame = RwFrameCreate();
@@ -426,10 +429,12 @@ C3dMarker::DeleteMarkerObject()
 	m_bIsUsed = false;
 	m_nType = MARKERTYPE_INVALID;
 
-	frame = RpAtomicGetFrame(m_pAtomic);
-	RpAtomicDestroy(m_pAtomic);
-	RwFrameDestroy(frame);
-	m_pAtomic = nil;
+	if(m_pAtomic) {
+		frame = RpAtomicGetFrame(m_pAtomic);
+		RpAtomicDestroy(m_pAtomic);
+		RwFrameDestroy(frame);
+		m_pAtomic = nil;
+	}
 }
 
 void

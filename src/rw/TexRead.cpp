@@ -2,7 +2,6 @@
 #pragma warning( disable : 4005)
 #pragma warning( pop )
 #include "common.h"
-#include "rpanisot.h"
 #include "crossplatform.h"
 #include "platform.h"
 

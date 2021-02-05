@@ -1094,8 +1094,6 @@ CAutomobile::ProcessControl(void)
 
 	if(m_fHealth < 250.0f && GetStatus() != STATUS_WRECKED){
 		// Car is on fire
-		if (m_fFireBlowUpTimer > 0.0f && m_fHealth > 0.0f)
-		{
 			CParticle::AddParticle(PARTICLE_CARFLAME2, damagePos,
 				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.01125f, 0.09f)),
 				nil, 0.9f);
@@ -1107,7 +1105,7 @@ CAutomobile::ProcessControl(void)
 			CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, coors, CVector(0.0f, 0.0f, 0.0f));
 
 			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, CVector(0.0f, 0.0f, 0.0f), nil, 0.5f);
-		}
+		
 		// Blow up car after 5 seconds
 		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
 		if(m_fFireBlowUpTimer > 5000.0f){

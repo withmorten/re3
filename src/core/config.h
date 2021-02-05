@@ -396,7 +396,3 @@ enum Config {
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 	#define VC_RAIN_NERF // Reduces number of rain particles
 #endif
-
-#ifdef LIBRW
-// these are not supported with librw yet
-#endif

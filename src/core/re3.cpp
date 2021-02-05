@@ -461,11 +461,11 @@ static void ParseHeap(void) { gMainHeap.ParseHeap(); }
 #endif
 
 static const char *carnames[] = {
-	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch", "manana", "infernus", "blista", "pony",
-	"mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "kuruma", "bobcat", "mrwhoop", "bfinject", "corpse", "police", "enforcer",
-	"securica", "banshee", "predator", "bus", "rhino", "barracks", "train", "chopper", "dodo", "coach", "cabbie", "stallion", "rumpo", "rcbandit",
-	"bellyup", "mrwongs", "mafia", "yardie", "yakuza", "diablos", "columb", "hoods", "airtrain", "deaddodo", "speeder", "reefer", "panlant", "flatbed",
-	"yankee", "escape", "borgnine", "toyz", "ghost",
+	"suv", "riviera", "boxsta", "freight", "nova", "beamer", "humvee", "firetruk", "garbage", "limo", "reliant", "lambo", "carrier", "transit",
+	"luton", "testeros", "ambulan", "fbicar", "astrovan", "eldorado", "taxi", "intrepid", "pickup", "icecream", "buggy", "corpse", "police", "swatvan",
+	"armour", "viper", "polboat", "bus", "tank", "armytruk", "train", "chopper", "dodo", "coach", "cabbie", "mustang", "ramvan", "rcbug",
+	"bellyup", "mrwongs", "fiat", "yardie", "yakuza", "impala", "columb", "hoods", "airtrain", "deaddodo", "speedboat", "fishboat", "panlant", "flatbed",
+	"tanker", "escape", "cruiser", "luton2", "ghost",
 };
 
 //#include <list>
@@ -585,23 +585,22 @@ DebugMenuPopulate(void)
 		static uint8 dummy;
 		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
 		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);
-		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ SpawnCar(MI_STINGER); });
-		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ SpawnCar(MI_INFERNUS); });
-		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ SpawnCar(MI_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Shark", [](){ SpawnCar(MI_STINGER); });
+		DebugMenuAddCmd("Spawn", "Spawn Dyablo", [](){ SpawnCar(MI_INFERNUS); });
+		DebugMenuAddCmd("Spawn", "Spawn Rocket", [](){ SpawnCar(MI_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Rumbler", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ SpawnCar(MI_ESPERANT); });
 		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ SpawnCar(MI_STALLION); });
-		DebugMenuAddCmd("Spawn", "Spawn Kuruma", [](){ SpawnCar(MI_KURUMA); });
+		DebugMenuAddCmd("Spawn", "Spawn Sentinal", [](){ SpawnCar(MI_KURUMA); });
+		DebugMenuAddCmd("Spawn", "Spawn Beamer", [](){ SpawnCar(MI_SENTINEL); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ SpawnCar(MI_TAXI); });
-		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ SpawnCar(MI_POLICE); });
-		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
-		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
-		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ SpawnCar(MI_YAKUZA); });
-		DebugMenuAddCmd("Spawn", "Spawn Yardie", [](){ SpawnCar(MI_YARDIE); });
+		DebugMenuAddCmd("Spawn", "Spawn Cop Car", [](){ SpawnCar(MI_POLICE); });
+		DebugMenuAddCmd("Spawn", "Spawn SWAT Van", [](){ SpawnCar(MI_ENFORCER); });
 		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ SpawnCar(MI_DODO); });
-		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
-		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
-		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
-		DebugMenuAddCmd("Spawn", "Spawn Truck with Trailer", []() { bTrailer = true; SpawnCar(MI_LINERUN); });
+		DebugMenuAddCmd("Spawn", "Spawn PHUQ-2", [](){ SpawnCar(MI_RHINO); });
+		DebugMenuAddCmd("Spawn", "Spawn Fire Truck", [](){ SpawnCar(MI_FIRETRUCK); });
+		DebugMenuAddCmd("Spawn", "Spawn Police Boat", [](){ SpawnCar(MI_PREDATOR); });
+		DebugMenuAddCmd("Spawn", "Spawn Semi Cab with Tanker", []() { bTrailer = true; SpawnCar(MI_LINERUN); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "Draw blips", &Wants_To_Draw_Blips, nil);

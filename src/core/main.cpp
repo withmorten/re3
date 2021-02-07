@@ -1183,37 +1183,17 @@ DisplayGameDebugText()
 		
 		AsciiToUnicode(str, ustr);
 		
-		CFont::SetPropOff();
+		CFont::SetPropOn();
 		CFont::SetBackgroundOff();
-#ifdef FIX_BUGS
-		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(1.5f));
-#else
-		CFont::SetScale(0.7f, 1.5f);
-#endif
+		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.8f));
 		CFont::SetCentreOff();
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
-#ifdef FIX_BUGS
 		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
-#else
-		CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
-#endif
 		CFont::SetFontStyle(FONT_HEADING);
-		
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-#ifdef FIX_BUGS
-		CFont::PrintString(SCREEN_SCALE_X(40.0f+2.0f), SCREEN_SCALE_Y(40.0f+2.0f), ustr);
-#else
-		CFont::PrintString(40.0f+2.0f, 40.0f+2.0f, ustr);
-#endif
-		
 		CFont::SetColor(CRGBA(255, 108, 0, 255));
-#ifdef FIX_BUGS
-		CFont::PrintString(SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), ustr);
-#else
-		CFont::PrintString(40.0f, 40.0f, ustr);
-#endif
+		CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(12.0f), ustr);
 	}
 }
 #endif
@@ -1397,12 +1377,13 @@ RenderEffects(void)
 void
 DrawSniperScope()
 {
+#ifdef PROPER_SCALING
 	bool properScaling = CDraw::ms_bProperScaling;
 
 	if(properScaling) {
 		CDraw::ms_bProperScaling = false;
 	}
-
+#endif
 	float x1, y1, x2, y2;
 
 	// Left
@@ -1569,8 +1550,10 @@ DrawSniperScope()
 	                         SCREEN_SCALE_X(x2) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y2), SCREEN_SCALE_X(x1) + SCREEN_WIDTH / 2, SCREEN_SCALE_Y(y1),
 	                         CRGBA(0, 0, 0, 255));
 
+#ifdef PROPER_SCALING
 	if(properScaling)
 		CDraw::ms_bProperScaling = properScaling;
+#endif
 }
 
 void

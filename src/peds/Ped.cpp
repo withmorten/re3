@@ -31,6 +31,7 @@
 #include "ParticleObject.h"
 #include "Floater.h"
 #include "Range2D.h"
+#include "Train.h"
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
@@ -1160,6 +1161,21 @@ CPed::RestoreGunPosition(void)
 	}
 }
 
+CVehicle*
+CPed::FindClosestTrain()
+{
+	int16 lastVehicle;
+	CEntity *vehicles[8];
+	CWorld::FindObjectsInRange(GetPosition(), 10.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+	for(int i = 0; i < lastVehicle; i++) {
+		CVehicle *nearVeh = (CVehicle *)vehicles[i];
+
+		if(nearVeh->IsTrain())
+			return nearVeh;
+	}
+	return nil;
+}
+
 void
 CPed::ScanForInterestingStuff(void)
 {
@@ -1175,7 +1191,7 @@ CPed::ScanForInterestingStuff(void)
 	LookForSexyPeds();
 	LookForSexyCars();
 	if (LookForInterestingNodes())
-		return;
+		return;	
 
 	if (m_nPedType == PEDTYPE_CRIMINAL && m_carJackTimer < CTimer::GetTimeInMilliseconds()) {
 		// Find a car to steal or a ped to mug if we haven't already decided to steal a car
@@ -1230,7 +1246,14 @@ CPed::ScanForInterestingStuff(void)
 		}
 	}
 
-	if (m_nPedState == PED_WANDER_PATH) {
+	if(m_nPedState == PED_WANDER_PATH ) {
+		CTrain *train = (CTrain*)FindClosestTrain();
+
+		if(train && m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER &&
+		   (train->m_nDoorState == TRAIN_DOOR_OPENING || train->m_nDoorState == TRAIN_DOOR_OPEN)) {
+			SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, train);
+			return;
+		}
 #ifndef VC_PED_PORTS
 		if (CTimer::GetTimeInMilliseconds() > m_chatTimer) {
 

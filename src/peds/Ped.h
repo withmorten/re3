@@ -621,6 +621,7 @@ public:
 	void ClearSeek(void);
 	void ClearWeapons(void);
 	void RestoreGunPosition(void);
+	CVehicle* FindClosestTrain();
 	void RestoreHeadingRate(void);
 	void SetAimFlag(CEntity* to);
 	void SetAimFlag(float angle);

@@ -34,6 +34,10 @@
 #include "PCSave.h"
 #include "User.h"
 #include "Camera_common.h"
+#include "CivilianPed.h"
+#include "General.h"
+#include "Zones.h"
+#include "Population.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "ControllerConfig.h"
@@ -311,6 +315,47 @@ DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
 
 bool bTrailer = false;
+
+void
+SpawnPed(CVector pos)
+{
+		CZoneInfo zoneinfo;
+		CTheZones::GetZoneInfoForTimeOfDay(&CWorld::Players[CWorld::PlayerInFocus].GetPos(), &zoneinfo);
+		int mi;
+		ePedType pedtype = PEDTYPE_COP;
+		int attempt = 0;
+		while(pedtype != PEDTYPE_CIVMALE && pedtype != PEDTYPE_CIVFEMALE && attempt < 5) {
+			mi = CPopulation::ChooseCivilianOccupation(zoneinfo.pedGroup);
+			if(CModelInfo::GetModelInfo(mi)->GetRwObject()) pedtype = ((CPedModelInfo *)(CModelInfo::GetModelInfo(mi)))->m_pedType;
+			attempt++;
+		}
+		if(!CModelInfo::GetModelInfo(mi)->GetRwObject()) {
+			mi = MI_MALE01;
+			pedtype = ((CPedModelInfo *)(CModelInfo::GetModelInfo(mi)))->m_pedType;
+		}
+
+		CPed *p = new CCivilianPed(pedtype, mi);
+		p->CharCreatedBy = RANDOM_CHAR;
+
+		float ground = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, nil);
+		pos.z = ground;
+		p->SetPosition(pos);
+		CWorld::Add(p);
+	    p->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
+		p->ClearObjective();
+		p->SetWanderPath(CGeneral::GetRandomNumber() & 7);
+}
+
+void
+SpawnGroupOfRandomPeds()
+{
+	CVector pos = TheCamera.GetPosition() + TheCamera.GetForward() * 10.0f;
+	SpawnPed(pos);
+	SpawnPed(pos + CVector(1.0f, 1.0f, 0.0f));
+	SpawnPed(pos + CVector(-1.0f, -1.0f, 0.0f));
+	SpawnPed(pos + CVector(0.0f, 2.0f, 0.0f));
+	SpawnPed(pos + CVector(0.0f, -2.0f, 0.0f));
+}
 
 void
 SpawnCar(int id)
@@ -610,6 +655,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Fire Truck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Police Boat", [](){ SpawnCar(MI_PREDATOR); });
 		DebugMenuAddCmd("Spawn", "Spawn Semi Cab with Tanker", []() { bTrailer = true; SpawnCar(MI_LINERUN); });
+		DebugMenuAddCmd("Spawn", "Spawn random group of peds", []() { SpawnGroupOfRandomPeds(); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "Draw blips", &Wants_To_Draw_Blips, nil);

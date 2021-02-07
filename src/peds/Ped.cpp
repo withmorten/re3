@@ -1250,7 +1250,7 @@ CPed::ScanForInterestingStuff(void)
 		CTrain *train = (CTrain*)FindClosestTrain();
 
 		if(train && m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER &&
-		   (train->m_nDoorState == TRAIN_DOOR_OPENING || train->m_nDoorState == TRAIN_DOOR_OPEN)) {
+		   (train->m_nDoorState == TRAIN_DOOR_OPEN && !InVehicle())) {
 			SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, train);
 			return;
 		}

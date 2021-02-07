@@ -2296,22 +2296,6 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 		} else if (itsBus) {
 			ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_COACH_OPEN_L);
 		} else {
-
-			if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && veh->pDriver) {
-
-				if (!veh->bLowVehicle
-					&& veh->pDriver->CharCreatedBy != MISSION_CHAR
-					&& veh->pDriver->m_nPedState == PED_DRIVING) {
-
-					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_QJACK);
-					ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
-					veh->pDriver->SetBeingDraggedFromCar(veh, ped->m_vehDoor, true);
-
-					if (veh->pDriver->IsGangMember())
-						veh->pDriver->RegisterThreatWithGangPeds(ped);
-					return;
-				}
-			}
 			ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_OPEN_LHS);
 		}
 		ped->m_pVehicleAnim->SetFinishCallback(PedAnimDoorOpenCB, ped);

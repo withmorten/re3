@@ -1320,6 +1320,7 @@ void CHud::DrawAfterFade()
 			CFont::SetBackGroundOnlyTextOff();
 			CFont::SetBackgroundColor(CRGBA(127, 120, 161, fAlpha));
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
+			CFont::SetDropShadowPosition(0);
 			CFont::PrintString(SCREEN_SCALE_X(26.0f), SCREEN_SCALE_Y(16.0f + fWantedOffset) + SCREEN_SCALE_Y_FIX((150.0f - PagerXOffset) * 0.4f), m_HelpMessageToPrint);
 			CFont::SetAlphaFade(255.0f);
 		}

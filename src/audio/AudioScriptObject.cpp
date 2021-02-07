@@ -91,6 +91,7 @@ void
 PlayOneShotScriptObject(uint8 id, CVector const &pos)
 {
 	cAudioScriptObject *audioScriptObject = new cAudioScriptObject();
+	if(audioScriptObject == nil) return;
 	audioScriptObject->Posn = pos;
 	audioScriptObject->AudioId = id;
 	audioScriptObject->AudioEntity = AEHANDLE_NONE;

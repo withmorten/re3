@@ -3903,6 +3903,9 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 		if(pPassengers[i]){
 			CDarkel::RegisterKillByPlayer(pPassengers[i], WEAPONTYPE_EXPLOSION);
 			if(pPassengers[i]->GetPedState() == PED_DRIVING){
+#ifdef FIX_BUGS
+				pPassengers[i]->m_lastWepDam = WEAPONTYPE_EXPLOSION;
+#endif
 				pPassengers[i]->SetDead();
 				if(!pPassengers[i]->IsPlayer())
 					pPassengers[i]->FlagToDestroyWhenNextProcessed();

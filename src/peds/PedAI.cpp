@@ -3787,7 +3787,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		optedDoorNode = CAR_DOOR_RF;
 
 	if(veh->GetModelIndex() == MI_RHINO)
-		optedDoorNode = CAR_DOOR_RR;
+		optedDoorNode = CAR_DOOR_LF;
 
 	bool someoneExitsFromOurExitDoor = false;
 	bool someoneEntersFromOurExitDoor = false;
@@ -4162,7 +4162,7 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 	}
 
 	if(veh->GetModelIndex() == MI_RHINO) {
-		m_vehDoor = CAR_DOOR_RR;
+		m_vehDoor = CAR_DOOR_LF;
 		posToOpen = rrPos;
 	}
 }
@@ -4182,8 +4182,8 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
 			return true;
 		case MI_RHINO:
-			m_vehDoor = CAR_DOOR_RR;
-			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
+			m_vehDoor = CAR_DOOR_LF;
+			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_LF);
 			return true;
 		default:
 			break;
@@ -4244,7 +4244,7 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 
 	if ( veh->GetModelIndex() == MI_RHINO )
 	{
-		m_vehDoor = CAR_DOOR_RR;
+		m_vehDoor = CAR_DOOR_LF;
 		posToOpen = rrPos;
 	}
 	

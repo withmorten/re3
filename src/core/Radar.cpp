@@ -477,7 +477,7 @@ CRadar::DrawRadarCop(CVector2D in, CVector2D out)
 			for(node = list.first; node; node = node->next) {
 				CVehicle *veh = (CVehicle *)node->item;
 
-				if(veh->IsLawEnforcementVehicle() && veh->m_fHealth > 0.0f) {
+				if(FindPlayerVehicle() != veh && veh->IsLawEnforcementVehicle() && veh->m_fHealth > 0.0f) {
 					CVector pos = veh->GetPosition();
 					TransformRealWorldPointToRadarSpace(in, pos);
 					LimitRadarPoint(in);

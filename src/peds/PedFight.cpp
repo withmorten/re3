@@ -2034,7 +2034,7 @@ CPed::ClearInvestigateEvent(void)
 bool
 CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPieceTypes pedPiece, uint8 direction)
 {
-	if(bCheatGodMode) return false;
+	if(bCheatGodMode && FindPlayerPed() == this) return false;
 
 	CPlayerPed *player = FindPlayerPed();
 	float dieDelta = 4.0f;

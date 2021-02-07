@@ -20,11 +20,6 @@
 #include "SpecialFX.h"
 #include "Shadows.h"
 
-#ifdef DEBUGMENU
-SETTWEAKPATH("Shadows");
-TWEAKBOOL(gbPrintShite);
-#endif
-
 RwImVertexIndex ShadowIndexList[24];
 
 RwTexture *gpShadowCarTex;

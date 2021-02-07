@@ -32,6 +32,8 @@
 #include "MemoryHeap.h"
 #include "FileMgr.h"
 #include "PCSave.h"
+#include "User.h"
+#include "Camera_common.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "ControllerConfig.h"
@@ -742,6 +744,10 @@ extern bool gbRenderWorld2;
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Debug", "Save Game on Selected Slot", []() { SaveGame(saveSlotId); });
 
+		static wchar pagerText[256];
+		AsciiToUnicode("AS CLAUDE ONCE SAID: ...............", pagerText);
+		DebugMenuAddCmd("Debug", "Display Pager",
+		                []() { CUserDisplay::Pager.AddMessage(pagerText, 140, 2, 0); });
 
 #endif
 
@@ -753,6 +759,19 @@ extern bool gbRenderWorld2;
 		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
 		DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
 		DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
+		static wchar camText[256];
+		DebugMenuAddCmd("Cam", "Save Camera Position", []() {
+			SaveCam(&TheCamera.Cams[TheCamera.ActiveCam]);
+			AsciiToUnicode("Camera position saved to file camposition.txt", camText);
+			CHud::SetHelpMessage(camText, true);
+		});
+
+		DebugMenuAddCmd("Cam", "Delete Camera Positions", []() {
+			DeleteSavedCams();
+			AsciiToUnicode("Camera position deleted", camText);
+			CHud::SetHelpMessage(camText, true);
+		});
+
 		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
 
 		CTweakVars::AddDBG("Debug");

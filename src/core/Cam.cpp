@@ -25,6 +25,7 @@
 #include "Debug.h"
 #include "Camera.h"
 #include "DMAudio.h"
+#include "Camera_common.h"
 
 bool PrintDebugCode = false;
 int16 DebugCamMode;

@@ -1546,10 +1546,10 @@ CStreaming::StreamZoneModels(const CVector &pos)
 		}
 
 		if(gangCarsToLoad & bit && (ms_loadedGangCars & bit) == 0){
-			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(CGangs::GetGangVehicleModel(i), STREAMFLAGS_DONT_REMOVE);
 		}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
-			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
-			SetModelTxdIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+			SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
+			SetModelTxdIsDeletable(CGangs::GetGangVehicleModel(i));
 		}
 	}
 	ms_loadedGangCars = gangCarsToLoad;

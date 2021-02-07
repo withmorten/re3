@@ -38,6 +38,8 @@
 #include "General.h"
 #include "Zones.h"
 #include "Population.h"
+#include "Wanted.h"
+#include "PlayerPed.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "ControllerConfig.h"
@@ -317,6 +319,33 @@ DebugMenuEntry *carCol2;
 bool bTrailer = false;
 
 void
+SetWantedLevel()
+{
+	FindPlayerPed()->m_pWanted->SetMaximumWantedLevel(6);
+	FindPlayerPed()->SetWantedLevel(6);
+}
+
+void
+ChangePlayerModel(int id)
+{
+	CPed *playerped = FindPlayerPed();
+	int flags;
+
+	if(playerped->IsPedInControl() && CModelInfo::GetModelInfo("player", 0) && CModelInfo::GetModelInfo(id)) {
+		AssocGroupId animGroup = playerped->m_animGroup;
+		flags = CStreaming::ms_aInfoForModel[playerped->GetModelIndex()].m_flags;
+		playerped->DeleteRwObject();
+
+		CStreaming::RequestModel(id, 5);
+		CStreaming::LoadAllRequestedModels(false);
+		playerped->SetModelIndex(id);
+		playerped->m_animGroup = animGroup;
+		if(id != 0 && !(flags & 1))
+			CStreaming::SetModelIsDeletable(id);
+	}
+}
+
+void
 SpawnPed(CVector pos)
 {
 		CZoneInfo zoneinfo;
@@ -522,6 +551,17 @@ static const char *carnames[] = {
 	"tanker", "escape", "cruiser", "luton2", "ghost",
 };
 
+static const char *pednames[] = {
+    "null",      "cop",      "swat",       "fbi",        "army",        "medic",       "fireman",    "male01",      "taxi_d",  "pimp",    "gang01",
+    "gang02",    "gang03",   "gang04",     "gang05",     "gang06",      "gang07",      "gang08",     "gang09",      "gang10",  "gang11",  "gang12",
+    "gang13",    "gang14",   "criminal01", "criminal02", "special01",   "special02",   "special03",  "special04",   "male02",  "male03",  "fatmale01",
+    "fatmale02", "female01", "female02",   "female03",   "fatfemale01", "fatfemale02", "prostitute", "prostitute2", "p_man1",  "p_man2",  "p_wom1",
+    "p_wom2",    "ct_man1",  "ct_man2",    "ct_wom1",    "ct_wom2",     "li_man1",     "li_man2",    "li_wom1",     "li_wom2", "docker1", "docker2",
+    "scum_man",  "scum_wom", "worker1",    "worker2",    "b_man1",      "b_man2",      "b_man3",     "b_wom1",      "b_wom2",  "b_wom3",  "mod_man",
+    "mod_wom",   "st_man",   "st_wom",     "fan_man1",   "fan_man2",    "fan_wom",     "hos_man",    "hos_wom",     "const1",  "const2",  "shopper1",
+    "shopper2",  "shopper3", "stud_man",   "stud_wom",   "cas_man",     "cas_wom",
+};
+
 //#include <list>
 
 static CTweakVar** TweakVarsList;
@@ -623,6 +663,19 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Chitty chitty bang bang", ChittyChittyBangBangCheat);
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
+
+		static int playerId = 0;
+		e = DebugMenuAddVar(
+		    "Player", "Player model", &playerId,
+		    []() {
+			    if(playerId >= 26 && playerId <= 29 || playerId == 8) return;
+			    ChangePlayerModel(playerId);
+		    },
+		    1, 0, 82, pednames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVarBool8("Player", "Invincible", &bCheatGodMode, nil);
+
+		DebugMenuAddCmd("Player", "Max Wanted level", []() { SetWantedLevel(); });
 
 		static int spawnCarId = MI_LANDSTAL;
 		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_LANDSTAL, MI_GHOST, carnames);

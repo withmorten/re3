@@ -320,13 +320,13 @@ CWanted::UpdateWantedLevel()
 	}
 	else if (m_nChaos >= 1600 && m_nChaos < 3200) {
 		m_nWantedLevel = 5;
-		m_MaximumLawEnforcerVehicles = 3;
+		m_MaximumLawEnforcerVehicles = 4; // 3;
 		m_MaxCops = 8;
 		m_RoadblockDensity = 10;
 	}
 	else if (m_nChaos >= 3200) {
 		m_nWantedLevel = 6;
-		m_MaximumLawEnforcerVehicles = 3;
+		m_MaximumLawEnforcerVehicles = 6;//3;
 		m_MaxCops = 10;
 		m_RoadblockDensity = 12;
 	}

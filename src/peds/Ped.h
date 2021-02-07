@@ -959,3 +959,5 @@ void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 #ifndef PED_SKIN
 VALIDATE_SIZE(CPed, 0x53C);
 #endif
+
+extern bool bCheatGodMode;

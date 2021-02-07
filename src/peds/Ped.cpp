@@ -47,6 +47,8 @@ bool CPed::bPedCheat2;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
+bool bCheatGodMode = false;
+
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }

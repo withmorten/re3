@@ -778,6 +778,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 			break;
 		case MI_RHINO:
 		case MI_BARRACKS:
+	    case MI_PATRIOT:
 			preferredModel = COP_ARMY;
 			pedType = PEDTYPE_COP;
 			break;

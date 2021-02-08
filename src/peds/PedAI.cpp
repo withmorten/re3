@@ -4163,7 +4163,7 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 
 	if(veh->GetModelIndex() == MI_RHINO) {
 		m_vehDoor = CAR_DOOR_LF;
-		posToOpen = rrPos;
+		posToOpen = lfPos;
 	}
 }
 
@@ -4171,7 +4171,7 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 bool
 CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 {
-	CVector rfPos, lrPos, rrPos;
+	CVector rfPos, lfPos, lrPos, rrPos;
 	bool canEnter = false;
 
 	CVehicleModelInfo *vehModel = (CVehicleModelInfo *)CModelInfo::GetModelInfo(veh->GetModelIndex());
@@ -4200,6 +4200,13 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 		rfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
 		canEnter = true;
 		rfPosDist = rfPos - GetPosition();
+	}
+	if (!veh->pPassengers[0]
+		&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_LF)
+		&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, nil)) {
+
+		lfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_LF);
+		canEnter = true;
 	}
 	if (vehModel->m_numDoors == 4) {
 		if (!veh->pPassengers[1]
@@ -4245,7 +4252,7 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 	if ( veh->GetModelIndex() == MI_RHINO )
 	{
 		m_vehDoor = CAR_DOOR_LF;
-		posToOpen = rrPos;
+		posToOpen = lfPos;
 	}
 	
 	return canEnter;

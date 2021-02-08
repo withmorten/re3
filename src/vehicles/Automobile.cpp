@@ -4865,9 +4865,6 @@ CAutomobile::AddTowPoint(float dist)
 	CVector vec(0.0f, 0.0f, 0.0f);
 	vec = GetTowHitchPos(GetMatrix(), CVector(0.0f, dist, 0.0f));
 
-	CCoronas::RegisterCorona((uintptr)this, 255, 0, 0, 0, vec, 0.2f, 25.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF,
-	                         CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
-
 	m_vecTowPos = vec;
 }
 

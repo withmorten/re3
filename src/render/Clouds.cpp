@@ -156,48 +156,6 @@ CClouds::Render(void)
 		}
 	}
 
-	// The R* logo
-	int starintens = 0;
-	if(CClock::GetHours() < 22 && CClock::GetHours() > 5)
-		starintens = 0;
-	else if(CClock::GetHours() > 22 || CClock::GetHours() < 5)
-		starintens = 255;
-	else if(CClock::GetHours() == 22)
-		starintens = 255 * CClock::GetMinutes()/60.0f;
-	else if(CClock::GetHours() == 5)
-		starintens = 255 * (60 - CClock::GetMinutes())/60.0f;
-	if(starintens != 0){
-		float coverage = Max(CWeather::Foggyness, CWeather::CloudCoverage);
-		int brightness = (1.0f - coverage) * starintens;
-
-		// R
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
-		for(i = 0; i < 11; i++){
-			RwV3d pos = { 100.0f, 0.0f, 10.0f };
-			if(i >= 9) pos.x = -pos.x;
-			RwV3dAdd(&worldpos, &campos, &pos);
-			worldpos.y -= 90.0f*StarCoorsX[i%9];
-			worldpos.z += 80.0f*StarCoorsY[i%9];
-			if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-				float sz = 0.8f*StarSizes[i%9];
-				CSprite::RenderBufferedOneXLUSprite(screenpos.x, screenpos.y, screenpos.z,
-					szx*sz, szy*sz, brightness, brightness, brightness, 255, 1.0f/screenpos.z, 255);
-			}
-		}
-		CSprite::FlushSpriteBuffer();
-
-		// *
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
-		RwV3d pos = { 100.0f, 0.0f, 10.0f };
-		RwV3dAdd(&worldpos, &campos, &pos);
-		worldpos.y -= 90.0f;
-		if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-			brightness *= (CGeneral::GetRandomNumber()&127) / 640.0f + 0.5f;
-			CSprite::RenderOneXLUSprite(screenpos.x, screenpos.y, screenpos.z,
-				szx*5.0f, szy*5.0f, brightness, brightness, brightness, 255, 1.0f/screenpos.z, 255);
-		}
-	}
-
 	// Low clouds
 	float lowcloudintensity = 1.0f - Max(CWeather::Foggyness, CWeather::CloudCoverage);
 	int r = CTimeCycle::GetLowCloudsRed() * lowcloudintensity;

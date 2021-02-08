@@ -1064,7 +1064,7 @@ CPed::AnnoyNearestPed()
 			charToAnnoy->SetObjectiveTimer(20000);
 		}
 		else if (charToAnnoy->m_nPedType == PEDTYPE_COP) {
-			if(IsPlayer()) FindPlayerPed()->SetWantedLevel(1);
+			if(IsPlayer()) FindPlayerPed()->SetWantedLevelNoDrop(1);
 		}
 
 		charToAnnoy->Say(SOUND_PED_ATTACK);

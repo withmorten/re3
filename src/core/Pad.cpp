@@ -41,6 +41,7 @@
 #include "PathFind.h"
 #include "Wanted.h"
 #include "General.h"
+#include "CarCtrl.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -350,6 +351,14 @@ void AltDodoCheat(void)
 	CHud::SetHelpMessage(string, true);
 }
 #endif
+
+void
+CopCityCheat()
+{
+	bCheatCopCity = !bCheatCopCity;
+
+	CHud::SetHelpMessage(bCheatCopCity ? TheText.Get("CHEAT1") : TheText.Get("CHEATOF"), true);
+}
 
 bool
 CControllerState::CheckForInput(void)
@@ -1006,6 +1015,10 @@ void CPad::AddToPCCheatString(char c)
 	// "NASTYLIMBSCHEAT"
 	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
 		NastyLimbsCheat();
+
+	// COPCITY
+	if(!_CHEATCMP("YTICPOC"))
+		CopCityCheat();
 
 #ifdef KANGAROO_CHEAT
 	// "KANGAROO"

@@ -174,7 +174,7 @@ enum Config {
 #define GTA3_PC_STEAM	312
 // TODO? maybe something for xbox or android?
 
-#define GTA_VERSION	GTA3_PC_11
+#define GTA_VERSION	GTA3_PC_10
 
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages

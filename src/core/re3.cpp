@@ -312,6 +312,7 @@ void OnlyRenderWheelsCheat();
 void ChittyChittyBangBangCheat();
 void StrongGripCheat();
 void NastyLimbsCheat();
+void CopCityCheat();
 
 DebugMenuEntry *carCol1;
 DebugMenuEntry *carCol2;
@@ -663,6 +664,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Chitty chitty bang bang", ChittyChittyBangBangCheat);
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
+		DebugMenuAddCmd("Cheats", "City full of cops.", CopCityCheat);
 
 		static int playerId = 0;
 		e = DebugMenuAddVar(

@@ -87,6 +87,8 @@ int32 CCarCtrl::CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
+bool bCheatCopCity = false;
+
 void
 CCarCtrl::GenerateRandomCars()
 {
@@ -134,7 +136,13 @@ CCarCtrl::GenerateOneRandomCar()
 		carClass = COPS;
 		carModel = ChoosePoliceCarModel();
 	}else{
-		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
+		if(bCheatCopCity) { 
+			carClass = COPS;
+			carModel = ChoosePoliceCarModel(); 
+		} else {
+			carModel = ChooseModel(&zone, &vecTargetPos, &carClass); 
+		}
+
 		if (carClass == COPS && pWanted->m_nWantedLevel >= 1)
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
@@ -609,14 +617,12 @@ CCarCtrl::ChooseModel(CZoneInfo *pZone, CVector *pPos, int *pClass)
 		else if(rnd < pZone->carThreshold[5])
 			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
 		else if(rnd < pZone->copThreshold) {
-			int emergency = CGeneral::GetRandomNumberInRange(0, 2);
-
-			if(emergency == 0)
-				*pClass = SPECIAL, model = MI_FIRETRUCK;
-			else if(emergency == 1)
-				*pClass = SPECIAL, model = MI_AMBULAN;
-			else
-				*pClass = COPS, model = ChoosePoliceCarModel();
+			int emergency = CGeneral::GetRandomNumberInRange(0, 2 * 3); // 6 instead of 2, cause 0 wasn't ever happening.
+			switch(emergency) {
+			case 1: *pClass = SPECIAL, model = MI_FIRETRUCK; break;
+			case 2: *pClass = SPECIAL, model = MI_AMBULAN; break;
+			default: *pClass = COPS, model = ChoosePoliceCarModel(); break;
+			}
 		}
 		else if(rnd < pZone->gangThreshold[0])
 			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);

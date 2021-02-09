@@ -463,8 +463,7 @@ bool CCrane::DoesCranePickUpThisCarType(uint32 mi)
 			mi == MI_FBICAR ||
 			mi == MI_RHINO ||
 			mi == MI_BARRACKS ||
-			mi == MI_POLICE ||
-			mi == MI_HUMVEE2;
+			mi == MI_POLICE;
 	}
 	return true;
 }

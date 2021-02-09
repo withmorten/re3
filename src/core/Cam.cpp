@@ -1045,13 +1045,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	// CenterDist should be > LateralDist because we don't have an angle for safety in this case
 	float CenterDist, LateralDist;
 	float AngleToGoToSpeed;
-	if(m_fCloseInPedHeightOffset > 0.00001f){
-		LateralDist = 0.55f;
-		CenterDist = 1.25f;
-		BetaOffsetAvoidBuildings = 0.9f;	// ~50 deg
-		BetaOffsetGoingBehind = 0.9f;
-		AngleToGoToSpeed = 0.88254666f;
-	}else{
 		LateralDist = 0.8f;
 		CenterDist = 1.35f;
 		if(TheCamera.PedZoomIndicator == CAM_ZOOM_1 || TheCamera.PedZoomIndicator == CAM_ZOOM_TOPDOWN){
@@ -1059,7 +1052,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			CenterDist = 1.6f;
 		}
 		AngleToGoToSpeed = 0.43254671f;
-	}
+	
 
 	FOV = DefaultFOV;
 
@@ -1077,9 +1070,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	TargetCoors = CameraTarget;
 	IdealSource = Source;
 	TargetCoors.z += m_fSyphonModeTargetZOffSet + 0.15f;
-
-	TargetCoors = DoAverageOnVector(TargetCoors);
-	TargetCoors.z += m_fRoadOffSet;
 
 	Dist.x = IdealSource.x - TargetCoors.x;
 	Dist.y = IdealSource.y - TargetCoors.y;
@@ -1167,10 +1157,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	if(ped->GetWeapon()->m_eWeaponType == WEAPONTYPE_DETONATOR ||
 	   ped->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT)
 		Shooting = false;
-
-
-	if(m_fCloseInPedHeightOffset > 0.00001f)
-		TargetCoors.z -= m_fRoadOffSet;
 
 	// Figure out if and where we want to rotate
 	if(CPad::GetPad(0)->ForceCameraBehindPlayer() || Shooting){
@@ -1264,40 +1250,14 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			m_fCamBufferedHeightSpeed = 0.0f;
 		}
 	}
-
-	// Subtract m_fRoadOffSet from both?
-	TargetCoors.z -= m_fRoadOffSet;
-	Source.z = IdealSource.z - m_fRoadOffSet;
-
-	// Apply zoom now
-	// m_fPedZoomValueSmooth makes the cam go down the further out it is
-	//  0.25 ->  0.20 for nearest dist
-	//  1.50 -> -0.05 for mid dist
-	//  2.90 -> -0.33 for far dist
+	Source.z = IdealSource.z;
 	Source.z += (2.5f - TheCamera.m_fPedZoomValueSmooth)*0.2f - 0.25f;
 	// Zoom out camera
 	Front = TargetCoors - Source;
 	Front.Normalise();
 	Source -= Front * TheCamera.m_fPedZoomValueSmooth;
-	// and then we move up again
-	//  -0.375
-	//   0.25
-	//   0.95
+
 	Source.z += (TheCamera.m_fPedZoomValueSmooth - 1.0f)*0.5f + m_fCloseInPedHeightOffset;
-
-	// Clip Source if necessary
-
-	bool ClipSource = m_fCloseInPedHeightOffset > 0.00001f && m_fCamBufferedHeight > 0.001f;
-	if(GoingBehind || ResetStatics || ClipSource){
-		CColPoint colpoint;
-		CEntity *entity;
-		if(CWorld::ProcessLineOfSight(TargetCoors, Source, colpoint, entity, true, false, false, true, false, true, true)){
-			Source = colpoint.point;
-			if((TargetCoors - Source).Magnitude2D() < 1.0f)
-				RwCameraSetNearClipPlane(Scene.camera, 0.05f);
-		}
-	}
-
 	TargetCoors.z += Min(1.0f, m_fCamBufferedHeight/2.0f);
 	m_cvecTargetCoorsForFudgeInter = TargetCoors;
 

@@ -3,6 +3,9 @@
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#ifdef ANISOTROPIC_FILTERING
+#include "rpanisot.h"
+#endif
 
 #include "main.h"
 #include "CdStream.h"
@@ -131,6 +134,24 @@ bool gbNewRenderer;
 #define CLEARMODE (rwCAMERACLEARZ)
 #endif
 
+#ifdef __MWERKS__
+void
+debug(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+
+void
+Error(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+#endif
+
 void
 ValidateVersion()
 {
@@ -183,6 +204,9 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
 
+#ifdef FIX_BUGS
+	CSprite2d::SetRecipNearClip();
+#endif
 	CSprite2d::InitPerFrame();
 
 	if(Alpha != 0)
@@ -417,6 +441,9 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifdef ANISOTROPIC_FILTERING
+	RpAnisotPluginAttach();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeRegister();
 #endif
@@ -908,6 +935,7 @@ ProcessSlowMode(void)
 float FramesPerSecondCounter;
 int32 FrameSamples;
 
+#ifndef MASTER
 struct tZonePrint
 {
   char name[12];
@@ -927,8 +955,6 @@ tZonePrint ZonePrint[] =
 	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
 	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
 };
-
-#ifndef MASTER
 
 void
 PrintMemoryUsage(void)
@@ -1135,8 +1161,13 @@ DisplayGameDebugText()
 #endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
+#ifdef FIX_BUGS
+	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
+#else
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+#endif
 	
 	if ( FrameSamples > 30 )
 	{

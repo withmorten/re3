@@ -1,4 +1,4 @@
-#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+#if (!defined(GTA_PS2_STUFF) && defined(RWLIBS)) || defined(__MWERKS__)
 #define WITHD3D
 #endif
 #include "config.h"
@@ -307,10 +307,10 @@ void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
 	CVector2D corners[4] = {
-		{  1.0f, -1.0f },	// top right
-		{  1.0f,  1.0f },	// bottom right
-		{ -1.0f,  1.0f },	// bottom left
-		{ -1.0f, -1.0f },	// top left
+		CVector2D(  1.0f, -1.0f ),	// top right
+		CVector2D(  1.0f,  1.0f ),	// bottom right
+		CVector2D( -1.0f,  1.0f ),	// bottom left
+		CVector2D( -1.0f, -1.0f ),	// top left
 	};
 	CVector2D tmp;
 	int i, j, n;
@@ -928,7 +928,7 @@ void CRadar::DrawRadarMask()
 		CVector2D(-1.0, -1.0f)
 	};
 
-	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nil);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
@@ -1055,7 +1055,7 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 
 uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
-	int32 c;
+	uint32 c;
 	switch (color) {
 	case RADAR_TRACE_RED:
 		c = 0xDD2410FF;

@@ -113,12 +113,15 @@ workspace "re3d"
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		
-	filter "configurations:Release"
+	filter "configurations:not Debug"
 		defines { "NDEBUG" }
 		optimize "Speed"
 		if(_OPTIONS["lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -201,6 +204,7 @@ project "librw"
 		architecture "amd64"
 
 	filter "platforms:win*"
+		defines { "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE" }
 		staticruntime "on"
 		buildoptions { "/Zc:sizedDealloc-" }
 

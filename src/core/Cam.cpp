@@ -194,7 +194,7 @@ CCam::Process(void)
 		break;
 	case MODE_CAM_ON_A_STRING:
 #ifdef FREE_CAM
-		if(CCamera::bFreeCam)
+		if(CCamera::bFreeCam && !CVehicle::bCheat5)
 			Process_FollowCar_SA(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
 #endif
@@ -947,7 +947,7 @@ CVector
 CCam::DoAverageOnVector(const CVector &vec)
 {
 	int i;
-	CVector Average = { 0.0f, 0.0f, 0.0f };
+	CVector Average(0.0f, 0.0f, 0.0f);
 
 	if(ResetStatics){
 		m_iRunningVectorArrayPos = 0;
@@ -1533,10 +1533,10 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 
 	if(CamTargetEntity->m_rwObject){
 		// what's going on here?
-		if(RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_PUMP) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_THROW) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_THROWU) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_START_THROW)){
+		if(RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_STD_WEAPON_PUMP) ||
+		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_STD_WEAPON_THROW) ||
+		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_STD_THROW_UNDER) ||
+		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_STD_START_THROW)){
 			CPed *player = FindPlayerPed();
 			float PlayerDist = (Source - player->GetPosition()).Magnitude();
 			if(PlayerDist < 2.75f)
@@ -4532,7 +4532,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 */
 	{
 		LookLeftRight = -CPad::GetPad(0)->LookAroundLeftRight();
-		LookUpDown = -CPad::GetPad(0)->LookAroundUpDown();
+		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
 	}
 	float AlphaOffset, BetaOffset;
 	if(UseMouse){
@@ -4939,11 +4939,15 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	// Using GetCarGun(LR/UD) will give us same unprocessed RightStick value as SA
 	float stickX = -(pad->GetCarGunLeftRight());
-	float stickY = pad->GetCarGunUpDown();
+	float stickY = -pad->GetCarGunUpDown();
 
 	// In SA this is for not let num2/num8 move camera when Keyboard & Mouse controls are used.
 	// if (CCamera::m_bUseMouse3rdPerson)
 	//	stickY = 0.0f;
+#ifdef INVERT_LOOK_FOR_PAD
+	if (CPad::bInvertLook4Pad)
+		stickY = -stickY;
+#endif
 
 	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
 	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;

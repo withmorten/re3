@@ -1,5 +1,8 @@
 #pragma once
 
+// disables (most) stuff that wasn't in original gta3.exe - check section at the bottom of this file
+//#define VANILLA_DEFINES
+
 enum Config {
 	NUMPLAYERS = 1,	// 4 on PS2
 
@@ -8,8 +11,11 @@ enum Config {
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,	// 3150 on PS2
-//	TXDSTORESIZE = 850,
+#if defined __MWERKS__ || defined VANILLA_DEFINES
+	TXDSTORESIZE = 850,
+#else
 	TXDSTORESIZE = 1024,	// for Xbox map
+#endif
 	EXTRADIRSIZE = 128,
 	CUTSCENEDIRSIZE = 512,
 
@@ -240,6 +246,12 @@ enum Config {
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif
 
+#define ASCII_STRCMP // use faster ascii str comparisons
+
+#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__ || defined VANILLA_DEFINES
+#undef ASCII_STRCMP
+#endif
+
 // Just debug menu entries
 #ifdef DEBUGMENU
 #define MISSION_SWITCHER // from debug menu
@@ -257,6 +269,7 @@ enum Config {
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
+#define ANISOTROPIC_FILTERING	// set all textures to max anisotropic filtering
 //#define USE_TEXTURE_POOL
 #ifdef LIBRW
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
@@ -279,8 +292,8 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if !defined(_WIN32) && !defined(__SWITCH__)
-#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined __SWITCH__)
+#define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 //#define KANGAROO_CHEAT
@@ -304,7 +317,11 @@ enum Config {
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-//#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+
+#	ifdef XINPUT
+//#		define GAMEPAD_MENU		// Add gamepad menu
+#	endif
+
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
@@ -313,6 +330,7 @@ enum Config {
 #	define CUSTOM_FRONTEND_OPTIONS
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
+//#		define MENU_MAP			// VC-like menu map. Won't appear if you don't have our menu.txd
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
 #		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH
@@ -331,6 +349,10 @@ enum Config {
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
+
+#if SCRIPT_LOG_FILE_LEVEL == 0
+#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#endif
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define USE_BASIC_SCRIPT_DEBUG_OUTPUT
@@ -385,8 +407,13 @@ enum Config {
 #endif
 
 #endif
-// IMG
-#define BIG_IMG // allows to read larger img files
+
+// Streaming
+#if !defined(_WIN32) && !defined(__SWITCH__)
+	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
+	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
+#endif
+#define BIG_IMG // Not complete - allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
@@ -395,4 +422,93 @@ enum Config {
 	#define PC_PARTICLE
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 	#define VC_RAIN_NERF // Reduces number of rain particles
+#endif
+
+// -------
+
+#if defined __MWERKS__ || defined VANILLA_DEFINES
+#define FINAL
+#undef CHATTYSPLASH
+#undef TIMEBARS
+//#define USE_MY_DOCUMENTS
+
+#define MASTER
+#undef VALIDATE_SAVE_SIZE
+#undef NO_MOVIES
+#undef DEBUGMENU
+
+//#undef NASTY_GAME
+//#undef NO_CDCHECK
+
+#undef DRAW_GAME_VERSION_TEXT
+#undef DRAW_MENU_VERSION_TEXT
+
+#undef GTA_PS2_STUFF
+#undef USE_PS2_RAND
+#undef RANDOMSPLASH
+#undef PS2_MATFX
+
+#undef FIX_BUGS
+#define THIS_IS_STUPID
+#undef MORE_LANGUAGES
+#undef COMPATIBLE_SAVES
+#undef LOAD_INI_SETTINGS
+
+#undef ASPECT_RATIO_SCALE
+#undef PROPER_SCALING
+//#undef DEFAULT_NATIVE_RESOLUTION
+#undef PS2_ALPHA_TEST
+#undef IMPROVED_VIDEOMODE
+#undef DISABLE_LOADING_SCREEN
+#undef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
+#undef ANISOTROPIC_FILTERING
+//#define USE_TEXTURE_POOL // not possible because R* used custom RW33
+
+#undef FIX_SPRITES
+
+#define PC_PARTICLE
+
+#undef XINPUT
+#undef DETECT_PAD_INPUT_SWITCH
+#undef KANGAROO_CHEAT
+#undef ALLCARSHELI_CHEAT
+#undef ALT_DODO_CHEAT
+#undef REGISTER_START_BUTTON
+#undef BIND_VEHICLE_FIREWEAPON
+#undef BUTTON_ICONS
+
+#undef HUD_ENHANCEMENTS
+#undef TRIANGULAR_BLIPS
+#undef FIX_RADAR
+#undef RADIO_OFF_TEXT
+
+#undef MENU_MAP
+#undef GAMEPAD_MENU
+#undef SCROLLABLE_STATS_PAGE
+#undef CUSTOM_FRONTEND_OPTIONS
+
+#undef GRAPHICS_MENU_OPTIONS
+#undef NO_ISLAND_LOADING
+#undef CUTSCENE_BORDERS_SWITCH
+#undef MULTISAMPLING
+#undef INVERT_LOOK_FOR_PAD
+
+#undef USE_DEBUG_SCRIPT_LOADER
+#undef USE_MEASUREMENTS_IN_METERS
+#undef USE_PRECISE_MEASUREMENT_CONVERTION
+#undef MISSION_REPLAY
+#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#undef USE_BASIC_SCRIPT_DEBUG_OUTPUT
+
+#define DONT_FIX_REPLAY_BUGS
+
+#undef EXPLODING_AIRTRAIN
+#undef CAMERA_PICKUP
+#undef PED_SKIN
+#undef ANIMATE_PED_COL_MODEL
+#undef CANCELLABLE_CAR_ENTER
+#undef IMPROVED_CAMERA
+#undef FREE_CAM
+#undef RADIO_SCROLL_TO_PREV_STATION
+#undef BIG_IMG
 #endif

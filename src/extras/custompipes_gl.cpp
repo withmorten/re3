@@ -160,8 +160,8 @@ CreateVehiclePipe(void)
 
 
 	{
-#include "shaders/obj/neoVehicle_fs_gl.inc"
-#include "shaders/obj/neoVehicle_vs_gl.inc"
+#include "shaders/obj/neoVehicle_frag.inc"
+#include "shaders/obj/neoVehicle_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoVehicle_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoVehicle_frag_src, nil };
 	neoVehicleShader = Shader::create(vs, fs);
@@ -271,8 +271,8 @@ CreateWorldPipe(void)
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
 	{
-#include "shaders/obj/neoWorldIII_fs_gl.inc"
-#include "shaders/obj/default_UV2_gl.inc"
+#include "shaders/obj/neoWorldIII_frag.inc"
+#include "shaders/obj/default_UV2_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, default_UV2_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoWorldIII_frag_src, nil };
 	neoWorldShader = Shader::create(vs, fs);
@@ -333,7 +333,12 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	V3d eyePos = rw::engine->currentCamera->getFrame()->getLTM()->pos;
 	glUniform3fv(U(u_eye), 1, (float*)&eyePos);
-	glUniform4fv(U(u_reflProps), 1, (float*)&GlossMult);
+	float reflProps[4];
+	reflProps[0] = GlossMult;
+	reflProps[1] = 0.0f;
+	reflProps[2] = 0.0f;
+	reflProps[3] = 0.0f;
+	glUniform4fv(U(u_reflProps), 1, reflProps);
 
 	SetRenderState(VERTEXALPHA, TRUE);
 	SetRenderState(SRCBLEND, BLENDONE);
@@ -374,8 +379,8 @@ CreateGlossPipe(void)
 	using namespace rw::gl3;
 
 	{
-#include "shaders/obj/neoGloss_fs_gl.inc"
-#include "shaders/obj/neoGloss_vs_gl.inc"
+#include "shaders/obj/neoGloss_frag.inc"
+#include "shaders/obj/neoGloss_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoGloss_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoGloss_frag_src, nil };
 	neoGlossShader = Shader::create(vs, fs);
@@ -548,8 +553,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#include "shaders/obj/simple_fs_gl.inc"
-#include "shaders/obj/neoRimSkin_gl.inc"
+#include "shaders/obj/simple_frag.inc"
+#include "shaders/obj/neoRimSkin_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRimSkin_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimSkinShader = Shader::create(vs, fs);
@@ -557,8 +562,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#include "shaders/obj/simple_fs_gl.inc"
-#include "shaders/obj/neoRim_gl.inc"
+#include "shaders/obj/simple_frag.inc"
+#include "shaders/obj/neoRim_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRim_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimShader = Shader::create(vs, fs);

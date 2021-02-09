@@ -633,7 +633,7 @@ void CHud::Draw()
 		*/
 		float fStarsX = STARS_X;
 		for(int i = 0; i < 6; i++) {
-			if(FindPlayerPed()->m_pWanted->m_nWantedLevel > i &&
+			if(FindPlayerPed()->m_pWanted->GetWantedLevel() > i &&
 			   (CTimer::GetTimeInMilliseconds() > FindPlayerPed()->m_pWanted->m_nLastWantedLevelChange + 2000 || CTimer::GetFrameCounter() & 4)) {
 
 				Sprites[HUD_WANTED].Draw(SCREEN_SCALE_X(fStarsX), SCREEN_SCALE_Y(14.0f), SCREEN_SCALE_X(16.0f), SCREEN_SCALE_Y(14.0f),
@@ -1083,20 +1083,20 @@ void CHud::Draw()
 			// Yeah, top and bottom changed place. R* vision
 			if (IntroRect.m_bIsUsed && IntroRect.m_bBeforeFade) {
 				if (IntroRect.m_nTextureId >= 0) {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.top );
 
 					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.top );
 
 					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}

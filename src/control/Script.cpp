@@ -2059,7 +2059,9 @@ int8 CRunningScript::ProcessOneCommand()
 	uint32 ip = m_nIp;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
+		m_nIp -= 2;
 		sprintf(commandInfo, m_nIp >= SIZE_MAIN_SCRIPT ? "M<%5d> " : "<%6d> ", m_nIp >= SIZE_MAIN_SCRIPT ? m_nIp - SIZE_MAIN_SCRIPT : m_nIp);
+		m_nIp += 2;
 		if (m_bNotFlag)
 			strcat(commandInfo, "NOT ");
 		if (commands[command].position == -1)
@@ -4083,7 +4085,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		return 0;
 	case COMMAND_IS_WANTED_LEVEL_GREATER:
 		CollectParameters(&m_nIp, 2);
-		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_pPed->m_pWanted->m_nWantedLevel > ScriptParams[1]);
+		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_pPed->m_pWanted->GetWantedLevel() > ScriptParams[1]);
 		return 0;
 	case COMMAND_CLEAR_WANTED_LEVEL:
 		CollectParameters(&m_nIp, 1);
@@ -4264,7 +4266,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 #ifdef FIX_BUGS
 		AnimationId anim = pVehicle->GetDriverAnim();
 #else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+		AnimationId anim = pVehicle->bLowVehicle ? ANIM_STD_CAR_SIT_LO : ANIM_STD_CAR_SIT;
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
@@ -4307,7 +4309,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			pPlayer->m_pPed->m_pVehicleAnim->blendDelta = -1000.0f;
 		pPlayer->m_pPed->m_pVehicleAnim = nil;
 		pPlayer->m_pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_STD_IDLE, 100.0f);
 		pPlayer->m_pPed->RestartNonPartialAnims();
 		AudioManager.PlayerJustLeftCar();
 		pos.z += pPlayer->m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();

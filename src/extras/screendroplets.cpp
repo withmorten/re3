@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef SCREEN_DROPLETS
@@ -118,8 +118,8 @@ ScreenDroplets::InitDraw(void)
 #ifdef RW_GL3
 	using namespace rw::gl3;
 	{
-#include "shaders/obj/im2d_UV2_gl.inc"
-#include "shaders/obj/screenDroplet_fs_gl.inc"
+#include "shaders/obj/im2d_UV2_vert.inc"
+#include "shaders/obj/screenDroplet_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_UV2_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, screenDroplet_frag_src, nil };
 	screenDroplet = Shader::create(vs, fs);

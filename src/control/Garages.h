@@ -1,11 +1,10 @@
 #pragma once
-#include "Automobile.h"
 #include "audio_enums.h"
 #include "Camera.h"
 #include "config.h"
+#include "Lists.h"
 
 class CVehicle;
-class CCamera;
 
 enum eGarageState
 {
@@ -167,6 +166,10 @@ public:
 	void FindDoorsEntities();
 	void FindDoorsEntitiesSectorList(CPtrList&, bool);
 	void PlayerArrestedOrDied();
+	bool Does60SecondsNeedThisCarAtAll(int mi);
+	bool Does60SecondsNeedThisCar(int mi);
+	void MarkThisCarAsCollectedFor60Seconds(int mi);
+	bool IsPlayerEntirelyInsideGarage();
 
 };
 
@@ -237,6 +240,7 @@ public:
 	static bool IsModelIndexADoor(uint32 id);
 	static void SetFreeBombs(bool bValue) { BombsAreFree = bValue; }
 	static void SetFreeResprays(bool bValue) { RespraysAreFree = bValue; }
+	static void StopCarFromBlowingUp(CAutomobile*);
 
 	static bool IsCarSprayable(CVehicle*);
 	static float FindDoorHeightForMI(int32);

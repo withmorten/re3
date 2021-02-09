@@ -2776,14 +2776,15 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 			ped->m_pNextPathNode = nil;
 
 		} else {
-			if (animAssoc)
-				animAssoc->blendDelta = -1000.0f;
+			if(animAssoc) animAssoc->blendDelta = -1000.0f;
 
-			if (isLow)
-				ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_LSHUFFLE_RHS);
-			else
-				ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_SHUFFLE_RHS);
+			if(veh->GetModelIndex() != MI_RHINO) {
 
+				if(isLow)
+					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_LSHUFFLE_RHS);
+				else
+					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_SHUFFLE_RHS);
+			}
 			ped->m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, ped);
 		}
 	} else {
@@ -3787,7 +3788,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		optedDoorNode = CAR_DOOR_RF;
 
 	if(veh->GetModelIndex() == MI_RHINO)
-		optedDoorNode = CAR_DOOR_LF;
+		optedDoorNode = CAR_DOOR_RR;
 
 	bool someoneExitsFromOurExitDoor = false;
 	bool someoneEntersFromOurExitDoor = false;
@@ -4162,8 +4163,8 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 	}
 
 	if(veh->GetModelIndex() == MI_RHINO) {
-		m_vehDoor = CAR_DOOR_LF;
-		posToOpen = lfPos;
+		m_vehDoor = CAR_DOOR_RR;
+		posToOpen = rrPos;
 	}
 }
 
@@ -4182,8 +4183,8 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
 			return true;
 		case MI_RHINO:
-			m_vehDoor = CAR_DOOR_LF;
-			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_LF);
+			m_vehDoor = CAR_DOOR_RR;
+			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
 			return true;
 		default:
 			break;
@@ -4251,8 +4252,8 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 
 	if ( veh->GetModelIndex() == MI_RHINO )
 	{
-		m_vehDoor = CAR_DOOR_LF;
-		posToOpen = lfPos;
+		m_vehDoor = CAR_DOOR_RR;
+		posToOpen = rrPos;
 	}
 	
 	return canEnter;

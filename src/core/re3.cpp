@@ -547,7 +547,7 @@ static const char *carnames[] = {
 	"suv", "riviera", "boxsta", "freight", "nova", "beamer", "humvee", "firetruk", "garbage", "limo", "reliant", "lambo", "carrier", "transit",
 	"luton", "testeros", "ambulan", "fbicar", "astrovan", "eldorado", "taxi", "intrepid", "pickup", "icecream", "buggy", "corpse", "police", "swatvan",
 	"armour", "viper", "polboat", "bus", "tank", "armytruk", "train", "chopper", "dodo", "coach", "cabbie", "mustang", "ramvan", "rcbug",
-	"bellyup", "mrwongs", "fiat", "yardie", "yakuza", "impala", "columb", "hoods", "airtrain", "deaddodo", "speedboat", "fishboat", "panlant", "flatbed",
+	"mafia", "humvee2", "fiat", "yardie", "yakuza", "impala", "columb", "hoods", "airtrain", "deaddodo", "speedboat", "fishboat", "panlant", "flatbed",
 	"tanker", "escape", "cruiser", "luton2", "ghost",
 };
 

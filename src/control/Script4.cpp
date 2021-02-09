@@ -1756,9 +1756,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_DODO:
 				case MI_COACH:
 				case MI_RCBANDIT:
-				case MI_BELLYUP:
-				case MI_MRWONGS:
 				case MI_MAFIA:
+				case MI_FIAT:
 				case MI_YARDIE:
 				case MI_YAKUZA:
 				case MI_DIABLOS:

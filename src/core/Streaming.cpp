@@ -1440,9 +1440,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 		RequestModel(MI_RHINO, STREAMFLAGS_DONT_REMOVE);
 		RequestModel(MI_BARRACKS, STREAMFLAGS_DONT_REMOVE);
 		RequestModel(MI_ARMY, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_HUMVEE2, STREAMFLAGS_DONT_REMOVE);
 	}else{
 		SetModelIsDeletable(MI_RHINO);
 		SetModelIsDeletable(MI_BARRACKS);
+		SetModelIsDeletable(MI_HUMVEE2);
 		if(!HasModelLoaded(MI_RHINO) && !HasModelLoaded(MI_BARRACKS))
 			SetModelIsDeletable(MI_ARMY);
 	}

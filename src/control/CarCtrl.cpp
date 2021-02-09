@@ -686,13 +686,13 @@ CCarCtrl::ChoosePoliceCarModel(void)
 		CStreaming::HasModelLoaded(MI_RHINO) && 
 		CStreaming::HasModelLoaded(MI_BARRACKS) &&
 	    CStreaming::HasModelLoaded(MI_ARMY) &&
-		CStreaming::HasModelLoaded(MI_PATRIOT)) {
+		CStreaming::HasModelLoaded(MI_HUMVEE2)) {
 		int r = CGeneral::GetRandomNumberInRange(0, 3);
 		switch(r) {
 		case 1: return MI_BARRACKS;
 		case 2: return MI_RHINO;
 		case 3: return MI_ARMY;
-		default: return MI_PATRIOT;
+		default: return MI_HUMVEE2;
 		}
 	}
 	return MI_POLICE;

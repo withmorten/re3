@@ -485,7 +485,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle)
 	case MI_POLICE:
 	case MI_RHINO:
 	case MI_BARRACKS:
-	case MI_PATRIOT:
+	case MI_HUMVEE2:
 		pVehicle->SetUpDriver();
 		if (FindPlayerPed()->m_pWanted->m_nWantedLevel > 1)
 			pVehicle->SetupPassenger(0);

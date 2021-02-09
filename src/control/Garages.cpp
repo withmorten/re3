@@ -1436,6 +1436,7 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 	case MI_BARRACKS:
 	case MI_DODO:
 	case MI_COACH:
+	case MI_HUMVEE2:
 		return false;
 	default:
 		break;

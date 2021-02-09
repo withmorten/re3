@@ -4660,7 +4660,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	
 	ped->StopNonPartialAnims();
 	if (veh->bIsBus)
-		ped->bRenderPedInCar = false;
+		ped->bRenderPedInCar = true;
 
 	// FIX: RegisterVehicleOfInterest not just registers the vehicle, but also updates register time. So remove the IsThisVehicleInteresting check.
 #ifndef FIX_BUGS

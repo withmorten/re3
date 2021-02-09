@@ -69,6 +69,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 			copType = COP_SWAT;
 			break;
 		case MI_BARRACKS:
+		case MI_HUMVEE2:
 			modelInfoId = MI_ARMY;
 			copType = COP_ARMY;
 			break;

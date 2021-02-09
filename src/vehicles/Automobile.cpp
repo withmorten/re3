@@ -273,6 +273,7 @@ CAutomobile::ProcessControl(void)
 		case MI_SECURICA:
 		case MI_RHINO:
 		case MI_BARRACKS:
+		case MI_HUMVEE2:
 			ScanForCrimes();
 	}
 

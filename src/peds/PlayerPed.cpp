@@ -1324,11 +1324,11 @@ CPlayerPed::ProcessControl(void)
 	}
 
 	// Middle finger.
-	if (padUsed && padUsed->GetStfuJustDown() && FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED) {
+	CAnimBlendAssociation *fuckUAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FUCKU);
+	if(padUsed && padUsed->GetStfuJustDown() && FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED && !fuckUAssoc) {
 		AnnoyNearestPed();
 	}
 
-	CAnimBlendAssociation *fuckUAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FUCKU);
 	if(fuckUAssoc) {
 		float animTime = fuckUAssoc->currentTime;
 		if(animTime > 6.0f / 30.0f && animTime < 32.0f / 30.0f) { 

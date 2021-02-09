@@ -667,7 +667,6 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void *)rwSHADEMODEGOURAUD);
 
-	CVector vec = posTarget - TheCamera.GetPosition();
 	RwV3d pos;
 	float w, h;
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN) {
@@ -682,20 +681,24 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 		CVector plr = FindPlayerCoors();
 		CVector target = posTarget;
 		float distX, distY;
-	
+		CVector dimensions;
+		float dist;
+
+		dist = (plr - posTarget).Magnitude2D();
+
 		if(plr.x > target.x)
-			distX = ((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude());
+			distX = ((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude2D());
 		else
-			distX = -((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude());
+			distX = -((CVector(target.x, 0.0f, target.z) - CVector(plr.x, 0.0f, plr.z)).Magnitude2D());
 
 		if(plr.y > target.y)
-			distY = ((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude());
+			distY = ((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude2D());
 		else
-			distY = -((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude());
+			distY = -((CVector(0.0f, target.y, target.z) - CVector(0.0f, plr.y, plr.z)).Magnitude2D());
 
 		CVector tempPoint;
-		if((plr - posTarget).Magnitude2D() > 7.0f)
-			tempPoint = CVector(plr.x - clamp((distX * 0.2f), -2.0f, 2.0f), plr.y - clamp((distY * 0.2f), -2.0f, 2.0f), plr.z);
+		if((plr - posTarget).Magnitude2D() > 10.0f)
+			tempPoint = CVector(plr.x - clamp((distX / dist), -2.0f, 2.0f), plr.y - clamp((distY / dist), -2.0f, 2.0f), plr.z);
 		else
 			tempPoint = posTarget;
 
@@ -704,8 +707,8 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 		m_fArrowPoint.z = interpF(m_fArrowPoint.z, tempPoint.z, CTimer::GetTimeStep() * 0.2f);
 
 		if(CSprite::CalcScreenCoors(m_fArrowPoint, &pos, &w, &h, false) && CHud::m_ItemToFlash != ITEM_RADAR) { 
-			float recipz = 1.0f;
-			float angle = RADTODEG(CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2);
+			float recipz = 1.0f / pos.z;
+			float angle = RADTODEG(CGeneral::GetATanOfXY((plr - target).x, (plr - target).y) + M_PI_2);
 
 			CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(pos.x, pos.y, pos.z, SCREEN_SCALE_X(20.0f * 0.5f), SCREEN_SCALE_Y(48.0f * 0.5f), 255, 255, 255, 255, recipz, angle, 255);
 		}
@@ -731,6 +734,7 @@ C3dMarkers::PlaceBigArrow(CVector &posTarget)
 		RwRGBA color = {255, 255, 1, 0};
 		RwV3d scale = {0.5f, 0.5f, 0.5f};
 
+		CVector vec = posTarget - TheCamera.GetPosition();
 		float x, y, z;
 		x = -5.0f;
 		y = RADTODEG(PI - TheCamera.GetForward().Heading() + (CGeneral::GetATanOfXY(vec.x, vec.y) - M_PI_2));

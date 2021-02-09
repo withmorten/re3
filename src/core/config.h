@@ -287,8 +287,8 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if !defined(_WIN32) && !defined(__SWITCH__)
-#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined __SWITCH__)
+#define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
@@ -312,7 +312,6 @@ enum Config {
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 
 #	ifdef XINPUT
 #		define GAMEPAD_MENU		// Add gamepad menu
@@ -326,6 +325,7 @@ enum Config {
 #	define CUSTOM_FRONTEND_OPTIONS
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
+#		define MENU_MAP			// VC-like menu map. Won't appear if you don't have our menu.txd
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
 #		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH

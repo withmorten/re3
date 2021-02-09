@@ -773,6 +773,7 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 	case MI_PREDATOR:
 	case MI_RHINO:
 	case MI_BARRACKS:
+	case MI_HUMVEE2:
 		return true;
 	}
 	return false;

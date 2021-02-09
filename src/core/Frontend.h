@@ -222,15 +222,15 @@ enum eMenuScreen
 	MENUPAGE_KEYBOARD_CONTROLS = 55,
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_MISSION_RETRY = 57,
+#ifdef CUSTOM_FRONTEND_OPTIONS
+
 #ifdef MENU_MAP
 	MENUPAGE_MAP = 58,
 #endif
-#ifdef CUSTOM_FRONTEND_OPTIONS
-
 #ifdef GRAPHICS_MENU_OPTIONS
 	MENUPAGE_GRAPHICS_SETTINGS,
 #endif
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 	MENUPAGE_DETECT_JOYSTICK,
 #endif
 
@@ -481,6 +481,7 @@ struct CCustomScreenLayout {
 struct CCFO
 {
 	int8 *value;
+	const char *saveCat;
 	const char *save;
 };
 
@@ -495,11 +496,12 @@ struct CCFOSelect : CCFO
 	bool disableIfGameLoaded;
 
 	CCFOSelect() {};
-	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false){
+	CCFOSelect(int8* value, const char* saveCat, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false){
 		this->value = value;
 		if (value)
 			this->lastSavedValue = this->displayedValue = *value;
 
+		this->saveCat = saveCat;
 		this->save = save;
 		this->rightTexts = (char**)rightTexts;
 		this->numRightTexts = numRightTexts;
@@ -515,8 +517,9 @@ struct CCFODynamic : CCFO
 	ButtonPressFunc buttonPressFunc;
 
 	CCFODynamic() {};
-	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+	CCFODynamic(int8* value, const char* saveCat, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
 		this->value = value;
+		this->saveCat = saveCat;
 		this->save = save;
 		this->drawFunc = drawFunc;
 		this->buttonPressFunc = buttonPressFunc;
@@ -709,6 +712,19 @@ public:
 	#define ISLAND_LOADING_ISNT(p)
 #endif
 
+#ifdef GAMEPAD_MENU
+	enum
+	{
+		CONTROLLER_DUALSHOCK2 = 0,
+		CONTROLLER_DUALSHOCK3,
+		CONTROLLER_DUALSHOCK4,
+		CONTROLLER_XBOX360,
+		CONTROLLER_XBOXONE,
+	};
+
+	static int8 m_PrefsControllerType;
+#endif
+
 	static float fMenuItemPulse;
 
 public:
@@ -772,6 +788,9 @@ public:
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
 	void ProcessList(bool &goBack, bool &optionSelected);
+#ifdef GAMEPAD_MENU
+	void LoadController(int8 type);
+#endif
 };
 
 #ifndef IMPROVED_VIDEOMODE

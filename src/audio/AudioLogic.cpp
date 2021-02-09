@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "AudioManager.h"
 #include "audio_enums.h"
@@ -38,7 +38,7 @@
 #include "ZoneCull.h"
 #include "sampman.h"
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
@@ -7927,7 +7927,7 @@ cAudioManager::ProcessFrontEnd()
 			frontendBank = true;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_NO_RADIO:
+		case SOUND_FRONTEND_RADIO_TURN_OFF:
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;

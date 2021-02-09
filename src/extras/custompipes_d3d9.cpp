@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #ifdef RW_D3D9
@@ -705,7 +705,7 @@ RenderBlendPass(int pass)
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
-			setMaterial(color, m->surfaceProps);
+			setMaterial(color, m->surfaceProps);	// always modulate here
 
 			if(m->texture){
 				d3d::setTexture(0, m->texture);

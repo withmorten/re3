@@ -4777,19 +4777,12 @@ CAutomobile::LinkUp(CAutomobile *car)
 	float cos_z = (pointA.y - pointB.y) / (dist * cos_x);
 	float sin_z = (pointB.x - pointA.x) / (dist * cos_x);
 
-	// Attach matrix to the vehicle we want to linkup.
-	CMatrix m;
-	m.m_hasRwMatrix = false;
-	m.m_attachment = nil;
-	m.Attach(car->GetMatrix().m_attachment);
-
 	// Set location and rotation.
-	m.GetForward() = CVector(sin_x * sin_y * cos_z - cos_x * sin_z, sin_x * sin_y * sin_z + cos_x * cos_z, sin_x * cos_y);
-	m.GetPosition() = pointA;
-	m.GetPosition() = GetTowHitchPos(m, CVector(0.0f, -TRAILER_FRONT_DISTANCE, 0.0f));
+	car->GetMatrix().GetForward() = CVector(sin_x * sin_y * cos_z - cos_x * sin_z, sin_x * sin_y * sin_z + cos_x * cos_z, sin_x * cos_y);
+	car->GetMatrix().GetPosition() = pointA;
+	car->GetMatrix().GetPosition() = GetTowHitchPos(car->GetMatrix(), CVector(0.0f, -TRAILER_FRONT_DISTANCE, 0.0f));
 
-	m.UpdateRW();
-	m.Detach();
+	car->GetMatrix().UpdateRW();
 
 	// Break link in case things get crazy.
 	float groundZ = Abs(CGeneral::LimitRadianAngle(car->GetDistanceFromCentreOfMassToBaseOfModel() + CWorld::FindGroundZFor3DCoord(car->GetPosition().x, car->GetPosition().y, car->GetPosition().z + 2.0f, nil) - car->GetMatrix().GetPosition().z));

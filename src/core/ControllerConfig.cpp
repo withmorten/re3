@@ -131,6 +131,9 @@ void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
 	int nVersion = 0;
+#ifdef BIND_VEHICLE_FIREWEAPON
+	bool skipVehicleFireWeapon = false;
+#endif
 
 	if (file)
 	{
@@ -148,11 +151,26 @@ void CControllerConfigManager::LoadSettings(int32 file)
 	if (bValid && nVersion >= 3)
 	{
 		ControlsManager.MakeControllerActionsBlank();
+#ifdef BIND_VEHICLE_FIREWEAPON
+		skipVehicleFireWeapon = nVersion < 4;
+		// Set the default settings of VEHICLE_FIREWEAPON
+		if (skipVehicleFireWeapon) {
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsPADINS, KEYBOARD);
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsLCTRL, OPTIONAL_EXTRA);
+			if (m_bMouseAssociated)
+				SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON, 1);
+		}
+#endif
 
 		for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 		{
 			for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
 			{
+#ifdef BIND_VEHICLE_FIREWEAPON
+				// Skip file read
+				if (skipVehicleFireWeapon && j == VEHICLE_FIREWEAPON)
+					continue;
+#endif
 				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
@@ -2421,7 +2439,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 #define VFB(b)
 #endif
 
-#define CONTROLLER_BUTTONS(T, O, X, Q, L1, L2, L3, R1, R2, R3, SELECT, RSL, RSR)                                                                                         \
+#define CONTROLLER_BUTTONS(T, O, X, Q, L1, L2, L3, R1, R2, R3, SELECT, RSU, RSD, RSL, RSR)                                                                                         \
 	{{                                                                                                                                                         \
 	     O,      /* PED_FIREWEAPON */                                                                                                                          \
 	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
@@ -2532,7 +2550,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     O,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
 	     L3,     /* PED_DUCK */                                                                                                                                \
-	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
+	     T,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2579,10 +2597,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     X,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
 	     L3,     /* PED_DUCK */                                                                                                                                \
-	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
+	     O,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(R1) /* VEHICLE_FIREWEAPON */                                                                                                                      \
-	     nil,    /* VEHICLE_ACCELERATE */                                                                                                                      \
-	     nil,    /* VEHICLE_BRAKE */                                                                                                                           \
+	     RSU,    /* VEHICLE_ACCELERATE */                                                                                                                      \
+	     RSD,    /* VEHICLE_BRAKE */                                                                                                                           \
 	     O,      /* VEHICLE_CHANGE_RADIO_STATION */                                                                                                            \
 	     L3,     /* VEHICLE_HORN */                                                                                                                            \
 	     Q,      /* TOGGLE_SUBMISSIONS */                                                                                                                      \
@@ -2623,10 +2641,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 #define RIGHT "RIGHT"
 #endif
 
-const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK", "right stick left", "right stick right");
+const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK", "right stick up", "right stick down", "right stick left", "right stick right");
 
 #ifdef BUTTON_ICONS
-const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK", "~(~", "~)~");
+const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK", "~H~", "~L~", "~(~", "~)~");
 #endif
 
 
@@ -2635,11 +2653,6 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O
 #define PS2_CIRCLE "|"
 #define PS2_CROSS "/"
 #define PS2_SQUARE "^"
-#elif defined(BUTTON_ICONS)
-#define PS2_TRIANGLE "~T~"
-#define PS2_CIRCLE "~O~"
-#define PS2_CROSS "~X~"
-#define PS2_SQUARE "~Q~"
 #else
 #define PS2_TRIANGLE "TRIANGLE"
 #define PS2_CIRCLE "CIRCLE"
@@ -2648,11 +2661,11 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O
 #endif
 
 const char *PlayStationButtons_noIcons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT", "right stick left", "right stick right");
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT", "right stick up", "right stick down", "right stick left", "right stick right");
 
 #ifdef BUTTON_ICONS
 const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT", "~(~", "~)~");
+    CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT", "~H~", "~L~", "~(~", "~)~");
 #endif
 
 #undef PS2_TRIANGLE
@@ -2674,11 +2687,36 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 	if (CPad::GetPad(0)->IsAffectedByController) {
 		wchar wstr[16];
 
-		// TODO: INI and/or menu setting for Xbox/PS switch 
+		const char* (*Buttons)[MAX_CONTROLLERACTIONS];
+
 #ifdef BUTTON_ICONS
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+	#ifdef GAMEPAD_MENU
+		switch (FrontEndMenuManager.m_PrefsControllerType)
+		{
+		case CMenuManager::CONTROLLER_DUALSHOCK2:
+		case CMenuManager::CONTROLLER_DUALSHOCK3:
+		case CMenuManager::CONTROLLER_DUALSHOCK4:
+			Buttons = CFont::ButtonsSlot != -1 ? PlayStationButtons : PlayStationButtons_noIcons;
+			break;
+		default:
+	#endif
+			Buttons = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+	#ifdef GAMEPAD_MENU
+			break;
+		}
+	#endif
 #else
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons_noIcons;
+		switch (FrontEndMenuManager.m_PrefsControllerType)
+		{
+		case CMenuManager::CONTROLLER_DUALSHOCK2:
+		case CMenuManager::CONTROLLER_DUALSHOCK3:
+		case CMenuManager::CONTROLLER_DUALSHOCK4:
+			Buttons = PlayStationButtons_noIcons;
+			break;
+		default:
+			Buttons = XboxButtons_noIcons;
+			break;
+		}
 #endif
 
 		assert(Buttons[CPad::GetPad(0)->Mode][action] != nil); // we cannot use these

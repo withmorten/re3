@@ -263,6 +263,7 @@ project "reVC"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
+	files { "src/extras/GitSHA1.cpp" } -- this won't be in repo in first build
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
@@ -312,8 +313,8 @@ project "reVC"
 		defines { "AUDIO_OAL" }
 
 	filter {}
-	if(os.getenv("GTA_VC_BETA_DIR")) then
-		setpaths("$(GTA_VC_BETA_DIR)/", "%(cfg.buildtarget.name)")
+	if(os.getenv("GTA_VC_RE_DIR")) then
+		setpaths(os.getenv("GTA_VC_RE_DIR") .. "/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"
@@ -327,6 +328,10 @@ project "reVC"
 			-- external librw is dynamic
 			staticruntime "on"
 		end
+		prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\src\\extras\\GitSHA1.cpp"' }
+
+	filter "platforms:not win*"
+		prebuildcommands { '"%{prj.location}/../printHash.sh" "%{prj.location}/../src/extras/GitSHA1.cpp"' }
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"

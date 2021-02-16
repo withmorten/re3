@@ -193,7 +193,11 @@ enum Config {
 #define NO_CDCHECK
 
 // those infamous texts
-//#define DRAW_GAME_VERSION_TEXT
+#define DRAW_GAME_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
+	// unlike R* development builds, ours has runtime switch on debug menu & .ini, and disabled as default.
+	#define USE_OUR_VERSIONING // If you disable this then game will fetch version from peds.col, as R* did while in development
+#endif
 
 // Memory allocation and compression
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet

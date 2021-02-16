@@ -351,11 +351,8 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 			}
 		}
 		if (found != -1 && CPad::XInputJoy1 != found) {
-			if (CPad::XInputJoy1 != -1 && CPad::XInputJoy1 != found)
-				CPad::XInputJoy2 = CPad::XInputJoy1;
-			else
-				CPad::XInputJoy2 = -1;
-
+			// We should never leave pads -1, so we can process them when they're connected and kinda support hotplug.
+			CPad::XInputJoy2 = (CPad::XInputJoy1 == -1 ? (found + 1) % 4 : CPad::XInputJoy1);
 			CPad::XInputJoy1 = found;
 			cachedButtonNum = 0; // fake too, because xinput bypass CControllerConfig
 		}
@@ -643,7 +640,7 @@ CMenuScreenCustom aScreens[] = {
 		 MENUACTION_LOADRADIO,		"FEO_AUD", {nil, SAVESLOT_NONE, MENUPAGE_SOUND_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 		 MENUACTION_CHANGEMENU,		"FEO_DIS", {nil, SAVESLOT_NONE, MENUPAGE_DISPLAY_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 #ifdef GRAPHICS_MENU_OPTIONS
-		 MENUACTION_CHANGEMENU,		"FET_GRA", {nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS}, 0, 0, MENUALIGN_CENTER,
+		 MENUACTION_CHANGEMENU,		"FET_GFX", {nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 #endif
 		 MENUACTION_CHANGEMENU,		"FEO_LAN", {nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 		 MENUACTION_PLAYERSETUP,	"FET_PS", {nil, SAVESLOT_NONE, MENUPAGE_SKIN_SELECT}, 0, 0, MENUALIGN_CENTER,
@@ -759,7 +756,7 @@ CMenuScreenCustom aScreens[] = {
 
 #ifdef GRAPHICS_MENU_OPTIONS
 	// MENUPAGE_GRAPHICS_SETTINGS
-	{ "FET_GRA", MENUPAGE_OPTIONS, new CCustomScreenLayout({40, 78, 25, true, true}), GraphicsGoBack,
+	{ "FET_GFX", MENUPAGE_OPTIONS, new CCustomScreenLayout({40, 78, 25, true, true}), GraphicsGoBack,
 
 		MENUACTION_SCREENRES,	"FED_RES", { nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS }, 0, 0, MENUALIGN_LEFT,
 		MENUACTION_WIDESCREEN,	"FED_WIS", { nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS }, 0, 0, MENUALIGN_LEFT,

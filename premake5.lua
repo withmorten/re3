@@ -313,8 +313,8 @@ project "reVC"
 		defines { "AUDIO_OAL" }
 
 	filter {}
-	if(os.getenv("GTA_VC_RE_DIR")) then
-		setpaths(os.getenv("GTA_VC_RE_DIR") .. "/", "%(cfg.buildtarget.name)")
+	if(os.getenv("GTA_VC_BETA_DIR")) then
+		setpaths(os.getenv("GTA_VC_BETA_DIR") .. "/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"

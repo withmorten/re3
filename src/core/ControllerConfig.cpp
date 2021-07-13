@@ -43,7 +43,7 @@ void CControllerConfigManager::MakeControllerActionsBlank()
 	}
 }
 
-#ifdef RW_GL3
+#if defined RW_GL3 && !defined XINPUT
 int MapIdToButtonId(int mapId) {
 	switch (mapId) {
 		case GLFW_GAMEPAD_BUTTON_A: // Cross

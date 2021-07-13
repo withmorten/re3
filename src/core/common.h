@@ -20,7 +20,7 @@
 #define RWLIBS // codewarrior doesn't support project level defines - so not even this is enough, but still catches most ifdefs
 #endif
 
-#if !defined RW_D3D9 && defined LIBRW
+#if !defined RW_D3D9 && defined LIBRW && !defined XINPUT
 #undef WITHD3D
 #undef WITHDINPUT
 #endif

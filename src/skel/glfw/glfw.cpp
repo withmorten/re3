@@ -2395,6 +2395,7 @@ main(int argc, char *argv[])
 RwV2d leftStickPos;
 RwV2d rightStickPos;
 
+#ifndef XINPUT
 void CapturePad(RwInt32 padID)
 {
 	int8 glfwPad = -1;
@@ -2489,6 +2490,7 @@ void CapturePad(RwInt32 padID)
 	
 	return;
 }
+#endif
 
 void joysChangeCB(int jid, int event)
 {

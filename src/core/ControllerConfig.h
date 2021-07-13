@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined RW_D3D9 || defined RWLIBS
+#if defined RW_D3D9 || defined RWLIBS || defined XINPUT
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #endif
@@ -106,7 +106,7 @@ class CControllerState;
 
 #define ACTIONNAME_LENGTH 40
 
-#ifdef RW_GL3
+#if defined RW_GL3 && !defined XINPUT
 struct GlfwJoyState {
 	int8 id;
 	bool isGamepad;
@@ -132,7 +132,7 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-#if defined RW_GL3
+#if defined RW_GL3 && !defined XINPUT
 	GlfwJoyState           m_OldState;
 	GlfwJoyState           m_NewState;
 #else
@@ -222,7 +222,7 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
-#ifndef RW_GL3
+#if !defined RW_GL3 || defined XINPUT
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
 #endif
 

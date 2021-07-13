@@ -1,3 +1,4 @@
+#define WITHWINDOWS
 #define WITHDINPUT
 #include "common.h"
 #include "crossplatform.h"

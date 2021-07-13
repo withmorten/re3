@@ -1,6 +1,6 @@
+#define WITHWINDOWS
 #include "common.h"
 #if defined DETECT_JOYSTICK_MENU && defined XINPUT
-#include <windows.h>
 #include <xinput.h>
 #if !defined(PSAPI_VERSION) || (PSAPI_VERSION > 1)
 #pragma comment( lib, "Xinput9_1_0.lib" )
@@ -271,7 +271,37 @@ int cachedButtonNum = -1;
 
 wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 
-#if defined RW_GL3 && !defined LIBRW_SDL2
+#if defined XINPUT
+	int found = -1;
+	XINPUT_STATE xstate;
+	memset(&xstate, 0, sizeof(XINPUT_STATE));
+	if (userHovering) {
+		for (int i = 0; i <= 3; i++) {
+			if (XInputGetState(i, &xstate) == ERROR_SUCCESS) {
+				if (xstate.Gamepad.bLeftTrigger || xstate.Gamepad.bRightTrigger) {
+					found = i;
+					break;
+				}
+				for (int j = XINPUT_GAMEPAD_DPAD_UP; j != XINPUT_GAMEPAD_Y << 1; j = (j << 1)) {
+					if (xstate.Gamepad.wButtons & j) {
+						found = i;
+						break;
+					}
+				}
+				if (found != -1)
+					break;
+			}
+		}
+		if (found != -1 && CPad::XInputJoy1 != found) {
+			// We should never leave pads -1, so we can process them when they're connected and kinda support hotplug.
+			CPad::XInputJoy2 = (CPad::XInputJoy1 == -1 ? (found + 1) % 4 : CPad::XInputJoy1);
+			CPad::XInputJoy1 = found;
+			cachedButtonNum = 0; // fake too, because xinput bypass CControllerConfig
+		}
+	}
+	sprintf(gSelectedJoystickName, "%d", CPad::XInputJoy1); // fake, on xinput we only store gamepad ids(thanks MS) so this is a temp variable to be used below
+	if (CPad::XInputJoy1 == -1)
+#elif defined RW_GL3 && !defined LIBRW_SDL2
 	int numButtons;
 	int found = -1;
 	const char *joyname;
@@ -302,36 +332,6 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 		}
 	}
 	if (PSGLOBAL(joy1id) == -1)
-#elif defined XINPUT
-	int found = -1;
-	XINPUT_STATE xstate;
-	memset(&xstate, 0, sizeof(XINPUT_STATE));
-	if (userHovering) {
-		for (int i = 0; i <= 3; i++) {
-			if (XInputGetState(i, &xstate) == ERROR_SUCCESS) {
-				if (xstate.Gamepad.bLeftTrigger || xstate.Gamepad.bRightTrigger) {
-					found = i;
-					break;
-				}
-				for (int j = XINPUT_GAMEPAD_DPAD_UP; j != XINPUT_GAMEPAD_Y << 1; j = (j << 1)) {
-					if (xstate.Gamepad.wButtons & j) {
-						found = i;
-						break;
-					}
-				}
-				if (found != -1)
-					break;
-			}
-		}
-		if (found != -1 && CPad::XInputJoy1 != found) {
-			// We should never leave pads -1, so we can process them when they're connected and kinda support hotplug.
-			CPad::XInputJoy2 = (CPad::XInputJoy1 == -1 ? (found + 1) % 4 : CPad::XInputJoy1);
-			CPad::XInputJoy1 = found;
-			cachedButtonNum = 0; // fake too, because xinput bypass CControllerConfig
-		}
-	}
-	sprintf(gSelectedJoystickName, "%d", CPad::XInputJoy1); // fake, on xinput we only store gamepad ids(thanks MS) so this is a temp variable to be used below
-	if (CPad::XInputJoy1 == -1)
 #endif
 		AsciiToUnicode("Not found", selectedJoystickUnicode);
 	else

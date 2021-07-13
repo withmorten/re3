@@ -95,7 +95,10 @@ bool gbModelViewer;
 bool gbShowTimebars;
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
+bool gbDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
+#endif
+#ifdef NO_MOVIES
+bool gbNoMovies;
 #endif
 
 volatile int32 frameCount;
@@ -376,7 +379,7 @@ DoRWStuffEndOfFrame(void)
 	}
 #else
 	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
-		sprintf(s, "screen_%11lld.png", time(nil));
+		sprintf(s, "screen_%011lld.png", time(nil));
 		RwGrabScreen(Scene.camera, s);
 	}
 #endif
@@ -1068,7 +1071,7 @@ DisplayGameDebugText()
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
 
-	if(gDrawVersionText) // This realtime switch is our thing
+	if(gbDrawVersionText) // This realtime switch is our thing
 	{
 
 #ifdef USE_OUR_VERSIONING
@@ -1128,11 +1131,14 @@ DisplayGameDebugText()
 #endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+#ifdef FIX_BUGS
+	// this is inaccurate with over 1000 fps
+	static uint32 PreviousTimeInMillisecondsPauseMode = 0;
+	FramesPerSecondCounter += (CTimer::GetTimeInMillisecondsPauseMode() - PreviousTimeInMillisecondsPauseMode) / 1000.0f; // convert to seconds
+	PreviousTimeInMillisecondsPauseMode = CTimer::GetTimeInMillisecondsPauseMode();
 	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
 #else
-	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
+	FramesPerSecondCounter += 1000.0f / CTimer::GetTimeStepNonClippedInMilliseconds();
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
 #endif
 	
@@ -1261,6 +1267,7 @@ if(gbRenderEverythingBarRoads)
 void
 RenderScene_new(void)
 {
+	PUSH_RENDERGROUP("RenderScene_new");
 	CClouds::Render();
 	DoRWRenderHorizon();
 
@@ -1268,6 +1275,7 @@ RenderScene_new(void)
 	DefinedState();
 	// CMattRenderer::ResetRenderStates
 	// moved CRenderer::RenderBoats to before transparent water
+	POP_RENDERGROUP();
 }
 
 // TODO
@@ -1275,11 +1283,14 @@ bool FredIsInFirstPersonCam(void) { return false; }
 void
 RenderEffects_new(void)
 {
+	PUSH_RENDERGROUP("RenderEffects_new");
+/*	// stupid to do this before the whole world is drawn!
 	CShadows::RenderStaticShadows();
 	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();
 	CRubbish::Render();
+*/
 
 	// these aren't really effects
 	DefinedState();
@@ -1302,6 +1313,13 @@ if(gbRenderFadingInEntities)
 	CRenderer::RenderFadingInEntities();
 
 	// actual effects here
+
+	// from above
+	CShadows::RenderStaticShadows();
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
 	CGlass::Render();
 	// CMattRenderer::ResetRenderStates
 	DefinedState();
@@ -1319,6 +1337,7 @@ if(gbRenderFadingInEntities)
 	CPointLights::RenderFogEffect();
 	CMovingThings::Render();
 	CRenderer::RenderFirstPersonVehicle();
+	POP_RENDERGROUP();
 }
 #endif
 
@@ -1331,6 +1350,7 @@ RenderScene(void)
 		return;
 	}
 #endif
+	PUSH_RENDERGROUP("RenderScene");
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -1346,11 +1366,13 @@ RenderScene(void)
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
 	CCoronas::RenderSunReflection();
+	POP_RENDERGROUP();
 }
 
 void
 RenderDebugShit(void)
 {
+	PUSH_RENDERGROUP("RenderDebugShit");
 	CTheScripts::RenderTheScriptDebugLines();
 #ifndef FINAL
 	if(gbShowCollisionLines)
@@ -1359,6 +1381,7 @@ RenderDebugShit(void)
 	CDebug::DrawLines();
 	DefinedState();
 #endif
+	POP_RENDERGROUP();
 }
 
 void
@@ -1370,6 +1393,7 @@ RenderEffects(void)
 		return;
 	}
 #endif
+	PUSH_RENDERGROUP("RenderEffects");
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1386,11 +1410,13 @@ RenderEffects(void)
 	CPointLights::RenderFogEffect();
 	CMovingThings::Render();
 	CRenderer::RenderFirstPersonVehicle();
+	POP_RENDERGROUP();
 }
 
 void
 Render2dStuff(void)
 {
+	PUSH_RENDERGROUP("Render2dStuff");
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -1462,6 +1488,7 @@ Render2dStuff(void)
 #ifdef DEBUGMENU
 	DebugMenuRender();
 #endif
+	POP_RENDERGROUP();
 }
 
 void
@@ -1469,7 +1496,9 @@ RenderMenus(void)
 {
 	if (FrontEndMenuManager.m_bMenuActive)
 	{
+		PUSH_RENDERGROUP("RenderMenus");
 		FrontEndMenuManager.DrawFrontEnd();
+		POP_RENDERGROUP();
 	}
 #ifndef MASTER
 	else
@@ -1480,6 +1509,7 @@ RenderMenus(void)
 void
 Render2dStuffAfterFade(void)
 {
+	PUSH_RENDERGROUP("Render2dStuffAfterFade");
 #ifndef MASTER
 	DisplayGameDebugText();
 #endif
@@ -1490,6 +1520,7 @@ Render2dStuffAfterFade(void)
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
 	CCredits::Render();
+	POP_RENDERGROUP();
 }
 
 void

@@ -915,14 +915,14 @@ void WaitForState(FILTER_STATE State)
  */
 void HandleGraphEvent(void)
 {
-	LONG evCode, evParam1, evParam2;
+	LONG evCode;
+	LONG_PTR evParam1, evParam2;
 	HRESULT hr=S_OK;
 	
 	ASSERT(pME != nil);
 
 	// Process all queued events
-	while (SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *)&evParam1,
-		(LONG_PTR *)&evParam2, 0)))
+	while (SUCCEEDED(pME->GetEvent(&evCode, &evParam1, &evParam2, 0)))
 	{
 		// Free memory associated with callback, since we're not using it
 		hr = pME->FreeEventParams(evCode, evParam1, evParam2);
@@ -1498,7 +1498,7 @@ psSelectDevice()
 #ifdef DEFAULT_NATIVE_RESOLUTION
 				GcurSelVM = 1;
 #else
-				MessageBox(nil, "Cannot find 640x480 video mode", "GTA3", MB_OK);
+				MessageBox(nil, "Cannot find 640x480 video mode", "GTA: Vice City", MB_OK);
 				return FALSE;
 #endif
 			}
@@ -1541,7 +1541,7 @@ psSelectDevice()
 		}
 
 		if(bestFsMode < 0){
-			MessageBox(nil, "Cannot find desired video mode", "GTA3", MB_OK);
+			MessageBox(nil, "Cannot find desired video mode", "GTA: Vice City", MB_OK);
 			return FALSE;
 		}
 		GcurSelVM = bestFsMode;
@@ -2273,7 +2273,7 @@ WinMain(HINSTANCE instance,
 					case GS_START_UP:
 					{
 #ifdef NO_MOVIES
-						gGameState = GS_INIT_ONCE;
+						gGameState = gbNoMovies ? GS_INIT_ONCE : GS_INIT_LOGO_MPEG;
 #else
 						gGameState = GS_INIT_LOGO_MPEG;
 #endif
@@ -2314,8 +2314,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_INTRO_MPEG:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						
@@ -2353,8 +2356,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_ONCE:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						

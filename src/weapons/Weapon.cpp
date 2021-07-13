@@ -35,6 +35,7 @@
 #include "Glass.h"
 #include "Sprite.h"
 #include "Pickups.h"
+#include "SaveBuf.h"
 
 float fReloadAnimSampleFraction[5] = {  0.5f,  0.7f,  0.75f,  0.75f,  0.7f };
 float fSeaSparrowAimingAngle = 10.0f;
@@ -251,7 +252,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 				else if ( shooter->IsPed() && ((CPed*)shooter)->m_pSeekTarget != nil )
 				{
 					float distToTarget = (shooter->GetPosition() - ((CPed*)shooter)->m_pSeekTarget->GetPosition()).Magnitude();
-					float power = clamp((distToTarget-10.0f)*0.02f, 0.2f, 1.0f);
+					float power = Clamp((distToTarget-10.0f)*0.02f, 0.2f, 1.0f);
 
 					fired = FireProjectile(shooter, source, power);
 				}
@@ -1066,7 +1067,11 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			if ( info->m_nFiringRate >= 50 || !(++counter & 1) )
 			{
+#ifdef FIX_BUGS
+				AddGunFlashBigGuns(*fireSource, target);
+#else
 				AddGunFlashBigGuns(*fireSource, *fireSource + target);
+#endif
 
 				CVector gunshellPos = *fireSource;
 				gunshellPos -= CVector(0.65f*ahead.x, 0.65f*ahead.y, 0.0f);
@@ -3280,7 +3285,7 @@ CWeapon::Save(uint8*& buf)
 	CopyToBuf(buf, m_nAmmoTotal);
 	CopyToBuf(buf, m_nTimer);
 	CopyToBuf(buf, m_bAddRotOffset);
-	SkipSaveBuf(buf, 3);
+	ZeroSaveBuf(buf, 3);
 }
 
 void

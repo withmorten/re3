@@ -1581,8 +1581,8 @@ void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float
 	forward.Normalise();
 	float forwardAngle = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float angleDiff = angleBetweenVehicles - forwardAngle;
-	float lenProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.y * sin(angleDiff));
-	float widthProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.x * cos(angleDiff));
+	float lenProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.y * Sin(angleDiff));
+	float widthProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.x * Cos(angleDiff));
 	float lengthToEvade = (2 * (lenProjection + widthProjection) + WIDTH_COEF_TO_WEAVE_SAFELY * 2 * pVehicle->GetColModel()->boundingBox.max.x) / distance;
 	float diffToLeftAngle = LimitRadianAngle(angleBetweenVehicles - *pAngleToWeaveLeft);
 	diffToLeftAngle = ABS(diffToLeftAngle);
@@ -2575,7 +2575,7 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CVehicle* pVehicle, float 
 	float angleToTarget = CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
 	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float steerAngle = LimitRadianAngle(angleToTarget - angleForward);
-	steerAngle = clamp(steerAngle, -DEFAULT_MAX_STEER_ANGLE, DEFAULT_MAX_STEER_ANGLE);
+	steerAngle = Clamp(steerAngle, -DEFAULT_MAX_STEER_ANGLE, DEFAULT_MAX_STEER_ANGLE);
 #ifdef FIX_BUGS
 	float speedTarget = pVehicle->AutoPilot.GetCruiseSpeed();
 #else
@@ -2735,7 +2735,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 {
 	CVector2D vecToTarget = pPlane->AutoPilot.m_vecDestinationCoors - pPlane->GetPosition();
 	float fForwardZ = (pPlane->AutoPilot.m_vecDestinationCoors.z - pPlane->GetPosition().z) / vecToTarget.Magnitude();
-	fForwardZ = clamp(fForwardZ, -0.3f, 0.3f);
+	fForwardZ = Clamp(fForwardZ, -0.3f, 0.3f);
 	float angle = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y);
 	while (angle > TWOPI)
 		angle -= TWOPI;
@@ -3238,7 +3238,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 		attempts += 1;
 	}
 	if (attempts >= 5)
-		return nil;
+		return false;
 	CAutomobile* pVehicle = new CAutomobile(mi, RANDOM_VEHICLE);
 	pVehicle->AutoPilot.m_vecDestinationCoors = vecPos;
 	pVehicle->SetPosition(spawnPos);

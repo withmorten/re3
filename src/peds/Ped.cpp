@@ -39,6 +39,7 @@
 #include "CutsceneShadow.h"
 #include "Clock.h"
 #include "Wanted.h"
+#include "SaveBuf.h"
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
@@ -53,10 +54,10 @@ bool CPed::bFannyMagnetCheat;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
-void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
-void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
-void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
-void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
+void *CPed::operator new(size_t sz) throw() { return CPools::GetPedPool()->New();  }
+void *CPed::operator new(size_t sz, int handle) throw() { return CPools::GetPedPool()->New(handle); }
+void CPed::operator delete(void *p, size_t sz) throw() { CPools::GetPedPool()->Delete((CPed*)p); }
+void CPed::operator delete(void *p, int handle) throw() { CPools::GetPedPool()->Delete((CPed*)p); }
 
 float gfTommyFatness = 1.0f;
 
@@ -317,7 +318,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 		bCanGiveUpSunbathing = true;
 
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
-	DMAudio.SetEntityStatus(m_audioEntityId, true);
+	DMAudio.SetEntityStatus(m_audioEntityId, TRUE);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;
 	m_eventOrThreat = CVector2D(0.0f, 0.0f);
@@ -402,6 +403,30 @@ CPed::~CPed(void)
 		CPopulation::NumMiamiViceCops--;
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, true);
 	DMAudio.DestroyEntity(m_audioEntityId);
+
+	// Because of the nature of ped lists in GTA, it can sometimes be outdated.
+	// Remove ourself from nearPeds list of the Peds in our nearPeds list.
+#ifdef FIX_BUGS
+	for(int i = 0; i < m_numNearPeds; i++) {
+		CPed *nearPed = m_nearPeds[i];
+		assert(nearPed != nil);
+		if (!nearPed->IsPointerValid())
+			continue;
+
+		for(int j = 0; j < nearPed->m_numNearPeds;) {
+			assert(j == ARRAY_SIZE(m_nearPeds) - 1 || nearPed->m_nearPeds[j] || !nearPed->m_nearPeds[j+1]); // ensure nil comes after nil
+
+			if (nearPed->m_nearPeds[j] == this) {
+				for (int k = j; k < ARRAY_SIZE(m_nearPeds) - 1; k++) {
+					nearPed->m_nearPeds[k] = nearPed->m_nearPeds[k + 1];
+					nearPed->m_nearPeds[k + 1] = nil;
+				}
+				nearPed->m_numNearPeds--;
+			} else
+				j++;
+		}
+	}
+#endif
 }
 
 void
@@ -518,13 +543,15 @@ CPed::BuildPedLists(void)
 				removePed = true;
 			}
 		}
+
+		assert(i == ARRAY_SIZE(m_nearPeds) - 1 || m_nearPeds[i] || !m_nearPeds[i+1]); // ensure nil comes after nil
+
 		if (removePed) {
 			// If we arrive here, the ped we're checking isn't "near", so we should remove it.
 			for (int j = i; j < ARRAY_SIZE(m_nearPeds) - 1; j++) {
 				m_nearPeds[j] = m_nearPeds[j + 1];
 				m_nearPeds[j + 1] = nil;
 			}
-			// Above loop won't work on last slot, so we need to empty it.
 			m_nearPeds[ARRAY_SIZE(m_nearPeds) - 1] = nil;
 			m_numNearPeds--;
 		} else
@@ -2382,7 +2409,7 @@ CPed::ProcessControl(void)
 						if (m_nPedState == PED_JUMP) {
 							if (m_nWaitTimer <= 2000) {
 								if (m_nWaitTimer < 1000)
-									m_nWaitTimer += CTimer::GetTimeStep() * 0.02f * 1000.0f;
+									m_nWaitTimer += CTimer::GetTimeStepInMilliseconds();
 							} else {
 								m_nWaitTimer = 0;
 							}
@@ -2860,7 +2887,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	CColModel *hisCol = CModelInfo::GetModelInfo(collidingEnt->GetModelIndex())->GetColModel();
 
 	if (!bUsesCollision && !bJustCheckCollision)
-		return false;
+		return 0;
 
 	if (collidingEnt->IsVehicle() && ((CVehicle*)collidingEnt)->IsBoat())
 		collidedWithBoat = true;
@@ -6748,7 +6775,7 @@ CPed::FollowPath(void)
 }
 
 void
-CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
+CPed::SetEvasiveStep(CPhysical *reason, uint8 animType)
 {
 	AnimationId stepAnim;
 
@@ -6766,22 +6793,23 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 	if (neededTurn > PI)
 		neededTurn = TWOPI - neededTurn;
 
-	CVehicle *veh = (CVehicle*)reason;
-	if (reason->IsVehicle() && veh->IsCar()) {
+	if (reason->IsVehicle() && ((CVehicle*)reason)->IsCar()) {
+		CVehicle *veh = (CVehicle*)reason;
 		if (veh->m_nCarHornTimer != 0) {
 			vehPressedHorn = true;
 			if (!IsPlayer())
 				animType = 1;
 		}
 	}
-	if (neededTurn <= DEGTORAD(90.0f) || veh->GetModelIndex() == MI_RCBANDIT || vehPressedHorn || animType != 0) {
-		SetLookFlag(veh, true);
-		if ((CGeneral::GetRandomNumber() & 1) && veh->GetModelIndex() != MI_RCBANDIT && animType == 0) {
+
+	if (neededTurn <= DEGTORAD(90.0f) || reason->GetModelIndex() == MI_RCBANDIT || vehPressedHorn || animType != 0) {
+		SetLookFlag(reason, true);
+		if ((CGeneral::GetRandomNumber() & 1) && reason->GetModelIndex() != MI_RCBANDIT && animType == 0) {
 			stepAnim = ANIM_STD_HAILTAXI;
 
 		} else {
-			float vehDirection = CGeneral::GetRadianAngleBetweenPoints(
-				veh->m_vecMoveSpeed.x, veh->m_vecMoveSpeed.y,
+			float dangerDirection = CGeneral::GetRadianAngleBetweenPoints(
+				reason->m_vecMoveSpeed.x, reason->m_vecMoveSpeed.y,
 				0.0f, 0.0f);
 
 			// Let's turn our back to the "reason"
@@ -6791,14 +6819,14 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 				angleToFace -=  TWOPI;
 
 			// We don't want to run towards car's direction
-			float dangerZone = angleToFace - vehDirection;
+			float dangerZone = angleToFace - dangerDirection;
 			dangerZone = CGeneral::LimitRadianAngle(dangerZone);
 
 			// So, add or subtract 90deg (jump to left/right) according to that
 			if (dangerZone > 0.0f)
-				angleToFace = vehDirection - HALFPI;
+				angleToFace = dangerDirection - HALFPI;
 			else
-				angleToFace = vehDirection + HALFPI;
+				angleToFace = dangerDirection + HALFPI;
 
 			stepAnim = ANIM_STD_NUM;
 			if (animType == 0 || animType == 1)
@@ -7761,26 +7789,40 @@ CPed::SetPedPositionInCar(void)
 	} else {
 		m_fRotationCur = m_pMyVehicle->GetForward().Heading();
 	}
-	GetMatrix() = newMat;
+	SetMatrix(newMat);
 }
 
 void
 CPed::LookForSexyPeds(void)
 {
 	if ((!IsPedInControl() && m_nPedState != PED_DRIVING)
-		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() || m_nPedType != PEDTYPE_CIVMALE)
+		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() ||
+#ifdef FIX_BUGS
+	   (m_nPedType != PEDTYPE_CIVMALE) && !IsFemale() && (m_nPedType != PEDTYPE_CRIMINAL) && !IsGangMember()
+#else
+		m_nPedType != PEDTYPE_CIVMALE
+#endif
+		)
 		return;
 
 	for (int i = 0; i < m_numNearPeds; i++) {
 		if (CanSeeEntity(m_nearPeds[i])) {
 			if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() < 10.0f) {
 				CPed *nearPed = m_nearPeds[i];
-				if ((nearPed->m_pedStats->m_sexiness > m_pedStats->m_sexiness)
-					&& nearPed->m_nPedType == PEDTYPE_CIVFEMALE) {
+				if((nearPed->m_pedStats->m_sexiness > m_pedStats->m_sexiness)
+#ifdef FIX_BUGS
+				   && ((IsFemale() && !nearPed->IsFemale()) || (!IsFemale() && nearPed->IsFemale()))) {
+#else
+				   && nearPed->m_nPedType == PEDTYPE_CIVFEMALE) {
+#endif
 
 					SetLookFlag(nearPed, true);
 					m_lookTimer = CTimer::GetTimeInMilliseconds() + 4000;
-					Say(SOUND_PED_CHAT_SEXY);
+#ifdef FIX_BUGS
+					Say(IsFemale() ? SOUND_PED_CHAT_SEXY_FEMALE : SOUND_PED_CHAT_SEXY_MALE);
+#else
+					Say(SOUND_PED_CHAT_SEXY_MALE);
+#endif
 					return;
 				}
 			}
@@ -8734,7 +8776,7 @@ CPed::Wait(void)
 						if ((GetPosition() - nearPed->GetPosition()).MagnitudeSqr() < sq(10.f)) {
 							for (int anim = ANIM_STRIP_A; anim <= ANIM_STRIP_G; anim++) {
 								if (RpAnimBlendClumpGetAssociation(nearPed->GetClump(), anim))
-									Say(SOUND_PED_149);
+									Say(SOUND_PED_JEER);
 							}
 						}
 					}
@@ -9543,19 +9585,19 @@ CPed::Say(uint16 audio, int32 time)
 void
 CPed::Save(uint8*& buf)
 {
-	SkipSaveBuf(buf, 52);
+	ZeroSaveBuf(buf, 52);
 	CopyToBuf(buf, GetPosition().x);
 	CopyToBuf(buf, GetPosition().y);
 	CopyToBuf(buf, GetPosition().z);
-	SkipSaveBuf(buf, 288);
+	ZeroSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 499);
+	ZeroSaveBuf(buf, 499);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 172);
+	ZeroSaveBuf(buf, 172);
 	for (int i = 0; i < 10; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 252);
+	ZeroSaveBuf(buf, 252);
 }
 
 void

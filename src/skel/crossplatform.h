@@ -1,4 +1,5 @@
 #include <time.h>
+#include <limits.h>
 
 // This is the common include for platform/renderer specific skeletons(glfw.cpp, win.cpp etc.) and using cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 
 // Functions that's different on glfw and win but have same signature, should be located on platform.h.
@@ -32,6 +33,7 @@ char *_strdate(char *buf);
 #endif
 extern DWORD _dwOperatingSystemVersion;
 #define fcaseopen fopen
+#define caserename rename
 #else
 char *strupr(char *str);
 char *strlwr(char *str);
@@ -54,6 +56,8 @@ extern long _dwOperatingSystemVersion;
 char *casepath(char const *path, bool checkPathFirst = true);
 FILE *_fcaseopen(char const *filename, char const *mode);
 #define fcaseopen _fcaseopen
+int _caserename(const char *old_filename, const char *new_filename);
+#define caserename _caserename
 #endif
 
 #ifdef RW_GL3
@@ -147,7 +151,7 @@ typedef void* HANDLE;
 
 struct WIN32_FIND_DATA {
     char extension[32]; // for searching
-    char folder[32];	// for searching
+    char folder[MAX_PATH];	// for searching
     char cFileName[256]; // because tSkinInfo has it 256
     time_t ftLastWriteTime;
 };

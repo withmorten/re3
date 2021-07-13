@@ -249,6 +249,8 @@ CCoronas::Render(void)
 	int i, j;
 	int screenw, screenh;
 
+	PUSH_RENDERGROUP("CCoronas::Render");
+
 	screenw = RwRasterGetWidth(RwCameraGetRaster(Scene.camera));
 	screenh = RwRasterGetHeight(RwCameraGetRaster(Scene.camera));
 
@@ -432,6 +434,8 @@ CCoronas::Render(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -442,6 +446,8 @@ CCoronas::RenderReflections(void)
 	CEntity *entity;
 
 	if(CWeather::WetRoads > 0.0f){
+		PUSH_RENDERGROUP("CCoronas::RenderReflections");
+
 		CSprite::InitSpriteBuffer();
 
 		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
@@ -487,7 +493,7 @@ CCoronas::RenderReflections(void)
 					if(spriteCoors.z < drawDist){
 						float fadeDistance = drawDist / 2.0f;
 						float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
-						distanceFade = clamp(distanceFade, 0.0f, 1.0f);
+						distanceFade = Clamp(distanceFade, 0.0f, 1.0f);
 						float recipz = 1.0f/RwCameraGetNearClipPlane(Scene.camera);
 						float heightFade = (20.0f - aCoronas[i].heightAboveRoad)/20.0f;
 						int intensity = distanceFade*heightFade * 230.0 * CWeather::WetRoads;
@@ -517,6 +523,8 @@ CCoronas::RenderReflections(void)
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+
+		POP_RENDERGROUP();
 	}else{
 		for(i = 0; i < NUMCORONAS; i++)
 			aCoronas[i].renderReflection = false;

@@ -26,6 +26,7 @@
 #include "ModelInfo.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
+#include "DMAudio.h"
 
 // Menu screens array is at the bottom of the file.
 
@@ -181,38 +182,6 @@ void IslandLoadingAfterChange(int8 before, int8 after) {
 }
 #endif
 
-#ifdef MORE_LANGUAGES
-void LangPolSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangRusSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangJapSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
 #ifndef MULTISAMPLING
 void GraphicsGoBack() {
 }
@@ -226,6 +195,8 @@ void MultiSamplingButtonPress(int8 action) {
 		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
 			FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel;
 			_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode);
+			DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
+			DMAudio.Service();
 			FrontEndMenuManager.SetHelperText(0);
 			FrontEndMenuManager.SaveSettings();
 		}
@@ -287,6 +258,8 @@ const char* screenModes[] = { "FED_FLS", "FED_WND" };
 void ScreenModeAfterChange(int8 before, int8 after)
 {
 	_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
+	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
+	DMAudio.Service();
 	FrontEndMenuManager.SetHelperText(0);
 }
 
@@ -471,11 +444,6 @@ CMenuScreenCustom aScreens[] = {
 		MENUACTION_LANG_GER,	"FEL_GER", {nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 		MENUACTION_LANG_ITA,	"FEL_ITA", {nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS}, 0, 0, MENUALIGN_CENTER,
 		MENUACTION_LANG_SPA,    "FEL_SPA", {nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS}, 0, 0, MENUALIGN_CENTER,
-#ifdef MORE_LANGUAGES
-		MENUACTION_CFO_DYNAMIC,    "FEL_POL", { new CCFODynamic(nil, nil, nil, nil, LangPolSelect) }, 0, 0, MENUALIGN_CENTER,
-		MENUACTION_CFO_DYNAMIC,    "FEL_RUS", { new CCFODynamic(nil, nil, nil, nil, LangRusSelect) }, 0, 0, MENUALIGN_CENTER
-		MENUACTION_CFO_DYNAMIC,    "FEL_JAP", { new CCFODynamic(nil, nil, nil, nil, LangJapSelect) }, 0, 0, MENUALIGN_CENTER,
-#endif
 		MENUACTION_GOBACK,		"FEDS_TB", {nil, SAVESLOT_NONE, MENUPAGE_NONE}, 0, 0, MENUALIGN_CENTER,
 	},
 

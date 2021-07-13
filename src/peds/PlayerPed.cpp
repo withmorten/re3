@@ -23,6 +23,7 @@
 #include "Replay.h"
 #include "PedPlacement.h"
 #include "VarConsole.h"
+#include "SaveBuf.h"
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
@@ -836,8 +837,8 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 
 	if (padMove > 0.0f) {
 		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
-		m_takeAStepAfterAttack = padMove > 2 * PAD_MOVE_TO_GAME_WORLD_MOVE;
-		if (padUsed->GetSprint() && padMove > 1 * PAD_MOVE_TO_GAME_WORLD_MOVE)
+		m_takeAStepAfterAttack = padMove > (2 * PAD_MOVE_TO_GAME_WORLD_MOVE);
+		if (padUsed->GetSprint() && padMove > (1 * PAD_MOVE_TO_GAME_WORLD_MOVE))
 			bIsAttacking = false;
 	}
 
@@ -869,7 +870,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 	if (m_nPedState == PED_JUMP) {
 		if (bIsInTheAir) {
 			if (bUsesCollision && !bHitSteepSlope && (!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
-				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
+				&& m_fDistanceTravelled < CTimer::GetTimeStepInSeconds() && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
 
 				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O
 				float angleCos = Cos(m_fRotationCur);
@@ -1483,7 +1484,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 	if (m_nPedState == PED_JUMP) {
 		if (bIsInTheAir) {
 			if (bUsesCollision && !bHitSteepSlope && (!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
-				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
+				&& m_fDistanceTravelled < CTimer::GetTimeStepInSeconds() && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
 
 				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O
 				float angleCos = Cos(m_fRotationCur);
@@ -1679,7 +1680,7 @@ CPlayerPed::ProcessControl(void)
 		}
 	}
 	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW && m_nPedState != PED_ATTACK && !bInVehicle) {
-		DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_CHAINSAW_ATTACK, 0.0f);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_CHAINSAW_IDLE, 0.0f);
 	}
 
 	if (m_nMoveState != PEDMOVE_RUN && m_nMoveState != PEDMOVE_SPRINT)
@@ -2079,13 +2080,13 @@ CPlayerPed::UpdateMeleeAttackers(void)
 void
 CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 {
-	int i = 0;
-	for (; m_pMeleeList[i] != ped; i++) {
-		if (i >= ARRAY_SIZE(m_pMeleeList))
+	for (uint16 i = 0; i < ARRAY_SIZE(m_pMeleeList); i++) {
+		if (m_pMeleeList[i] == ped) {
+			m_pMeleeList[i] = nil;
+			ped->m_attackTimer = 0;
 			return;
+		}
 	}
-	m_pMeleeList[i] = nil;
-	ped->m_attackTimer = 0;
 }
 
 void
@@ -2187,14 +2188,14 @@ void
 CPlayerPed::Save(uint8*& buf)
 {
 	CPed::Save(buf);
-	SkipSaveBuf(buf, 16);
+	ZeroSaveBuf(buf, 16);
 	CopyToBuf(buf, m_fMaxStamina);
-	SkipSaveBuf(buf, 28);
+	ZeroSaveBuf(buf, 28);
 	CopyToBuf(buf, m_nTargettableObjects[0]);
 	CopyToBuf(buf, m_nTargettableObjects[1]);
 	CopyToBuf(buf, m_nTargettableObjects[2]);
 	CopyToBuf(buf, m_nTargettableObjects[3]);
-	SkipSaveBuf(buf, 164);
+	ZeroSaveBuf(buf, 164);
 }
 
 void

@@ -226,7 +226,7 @@ CPhysical::RemoveAndAdd(void)
 CRect
 CPhysical::GetBoundRect(void)
 {
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 	GetBoundCentre(center);
 	radius = GetBoundRadius();
@@ -462,7 +462,7 @@ CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 void
 CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
-	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnSpeed += turnimpulse*(1.0f/m_fTurnMass);
 }
@@ -477,7 +477,7 @@ CPhysical::ApplyFrictionMoveForce(float jx, float jy, float jz)
 void
 CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
-	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
@@ -521,6 +521,10 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 {
 	float speedA = DotProduct(speed, springDir);
 	float speedB = DotProduct(GetSpeed(point), springDir);
+#ifdef FIX_BUGS
+	if (speedB == 0.0f)
+		return true;
+#endif
 	float step = Min(CTimer::GetTimeStep(), 3.0f);
 	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
 	if(bIsHeavy)
@@ -553,7 +557,7 @@ CPhysical::ApplyGravity(void)
 			surfaceUp = point.normal;
 		else
 			surfaceUp = CVector(0.0f, 0.0f, 1.0f);
-		float t = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		float t = Clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
 		gravityUp = gravityUp * (1.0f - t) + surfaceUp * t;
 		if (gravityUp.MagnitudeSqr() < 0.1f)
 			gravityUp = CVector(0.0f, 0.0f, 1.0f);
@@ -1023,7 +1027,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 				moveSpeed += vImpulse * (1.0f/m_fMass);
 
 			// ApplyTurnForce
-			CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+			CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 			CVector turnimpulse = CrossProduct(pointpos-com, vImpulse);
 			turnSpeed += turnimpulse*(1.0f/m_fTurnMass);
 
@@ -1259,7 +1263,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 	CPhysical *A, *B;
 	CObject *Bobj;
 	bool canshift;
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 
 	int numCollisions;
@@ -1418,7 +1422,7 @@ CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	int listtype;
 	CPhysical *A, *B;
 	int numCollisions;
@@ -1585,7 +1589,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	CPtrList *list;
 	CPhysical *A, *B;
 	CObject *Aobj, *Bobj;

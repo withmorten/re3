@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Timer.h"
 #include "ModelIndices.h"
 #include "Streaming.h"
@@ -91,9 +92,11 @@ void
 CRopes::Render(void)
 {
 	int i;
+	PUSH_RENDERGROUP("CRopes::Render");
 	for(i = 0; i < ARRAY_SIZE(aRopes); i++)
 		if(aRopes[i].m_bActive)
 			aRopes[i].Render();
+	POP_RENDERGROUP();
 }
 
 bool
@@ -147,7 +150,7 @@ CRopes::FindCoorsAlongRope(uintptr id, float t, CVector *coors)
 	float f;
 	for(i = 0; i < ARRAY_SIZE(aRopes); i++)
 		if(aRopes[i].m_bActive && aRopes[i].m_id == id){
-			t = (ARRAY_SIZE(aRopes[0].m_pos)-1)*clamp(t, 0.0f, 0.999f);
+			t = (ARRAY_SIZE(aRopes[0].m_pos)-1)*Clamp(t, 0.0f, 0.999f);
 			j = t;
 			f = t - j; 
 			*coors = (1.0f-f)*aRopes[i].m_pos[j] + f*aRopes[i].m_pos[j+1];

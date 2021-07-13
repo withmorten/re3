@@ -1829,7 +1829,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
 	CPad::GetPad(0)->SetDrunkInputDelay(0);
 	CWorld::Players[0].m_bDriveByAllowed = true;
-	DMAudio.ShutUpPlayerTalking(0);
+	DMAudio.ShutUpPlayerTalking(FALSE);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CGameLogic::ClearShortCut();
@@ -2208,20 +2208,16 @@ void CRunningScript::Init()
 int scriptToLoad = 0;
 const char *scriptfile = "main.scm";
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 int open_script()
 {
-	// glfwGetKey doesn't work because of CGame::Initialise is blocking
-#ifdef _WIN32
-	if (GetAsyncKeyState('G') & 0x8000)
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking 
+	CPad::UpdatePads();
+	if (CPad::GetPad(0)->GetChar('G'))
 		scriptToLoad = 0;
-	if (GetAsyncKeyState('R') & 0x8000)
+	if (CPad::GetPad(0)->GetChar('R'))
 		scriptToLoad = 1;
-	if (GetAsyncKeyState('D') & 0x8000)
+	if (CPad::GetPad(0)->GetChar('D'))
 		scriptToLoad = 2;
-#endif
 	switch (scriptToLoad) {
 	case 0: scriptfile = "main.scm"; break;
 	case 1: scriptfile = "freeroam_miami.scm"; break;

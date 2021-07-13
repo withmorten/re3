@@ -14,6 +14,7 @@
 #include "Wanted.h"
 #include "World.h"
 #include "MemoryHeap.h"
+#include "SaveBuf.h"
 
 CCPtrNodePool *CPools::ms_pPtrNodePool;
 CEntryInfoNodePool *CPools::ms_pEntryInfoNodePool;
@@ -105,7 +106,7 @@ CPools::CheckPoolsEmpty()
 	printf("pools have been cleared\n");
 }
 
-
+// Thankfully unused, it would break the game!
 void
 CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 {
@@ -137,15 +138,20 @@ CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 void CPools::LoadVehiclePool(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	int nNumCars = ReadSaveBuf<int>(buf);
-	int nNumBoats = ReadSaveBuf<int>(buf);
-	int nNumBikes = ReadSaveBuf<int>(buf);
+	int nNumCars, nNumBoats, nNumBikes;
+	ReadSaveBuf(&nNumCars, buf);
+	ReadSaveBuf(&nNumBoats, buf);
+	ReadSaveBuf(&nNumBikes, buf);
 	for (int i = 0; i < nNumCars + nNumBoats + nNumBikes; i++) {
-		uint32 type = ReadSaveBuf<uint32>(buf);
-		int16 model = ReadSaveBuf<int16>(buf);
+		uint32 type;
+		int16 model;
+		int32 slot;
+
+		ReadSaveBuf(&type, buf);
+		ReadSaveBuf(&model, buf);
 		CStreaming::RequestModel(model, STREAMFLAGS_DEPENDENCY);
 		CStreaming::LoadAllRequestedModels(false);
-		int32 slot = ReadSaveBuf<int32>(buf);
+		ReadSaveBuf(&slot, buf);
 		CVehicle* pVehicle;
 #ifdef COMPATIBLE_SAVES
 		if (type == VEHICLE_TYPE_BOAT)
@@ -304,9 +310,9 @@ INITSAVEBUF
 #else
 			if ((pVehicle->IsCar() || pVehicle->IsBoat() || pVehicle->IsBike()) && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 #endif
-				WriteSaveBuf<uint32>(buf, pVehicle->m_vehType);
-				WriteSaveBuf<int16>(buf, pVehicle->GetModelIndex());
-				WriteSaveBuf<int32>(buf, GetVehicleRef(pVehicle));
+				WriteSaveBuf(buf, pVehicle->m_vehType);
+				WriteSaveBuf(buf, pVehicle->GetModelIndex());
+				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				pVehicle->Save(buf);
 			}
 #else
@@ -315,7 +321,7 @@ INITSAVEBUF
 #else
 			if (pVehicle->IsCar() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 #endif
-				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
+				WriteSaveBuf(buf, pVehicle->m_vehType);
 				WriteSaveBuf(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				memcpy(buf, pVehicle, sizeof(CAutomobile));
@@ -326,7 +332,7 @@ INITSAVEBUF
 #else
 			if (pVehicle->IsBoat() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 #endif
-				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
+				WriteSaveBuf(buf, pVehicle->m_vehType);
 				WriteSaveBuf(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				memcpy(buf, pVehicle, sizeof(CBoat));
@@ -337,7 +343,7 @@ INITSAVEBUF
 #else
 			if (pVehicle->IsBike() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 #endif
-				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
+				WriteSaveBuf(buf, pVehicle->m_vehType);
 				WriteSaveBuf(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				memcpy(buf, pVehicle, sizeof(CBike));

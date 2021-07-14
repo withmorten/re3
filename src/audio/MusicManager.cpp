@@ -1387,7 +1387,7 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 {
 	switch (veh->GetModelIndex())
 	{
-	case MI_VCNMAV:
+	//case MI_VCNMAV:
 	case MI_POLMAV:
 	case MI_COASTG:
 	//case MI_RHINO:
@@ -1401,8 +1401,6 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 	//case MI_FBIRANCH:
 	//case MI_VICECHEE:
 		return TRUE;
-	case MI_MRWHOOP:
-	case MI_HUNTER:
 	default:
 		return FALSE;
 	}
